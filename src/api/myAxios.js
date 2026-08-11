@@ -2,10 +2,15 @@ import axios from 'axios';
 import { useAuthStore } from '../store/auth/useAuthStore';
 import { isJwtExpiringSoon } from '../util/jwt';
 
-const AUTH_EXEMPT_PATHS = ['/auth/login', '/auth/reissue-token'];
+const AUTH_EXEMPT_PATHS = [
+  '/api/auth/student/login',
+  '/api/auth/professor/login',
+  '/api/auth/admin/login',
+  '/api/auth/reissue-token',
+];
 
 const myAxios = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   withCredentials: true,
 });
 
@@ -14,7 +19,7 @@ let reissuePromise = null;
 const reissueTokenOnce = () => {
   if (!reissuePromise) {
     const authStore = useAuthStore();
-    reissuePromise = authStore.reissueToken().finally(() => {
+    reissuePromise = authStore.reissue().finally(() => {
       reissuePromise = null;
     });
   }

@@ -1,41 +1,69 @@
 :root {
-  /* 색상 - 배경 */
-  --personal-color-bg-surface: #f8fafc;
-  --personal-color-white: #ffffff;
+    /* 색상 - 배경 */
+    --personal-color-bg-surface: #f8fafc;
+    --personal-color-white: #ffffff;
 
-  /* 색상 - 관리자 역할 (Figma Foundations & Components, Dev Mode 실측) */
-  --personal-color-admin-primary: #334155;
-  --personal-color-admin-secondary: #4f46e5;
-  --personal-color-admin-accent: #f59e0b;
+    /* 색상 - 관리자 역할 (Figma Foundations & Components, Dev Mode 실측) */
+    --personal-color-admin-primary: #334155;
+    --personal-color-admin-secondary: #4f46e5;
+    --personal-color-admin-accent: #f59e0b;
 
-  /* 색상 - 학생 역할 */
-  --personal-color-student-primary: #0b3d91;
-  --personal-color-student-secondary: #2563eb;
-  --personal-color-student-accent: #60a5fa;
+    /* 색상 - 학생 역할 */
+    --personal-color-student-primary: #0b86c6;
+    --personal-color-student-secondary: #2563eb;
+    --personal-color-student-accent: #60a5fa;
 
-  /* 색상 - 상태 배지 배경 (TuitionBillStatus/RefundStatus/PaymentStatus/VirtualAccountStatus 공용) */
-  --personal-color-status-success-bg: #dcfce7;
-  --personal-color-status-processing-bg: #dbeafe;
-  --personal-color-status-warning-bg: #fef3c7;
-  --personal-color-status-fail-bg: #fee2e2;
+    /* 색상 - 교수 역할할 */
+    --personal-color-professor-primary: #123d8d;
+    --personal-color-professor-secondary: #5b7fc4;
 
-  /* 모서리 */
-  --personal-radius: 12px;
-  --personal-radius-card: 28px;
-  --personal-radius-badge: 24px;
+    /* 그 외 색상상 */
+    --primary-text-color: #1e293b;
+    --secondary-blue: #2563eb;
+    --personal-color-green: #16a34a;
+    --personal-color-red: #dc2626;
 
-  /* 뱃지 크기 */
-  --personal-badge-padding: 4px 12px;
-  --personal-badge-font-size: 0.8rem;
+    /* 색상 - 상태 배지 배경 (TuitionBillStatus/RefundStatus/PaymentStatus/VirtualAccountStatus 공용) */
+    --personal-color-status-success-bg: #dcfce7;
+    --personal-color-status-processing-bg: #dbeafe;
+    --personal-color-status-warning-bg: #fef3c7;
+    --personal-color-status-fail-bg: #fee2e2;
 
-  /* 폰트 */
-  --personal-font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+    /* 모서리 */
+    --personal-radius: 12px;
+    --personal-radius-card: 28px;
+    --personal-radius-badge: 24px;
 
-  font-family: var(--personal-font-family);
-  color-scheme: light dark;
+    /* 뱃지 크기 */
+    --personal-badge-padding: 4px 12px;
+    --personal-badge-font-size: 0.8rem;
+
+    /* 폰트 */
+    --personal-font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+
+    font-family: var(--personal-font-family);
+    color-scheme: light dark;
 }
 
 body {
-  margin: 0;
-  background: var(--personal-color-bg-surface);
+    margin: 0;
+    background: var(--personal-color-bg-surface);
+}
+
+html,
+body,
+#app {
+    min-width: 320px;
+    min-height: 100%;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
 }

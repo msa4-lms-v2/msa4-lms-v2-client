@@ -1,3 +1,66 @@
+<script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import Header from './components/layout/Header.vue';
+import SideBar from './components/layout/SideBar.vue';
+import TabBar from './components/layout/TabBar.vue';
+
+const route = useRoute();
+const usesAppLayout = computed(() => route.path !== '/login');
+</script>
+
 <template>
-  <router-view />
+  <router-view v-if="!usesAppLayout" />
+
+  <div v-else class="app-shell">
+    <Header />
+    <div class="app-body">
+      <SideBar />
+      <main class="app-content">
+        <TabBar />
+        <div class="page-content">
+          <router-view />
+        </div>
+      </main>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--personal-color-bg-surface);
+}
+
+.app-body {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+}
+
+.app-content {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  min-height: 0;
+  flex: 1;
+  padding: 20px;
+}
+
+@media (max-width: 900px) {
+  .app-body {
+    display: block;
+  }
+
+  .page-content {
+    padding: 12px;
+  }
+}
+</style>
