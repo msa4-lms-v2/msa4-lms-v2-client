@@ -18,8 +18,11 @@ const roleLabel = computed(
 const roleClass = computed(() => `role-${(authStore.userInfo?.role || 'STUDENT').toLowerCase()}`);
 
 const logout = async () => {
-    await authStore.logout();
-    await router.replace('/login');
+    try {
+        await authStore.logout();
+    } finally {
+        await router.replace('/login');
+    }
 };
 </script>
 

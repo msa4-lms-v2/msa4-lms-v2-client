@@ -47,7 +47,7 @@ myAxios.interceptors.response.use(
     const { config, response } = error;
     const isExempt = AUTH_EXEMPT_PATHS.some((path) => config?.url?.startsWith(path));
 
-    if (response?.status === 401 && !isExempt && !config._retried) {
+    if (response?.status === 401 && !isExempt && !config?.skipAuthRefresh && !config._retried) {
       config._retried = true;
       const newToken = await reissueTokenOnce();
       config.headers.Authorization = `Bearer ${newToken}`;

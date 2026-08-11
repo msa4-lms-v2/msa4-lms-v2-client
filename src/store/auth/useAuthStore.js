@@ -55,7 +55,7 @@ export const useAuthStore = defineStore('authStore', () => {
             const url = '/api/auth/logout';
             await myAxios.post(url);
         } catch (error) {
-            console.error(error);
+            console.error('서버 로그아웃 요청 실패', error);
         } finally {
             clearAuthStore();
         }
