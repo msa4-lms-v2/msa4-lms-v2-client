@@ -33,7 +33,7 @@ const handleSubmit = () => {
 
         <div class="field">
             <label for="scholarship-amount">감면 금액</label>
-            <input id="scholarship-amount" v-model.number="amount" type="number" min="0" required />
+            <input id="scholarship-amount" v-model.number="amount" type="number" min="0.01" step="0.01" required />
         </div>
 
         <div class="field">

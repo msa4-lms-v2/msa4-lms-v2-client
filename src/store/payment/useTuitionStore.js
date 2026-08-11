@@ -21,7 +21,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const fetchAdminBills = async ({ status = null, page = 1, size = 20 } = {}) => {
     isLoadingAdminBills.value = true;
     try {
-      const res = await myAxios.get('/payments/admin-tuition-bills', {
+      const res = await myAxios.get('/api/payments/admin-tuition-bills', {
         params: { status, page, size },
       });
       adminBills.value = res.data.data.items;
@@ -39,7 +39,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const fetchMyBills = async () => {
     isLoadingMyBills.value = true;
     try {
-      const res = await myAxios.get('/payments/student-tuition');
+      const res = await myAxios.get('/api/payments/student-tuition');
       myBills.value = res.data.data;
     } finally {
       isLoadingMyBills.value = false;
@@ -49,7 +49,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const fetchStatus = async (tuitionBillId) => {
     isLoadingStatus.value = true;
     try {
-      const res = await myAxios.get('/payments/tuition-payment-status', {
+      const res = await myAxios.get('/api/payments/tuition-payment-status', {
         params: { tuitionBillId },
       });
       currentStatus.value = res.data.data;
@@ -61,7 +61,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const fetchAllocation = async (tuitionBillId) => {
     isLoadingAllocation.value = true;
     try {
-      const res = await myAxios.post('/payments/payment-scholarship-allocation', {
+      const res = await myAxios.post('/api/payments/payment-scholarship-allocation', {
         tuitionBillId,
       });
       currentAllocation.value = res.data.data;
@@ -73,7 +73,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const applyScholarship = async ({ tuitionBillId, type, amount, reason }) => {
     isSubmittingScholarship.value = true;
     try {
-      await myAxios.post('/payments/scholarship-discounts', { tuitionBillId, type, amount, reason });
+      await myAxios.post('/api/payments/scholarship-discounts', { tuitionBillId, type, amount, reason });
       await fetchAllocation(tuitionBillId);
     } finally {
       isSubmittingScholarship.value = false;
