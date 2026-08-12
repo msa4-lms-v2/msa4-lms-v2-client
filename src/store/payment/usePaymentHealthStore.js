@@ -15,8 +15,8 @@ export const usePaymentHealthStore = defineStore('paymentHealthStore', () => {
     isLoading.value = true;
     try {
       const [pgRes, vaRes] = await Promise.all([
-        myAxios.get('/api/payments/pg-sandbox-health'),
-        myAxios.get('/api/payments/virtual-account-health'),
+        myAxios.get('/api/payment/pg-sandbox-health'),
+        myAxios.get('/api/payment/virtual-account-health'),
       ]);
       pgHealth.value = pgRes.data.data;
       virtualAccountHealth.value = vaRes.data.data;
