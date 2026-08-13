@@ -18,6 +18,8 @@ const addOneDay = (date) => {
     if (!date) return null;
 
     const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return null;
+
     d.setDate(d.getDate() + 1);
 
     return d.toISOString().split('T')[0];
