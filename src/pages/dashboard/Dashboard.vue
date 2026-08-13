@@ -42,13 +42,26 @@ onMounted(async () => {
 <template>
     <div class="dashboard">
         <div class="left">
-            <DashboardCalendar :schedules="dashboardStore.schedules" @update:visible-range="updateVisibleRange" />
-
-            <ScheduleList :schedules="visibleMonthSchedules" />
+            <div v-if="dashboardStore.isSchedulesLoading" class="status-msg">일정을 불러오는 중입니다...</div>
+            <div v-else-if="dashboardStore.isSchedulesError" class="status-msg error">
+                일정을 불러오지 못했습니다. <button type="button" @click="dashboardStore.loadSchedules()">재시도</button>
+            </div>
+            <template v-else>
+                <DashboardCalendar :schedules="dashboardStore.schedules" @update:visible-range="updateVisibleRange" />
+                <ScheduleList :schedules="visibleMonthSchedules" />
+                <div v-if="dashboardStore.schedules.length === 0" class="empty-msg">일정이 없습니다.</div>
+            </template>
         </div>
 
         <div class="right">
-            <NoticeList :notices="dashboardStore.notices" />
+            <div v-if="dashboardStore.isNoticesLoading" class="status-msg">공지사항을 불러오는 중입니다...</div>
+            <div v-else-if="dashboardStore.isNoticesError" class="status-msg error">
+                공지사항을 불러오지 못했습니다. <button type="button" @click="dashboardStore.loadNotices()">재시도</button>
+            </div>
+            <template v-else>
+                <NoticeList :notices="dashboardStore.notices" />
+                <div v-if="dashboardStore.notices.length === 0" class="empty-msg">공지사항이 없습니다.</div>
+            </template>
         </div>
     </div>
 </template>
@@ -89,5 +102,28 @@ onMounted(async () => {
 
 .right {
     display: flex;
+    flex-direction: column;
+}
+
+.status-msg, .empty-msg {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    text-align: center;
+    color: #64748b;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.status-msg.error {
+    color: #ef4444;
+}
+.status-msg.error button {
+    margin-left: 10px;
+    padding: 4px 8px;
+    border: 1px solid #ef4444;
+    background: #fff;
+    color: #ef4444;
+    border-radius: 4px;
+    cursor: pointer;
 }
 </style>
