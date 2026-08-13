@@ -166,7 +166,7 @@ const handleLogin = async () => {
                 </div>
 
                 <form @submit.prevent="handleLogin">
-                    <label class="login-title" for="userId">{{ loginContent.idLabel }}</label>
+                    <label class="login-title" for="loginId">{{ loginContent.idLabel }}</label>
                     <div class="input-box">
                         <svg viewBox="0 0 24 24">
                             <path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
