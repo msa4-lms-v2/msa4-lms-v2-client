@@ -19,6 +19,8 @@ export const MENU_TITLES = {
     '/scholarships/apply': { default: '장학금 신청' },
     '/scholarships/history': { default: '장학금 수혜 내역' },
     '/tuition/:tuitionBillId/installment': { default: '분할납부 신청' },
+    '/payments/toss/success': { default: '결제 완료' },
+    '/payments/toss/fail': { default: '결제 취소' },
 };
 
 // 권한에 따른 메뉴 타이틀 반환 유틸리티

@@ -87,24 +87,27 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     }
   };
 
-  const submitPayment = async ({ tuitionBillId, method, amount }) => {
+  const TOSS_METHOD_LABEL = {
+    CARD: '카드',
+    VIRTUAL_ACCOUNT: '가상계좌',
+    TRANSFER: '계좌이체',
+  };
+
+  // 결제 수단 선택 -> 체크아웃 세션 생성까지는 우리 서버가 하고, 그 뒤 실제 승인은 토스 결제창(SDK)으로 넘긴다.
+  // 토스가 successUrl/failUrl로 브라우저를 이동시키므로 이 함수는 정상 반환 없이 페이지를 떠난다(리다이렉트).
+  const initiateTossPayment = async ({ tuitionBillId, method, amount }) => {
     isPaymentLoading.value = true;
     isPaymentError.value = false;
     currentPayment.value = null;
-    let validationWarning = '';
 
     try {
-      try {
-        const validationRes = await myAxios.post('/api/payment/payment-amount-validation', {
-          tuitionBillId,
-          amount,
-        });
-        const validation = validationRes.data.data;
-        if (!validation.valid || Number(validation.expectedAmount) !== Number(amount)) {
-          validationWarning = '화면의 결제 금액과 서버 계산 금액이 다릅니다. 결제를 계속 진행했습니다.';
-        }
-      } catch {
-        validationWarning = '결제 금액을 확인하지 못했습니다. 결제를 계속 진행했습니다.';
+      const validationRes = await myAxios.post('/api/payment/payment-amount-validation', {
+        tuitionBillId,
+        amount,
+      });
+      const validation = validationRes.data.data;
+      if (!validation.valid || Number(validation.expectedAmount) !== Number(amount)) {
+        throw new Error('결제 금액이 서버 계산값과 일치하지 않습니다.');
       }
 
       const checkoutRes = await myAxios.post('/api/payment/payments', {
@@ -112,23 +115,40 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
         method,
       });
       const checkoutSession = checkoutRes.data.data;
+
+      const tossPayments = window.TossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
+      await tossPayments.requestPayment(TOSS_METHOD_LABEL[method], {
+        amount: checkoutSession.amount,
+        orderId: checkoutSession.orderId,
+        orderName: checkoutSession.orderName,
+        successUrl: `${window.location.origin}/payments/toss/success?tuitionBillId=${tuitionBillId}`,
+        failUrl: `${window.location.origin}/payments/toss/fail?tuitionBillId=${tuitionBillId}`,
+      });
+    } catch (error) {
+      isPaymentError.value = true;
+      isPaymentLoading.value = false;
+      throw error;
+    }
+  };
+
+  // 토스 결제창이 successUrl로 돌아온 뒤(paymentKey/orderId/amount 쿼리 파라미터) 실제 승인을 확정한다.
+  const confirmTossPayment = async ({ tuitionBillId, orderId, paymentKey, amount }) => {
+    isPaymentLoading.value = true;
+    isPaymentError.value = false;
+    currentPayment.value = null;
+
+    try {
       const confirmRes = await myAxios.post(
         '/api/payment/payments/confirm',
-        {
-          orderId: checkoutSession.orderId,
-          paymentKey: `pk_${checkoutSession.orderId}`,
-          amount: checkoutSession.amount,
-        },
-        {
-          headers: { 'Idempotency-Key': crypto.randomUUID() },
-        },
+        { orderId, paymentKey, amount },
+        { headers: { 'Idempotency-Key': crypto.randomUUID() } },
       );
 
       currentPayment.value = confirmRes.data.data;
       await myAxios.patch('/api/payment/payment-status', { tuitionBillId });
       await Promise.all([fetchStatus(tuitionBillId), fetchAllocation(tuitionBillId)]);
 
-      return { payment: currentPayment.value, validationWarning };
+      return currentPayment.value;
     } catch (error) {
       isPaymentError.value = true;
       throw error;
@@ -199,7 +219,8 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     fetchStatus,
     fetchAllocation,
     applyScholarship,
-    submitPayment,
+    initiateTossPayment,
+    confirmTossPayment,
     fetchWithdrawalEstimate,
   };
 });
