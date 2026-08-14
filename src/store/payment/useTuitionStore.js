@@ -21,7 +21,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const fetchAdminBills = async ({ status = null, page = 1, size = 20 } = {}) => {
     isLoadingAdminBills.value = true;
     try {
-      const res = await myAxios.get('/api/payment/admin-tuition-bills', {
+      const res = await myAxios.get('/api/payment/tuition-bills', {
         params: { status, page, size },
       });
       adminBills.value = res.data.data.items;
@@ -39,7 +39,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const fetchMyBills = async () => {
     isLoadingMyBills.value = true;
     try {
-      const res = await myAxios.get('/api/payment/student-tuition');
+      const res = await myAxios.get('/api/payment/me/tuition-bills');
       myBills.value = res.data.data;
     } finally {
       isLoadingMyBills.value = false;
