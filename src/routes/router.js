@@ -57,6 +57,16 @@ const routes = [
         component: () => import('../pages/payment/InstallmentApply.vue'),
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
+    {
+        path: '/payments/toss/success',
+        component: () => import('../pages/payment/TossPaymentSuccess.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/payments/toss/fail',
+        component: () => import('../pages/payment/TossPaymentFail.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
 ];
 
 const router = createRouter({

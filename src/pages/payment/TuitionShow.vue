@@ -16,7 +16,6 @@ const route = useRoute();
 const tuitionBillId = Number(route.params.id);
 const tuitionStore = useTuitionStore();
 const selectedPaymentMethod = ref('CARD');
-const paymentWarning = ref('');
 const paymentErrorMessage = ref('');
 const refundErrorMessage = ref('');
 
@@ -44,18 +43,17 @@ const formatRefundRate = (rate) => {
 };
 
 const handlePayment = async () => {
-  paymentWarning.value = '';
   paymentErrorMessage.value = '';
 
   try {
-    const result = await tuitionStore.submitPayment({
+    // 성공 시 토스 결제창이 successUrl로 브라우저를 이동시키므로 여기서 더 할 일이 없다.
+    await tuitionStore.initiateTossPayment({
       tuitionBillId,
       method: selectedPaymentMethod.value,
       amount: displayedPaymentAmount.value,
     });
-    paymentWarning.value = result.validationWarning;
   } catch {
-    paymentErrorMessage.value = '결제를 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+    paymentErrorMessage.value = '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.';
   }
 };
 
@@ -126,13 +124,6 @@ onMounted(() => {
           </label>
         </fieldset>
 
-        <p
-          v-if="paymentWarning"
-          class="notice notice--warning"
-          role="status"
-        >
-          {{ paymentWarning }}
-        </p>
         <p
           v-if="tuitionStore.isPaymentError && paymentErrorMessage"
           class="notice notice--error"
