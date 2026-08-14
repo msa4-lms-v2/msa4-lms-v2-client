@@ -9,11 +9,18 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const myBills = ref([]);
   const currentStatus = ref(null);
   const currentAllocation = ref(null);
+  const currentPayment = ref(null);
+  const currentRefundEstimate = ref(null);
   const isLoadingAdminBills = ref(false);
   const isLoadingMyBills = ref(false);
   const isLoadingStatus = ref(false);
   const isLoadingAllocation = ref(false);
   const isSubmittingScholarship = ref(false);
+  const isPaymentLoading = ref(false);
+  const isPaymentError = ref(false);
+  const isRefundEstimateLoading = ref(false);
+  const isRefundEstimateError = ref(false);
+  const hasNoWithdrawalRequest = ref(false);
 
   // 2. Getters (computed)
 
@@ -80,21 +87,106 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     }
   };
 
+  const submitPayment = async ({ tuitionBillId, method, amount }) => {
+    isPaymentLoading.value = true;
+    isPaymentError.value = false;
+    currentPayment.value = null;
+    let validationWarning = '';
+
+    try {
+      try {
+        const validationRes = await myAxios.post('/api/payment/payment-amount-validation', {
+          tuitionBillId,
+          amount,
+        });
+        const validation = validationRes.data.data;
+        if (!validation.valid || Number(validation.expectedAmount) !== Number(amount)) {
+          validationWarning = '화면의 결제 금액과 서버 계산 금액이 다릅니다. 결제를 계속 진행했습니다.';
+        }
+      } catch {
+        validationWarning = '결제 금액을 확인하지 못했습니다. 결제를 계속 진행했습니다.';
+      }
+
+      const checkoutRes = await myAxios.post('/api/payment/payments', {
+        tuitionBillId,
+        method,
+      });
+      const checkoutSession = checkoutRes.data.data;
+      const confirmRes = await myAxios.post(
+        '/api/payment/payments/confirm',
+        {
+          orderId: checkoutSession.orderId,
+          paymentKey: `pk_${checkoutSession.orderId}`,
+          amount: checkoutSession.amount,
+        },
+        {
+          headers: { 'Idempotency-Key': crypto.randomUUID() },
+        },
+      );
+
+      currentPayment.value = confirmRes.data.data;
+      await myAxios.patch('/api/payment/payment-status', { tuitionBillId });
+      await Promise.all([fetchStatus(tuitionBillId), fetchAllocation(tuitionBillId)]);
+
+      return { payment: currentPayment.value, validationWarning };
+    } catch (error) {
+      isPaymentError.value = true;
+      throw error;
+    } finally {
+      isPaymentLoading.value = false;
+    }
+  };
+
+  const fetchWithdrawalEstimate = async (tuitionBillId) => {
+    isRefundEstimateLoading.value = true;
+    isRefundEstimateError.value = false;
+    hasNoWithdrawalRequest.value = false;
+    currentRefundEstimate.value = null;
+
+    try {
+      const res = await myAxios.get('/api/payment/refunds/withdrawal-estimate', {
+        params: { tuitionBillId },
+      });
+      currentRefundEstimate.value = res.data.data;
+      return currentRefundEstimate.value;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        hasNoWithdrawalRequest.value = true;
+        return null;
+      }
+      isRefundEstimateError.value = true;
+      throw error;
+    } finally {
+      isRefundEstimateLoading.value = false;
+    }
+  };
+
+  // 환불률 확정은 자퇴 승인 화면 완성 후 연동 예정.
+
   return {
     adminBills,
     adminBillsPage,
     myBills,
     currentStatus,
     currentAllocation,
+    currentPayment,
+    currentRefundEstimate,
     isLoadingAdminBills,
     isLoadingMyBills,
     isLoadingStatus,
     isLoadingAllocation,
     isSubmittingScholarship,
+    isPaymentLoading,
+    isPaymentError,
+    isRefundEstimateLoading,
+    isRefundEstimateError,
+    hasNoWithdrawalRequest,
     fetchAdminBills,
     fetchMyBills,
     fetchStatus,
     fetchAllocation,
     applyScholarship,
+    submitPayment,
+    fetchWithdrawalEstimate,
   };
 });
