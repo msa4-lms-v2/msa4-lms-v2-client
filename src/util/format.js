@@ -7,5 +7,7 @@ export function formatDate(date, pattern = 'YYYY-MM-DD') {
 
 export function formatCurrency(amount) {
   if (amount === null || amount === undefined) return '-';
-  return `${Number(amount).toLocaleString('ko-KR')}원`;
+  const num = Number(amount);
+  if (!Number.isFinite(num)) return '-';
+  return `${num.toLocaleString('ko-KR')}원`;
 }
