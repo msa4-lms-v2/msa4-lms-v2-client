@@ -15,10 +15,10 @@ export const useDashboardStore = defineStore("dashboard", () => {
     isSchedulesLoading.value = true;
     isSchedulesError.value = false;
     try {
-      const res = await myAxios.get("/api/dashboard/schedules");
+      const res = await myAxios.get("/api/academic/academic-schedules");
 
       if (res.data.code === "00") {
-        schedules.value = res.data.data;
+        schedules.value = res.data.data.items;
       } else {
         isSchedulesError.value = true;
       }
@@ -34,10 +34,10 @@ export const useDashboardStore = defineStore("dashboard", () => {
     isNoticesLoading.value = true;
     isNoticesError.value = false;
     try {
-      const res = await myAxios.get("/api/dashboard/notices");
+      const res = await myAxios.get("/api/academic/catalog/notices");
 
       if (res.data.code === "00") {
-        notices.value = res.data.data;
+        notices.value = res.data.data.items;
       } else {
         isNoticesError.value = true;
       }

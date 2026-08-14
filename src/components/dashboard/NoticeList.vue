@@ -17,10 +17,6 @@ defineProps({
                 <div class="notice-title">
                     {{ notice.title }}
                 </div>
-
-                <div class="notice-content">
-                    {{ notice.content }}
-                </div>
             </div>
         </div>
     </div>
@@ -54,12 +50,5 @@ defineProps({
 
 .notice-title {
     font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.notice-content {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.5;
 }
 </style>
