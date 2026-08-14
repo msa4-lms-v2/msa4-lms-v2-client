@@ -42,6 +42,21 @@ const routes = [
         component: () => import('../pages/payment/PaymentHealthIndex.vue'),
         meta: { requiresAuth: true, roles: ['STUDENT', 'ADMIN'] },
     },
+    {
+        path: '/scholarships/apply',
+        component: () => import('../pages/payment/ScholarshipApplicationApply.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/scholarships/history',
+        component: () => import('../pages/payment/ScholarshipHistory.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/tuition/:tuitionBillId/installment',
+        component: () => import('../pages/payment/InstallmentApply.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
 ];
 
 const router = createRouter({
