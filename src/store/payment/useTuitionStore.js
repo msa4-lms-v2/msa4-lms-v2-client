@@ -137,6 +137,9 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     }
   };
 
+  // /api/payment/refunds/withdrawal-estimate는 tuitionBillId와 함께 withdrawalId도 요구한다(IDOR 방지 -
+  // 본인의 어떤 자퇴 신청인지 명시). Payment는 자퇴 신청 목록을 갖고 있지 않으므로, 먼저 Academic에서
+  // 본인 자퇴 신청 목록을 조회해 withdrawalId를 구한 뒤에만 Payment의 예상 환불액 조회를 호출한다.
   const fetchWithdrawalEstimate = async (tuitionBillId) => {
     isRefundEstimateLoading.value = true;
     isRefundEstimateError.value = false;
@@ -144,8 +147,18 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     currentRefundEstimate.value = null;
 
     try {
+      const withdrawalsRes = await myAxios.get('/api/academic/withdrawals', {
+        params: { page: 1, size: 1 },
+      });
+      const withdrawals = withdrawalsRes.data.data.items;
+      if (!withdrawals || withdrawals.length === 0) {
+        hasNoWithdrawalRequest.value = true;
+        return null;
+      }
+
+      const withdrawalId = withdrawals[0].id;
       const res = await myAxios.get('/api/payment/refunds/withdrawal-estimate', {
-        params: { tuitionBillId },
+        params: { tuitionBillId, withdrawalId },
       });
       currentRefundEstimate.value = res.data.data;
       return currentRefundEstimate.value;
@@ -161,7 +174,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     }
   };
 
-  // 환불률 확정은 자퇴 승인 화면 완성 후 연동 예정.
+  // 환불률 확정(PATCH /api/payment/refunds/withdrawal-rate)은 자퇴 승인 화면 완성 후 연동 예정.
 
   return {
     adminBills,
