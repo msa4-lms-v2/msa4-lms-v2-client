@@ -49,8 +49,20 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to) => {
+let isInitChecked = false;
+
+router.beforeEach(async (to) => {
     const authStore = useAuthStore();
+    
+    if (!isInitChecked) {
+        try {
+            await authStore.reissue();
+        } catch (e) {
+            // 조용한 재발급 실패 무시
+        }
+        isInitChecked = true;
+    }
+
     if (to.meta.requiresAuth && !authStore.isLoggedIn) {
         return '/login';
     }
