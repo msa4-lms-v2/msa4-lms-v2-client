@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
@@ -84,9 +85,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page">
-    <h1>등록금 고지서</h1>
-
+  <MyPageContainer title="등록금 고지서">
     <div class="panels">
       <section
         v-if="tuitionStore.currentAllocation"
@@ -241,16 +240,10 @@ onMounted(() => {
         </dl>
       </section>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.page {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
 .panels {
   display: flex;
   flex-direction: column;
@@ -361,11 +354,5 @@ onMounted(() => {
 
 .highlight {
   font-weight: 700;
-}
-
-@media (max-width: 640px) {
-  .page {
-    padding: 20px;
-  }
 }
 </style>

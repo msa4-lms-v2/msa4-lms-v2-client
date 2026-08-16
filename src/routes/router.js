@@ -25,6 +25,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/tuition/history',
+        name: 'TuitionHistoryIndex',
+        component: () => import('../pages/payment/TuitionHistoryIndex.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/tuition/:id',
         name: 'TuitionShow',
         component: () => import('../pages/payment/TuitionShow.vue'),

@@ -1,7 +1,5 @@
 <template>
-  <div class="scholarship-history-page">
-    <h2>장학금 수혜 내역</h2>
-    
+  <MyPageContainer title="장학금 수혜 내역">
     <div v-if="appStore.isLoadingMyScholarships">
       <p class="notice">불러오는 중...</p>
     </div>
@@ -45,7 +43,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <script setup>
@@ -55,6 +53,7 @@ import { useScholarshipApplicationStore } from '../../store/payment/useScholarsh
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { SCHOLARSHIP_TYPE_LABEL } from '../../util/payment/enumLabels';
 import { formatCurrency, formatDate } from '../../util/format';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 
@@ -95,15 +94,6 @@ const goToInstallment = () => {
 </script>
 
 <style scoped>
-.scholarship-history-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px;
-}
-h2 {
-  margin: 0 0 20px;
-  color: var(--primary-text-color);
-}
 .form-group {
   margin-bottom: 20px;
   padding: 16px 20px;
@@ -139,10 +129,5 @@ select {
   margin-top: 24px;
   display: flex;
   justify-content: flex-end;
-}
-@media (max-width: 640px) {
-  .scholarship-history-page {
-    padding: 20px;
-  }
 }
 </style>

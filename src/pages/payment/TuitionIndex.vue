@@ -2,19 +2,12 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
-import MyTable from '../../components/table/MyTable.vue';
-import MyButton from '../../components/button/MyButton.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
-import {
-  TUITION_BILL_STATUS_LABEL,
-  TUITION_BILL_STATUS_VARIANT,
-  PAYMENT_STATUS_LABEL,
-  PAYMENT_STATUS_VARIANT,
-  PAYMENT_TYPE_LABEL,
-} from '../../util/payment/enumLabels';
+import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
@@ -22,8 +15,6 @@ const semesterStore = useSemesterStore();
 const filters = reactive({
   academicYear: '',
   term: '',
-  paymentType: '',
-  status: '',
 });
 const appliedFilters = ref({ ...filters });
 
@@ -45,13 +36,6 @@ const semesterMatches = (semesterId) => {
 
 const filteredBills = computed(() => tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId)));
 
-const filteredHistory = computed(() => tuitionStore.paymentHistory.filter((row) => {
-  if (!semesterMatches(row.semesterId)) return false;
-  if (appliedFilters.value.paymentType && row.paymentType !== appliedFilters.value.paymentType) return false;
-  if (appliedFilters.value.status && row.status !== appliedFilters.value.status) return false;
-  return true;
-}));
-
 // 요약 카드는 필터링된 고지 중 납부 기한이 가장 최근인 고지 하나를 기준으로 보여준다.
 const latestBill = computed(() => {
   if (filteredBills.value.length === 0) return null;
@@ -64,15 +48,12 @@ watch(latestBill, (bill) => {
 
 onMounted(() => {
   tuitionStore.fetchMyBills();
-  tuitionStore.fetchPaymentHistory();
   semesterStore.fetchSemesters();
 });
 </script>
 
 <template>
-  <div class="page">
-    <h1>등록금 신청 내역</h1>
-
+  <MyPageContainer title="등록금 납부">
     <MySearchFilter submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="filter-year">연도</label>
@@ -89,23 +70,6 @@ onMounted(() => {
           <option value="">전체</option>
           <option value="FIRST">1학기</option>
           <option value="SECOND">2학기</option>
-        </select>
-      </div>
-      <div class="search-group">
-        <label for="filter-type">신청 구분</label>
-        <select id="filter-type" v-model="filters.paymentType">
-          <option value="">전체</option>
-          <option value="LUMP_SUM">일괄납부</option>
-          <option value="INSTALLMENT">분할납부</option>
-        </select>
-      </div>
-      <div class="search-group">
-        <label for="filter-status">처리 상태</label>
-        <select id="filter-status" v-model="filters.status">
-          <option value="">전체</option>
-          <option v-for="(label, value) in PAYMENT_STATUS_LABEL" :key="value" :value="value">
-            {{ label }}
-          </option>
         </select>
       </div>
     </MySearchFilter>
@@ -133,41 +97,6 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="history-section">
-      <h3>나의 납부 내역</h3>
-      <MyTable
-        :loading="tuitionStore.isLoadingPaymentHistory"
-        :empty="!tuitionStore.isLoadingPaymentHistory && filteredHistory.length === 0"
-        empty-message="조회된 납부 내역이 없습니다."
-        :columns="[
-          { key: 'semester', label: '학기' },
-          { key: 'type', label: '납부 구분' },
-          { key: 'date', label: '납부일' },
-          { key: 'amount', label: '납부금액' },
-          { key: 'status', label: '상태' },
-          { key: 'detail', label: '상세' },
-        ]"
-      >
-        <tr v-for="row in filteredHistory" :key="`${row.tuitionBillId}-${row.paymentDate}-${row.amount}`">
-          <td>{{ semesterStore.getSemesterLabel(row.semesterId) }}</td>
-          <td>{{ PAYMENT_TYPE_LABEL[row.paymentType] || row.paymentType }}</td>
-          <td>{{ row.paymentDate ? formatDate(row.paymentDate) : '-' }}</td>
-          <td>{{ formatCurrency(row.amount) }}</td>
-          <td>
-            <StatusBadge
-              :label="PAYMENT_STATUS_LABEL[row.status]"
-              :variant="PAYMENT_STATUS_VARIANT[row.status]"
-            />
-          </td>
-          <td>
-            <RouterLink :to="`/tuition/${row.tuitionBillId}`">
-              <MyButton color="white" size="small" content="상세보기" />
-            </RouterLink>
-          </td>
-        </tr>
-      </MyTable>
-    </section>
-
     <section class="bill-list-section">
       <h3>등록금 고지 목록</h3>
       <p v-if="tuitionStore.isLoadingMyBills">
@@ -190,16 +119,10 @@ onMounted(() => {
         </li>
       </ul>
     </section>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
 .summary-bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -222,12 +145,6 @@ onMounted(() => {
   color: #64748b;
 }
 
-.history-section,
-.bill-list-section {
-  margin-bottom: 24px;
-}
-
-.history-section h3,
 .bill-list-section h3 {
   margin: 0 0 12px;
 }
@@ -265,10 +182,6 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
-  .page {
-    padding: 20px;
-  }
-
   .summary-bar {
     grid-template-columns: repeat(2, 1fr);
   }

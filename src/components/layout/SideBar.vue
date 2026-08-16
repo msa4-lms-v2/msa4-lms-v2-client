@@ -10,7 +10,8 @@ const activeMenus = ref({
   studentCourse: false,
   studentGrade: false,
   studentAttendance: false,
-  studentPayment: false,
+  studentRegistration: false,
+  studentScholarship: false,
   professorTeacher: false,
   professorStudent: false,
   professorCourse: false,
@@ -113,25 +114,44 @@ const toggleMenu = (menuKey) => {
           </div>
         </div>
 
-        <!-- 결제 관리 -->
+        <!-- 등록 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentPayment')">
-            <span>결제 관리</span>
+          <div class="menu-header" @click="toggleMenu('studentRegistration')">
+            <span>등록 관리</span>
             <span
               class="chevron"
-              :class="{ rotated: !activeMenus.studentPayment }"
+              :class="{ rotated: !activeMenus.studentRegistration }"
               >▼</span
             >
           </div>
-          <div class="submenu-list" v-show="activeMenus.studentPayment">
-            <router-link to="/tuition" class="submenu-item">등록금</router-link>
+          <div class="submenu-list" v-show="activeMenus.studentRegistration">
+            <router-link to="/tuition" class="submenu-item">{{
+              getMenuTitle("/tuition")
+            }}</router-link>
+            <router-link to="/tuition/history" class="submenu-item">{{
+              getMenuTitle("/tuition/history")
+            }}</router-link>
+            <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
+          </div>
+        </div>
+
+        <!-- 장학 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('studentScholarship')">
+            <span>장학 관리</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.studentScholarship }"
+              >▼</span
+            >
+          </div>
+          <div class="submenu-list" v-show="activeMenus.studentScholarship">
             <router-link to="/scholarships/apply" class="submenu-item">{{
               getMenuTitle("/scholarships/apply")
             }}</router-link>
             <router-link to="/scholarships/history" class="submenu-item">{{
               getMenuTitle("/scholarships/history")
             }}</router-link>
-            <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
           </div>
         </div>
       </template>
