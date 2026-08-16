@@ -1,9 +1,14 @@
 <script setup>
+import { computed } from 'vue';
 import { useTabStore } from '../../store/tab/useTabStore';
+import { useAuthStore } from '../../store/auth/useAuthStore';
 import { useRouter } from 'vue-router';
 
 const tabStore = useTabStore();
+const authStore = useAuthStore();
 const router = useRouter();
+
+const roleClass = computed(() => `role-${(authStore.userInfo?.role || 'student').toLowerCase()}`);
 
 const selectTab = (path) => {
     if (tabStore.activeTab !== path) {
@@ -22,7 +27,7 @@ const closeTab = (path, event) => {
         <div
             v-for="tab in tabStore.tabs"
             :key="tab.path"
-            :class="['tab-item', { active: tab.path === tabStore.activeTab }]"
+            :class="['tab-item', roleClass, { active: tab.path === tabStore.activeTab }]"
             @click="selectTab(tab.path)"
         >
             <span class="tab-title">{{ tab.title }}</span>
@@ -71,8 +76,20 @@ const closeTab = (path, event) => {
     color: var(--primary-text-color);
 }
 
-.tab-item.active {
-    background-color: var(--primary-color);
+.tab-item.role-student.active {
+    background-color: var(--personal-color-student-primary);
+    color: var(--personal-color-white);
+    border-color: #cbd5e1;
+}
+
+.tab-item.role-professor.active {
+    background-color: var(--personal-color-professor-primary);
+    color: var(--personal-color-white);
+    border-color: #cbd5e1;
+}
+
+.tab-item.role-admin.active {
+    background-color: var(--personal-color-admin-primary);
     color: var(--personal-color-white);
     border-color: #cbd5e1;
 }

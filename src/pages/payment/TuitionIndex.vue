@@ -7,7 +7,7 @@ import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
-import { formatCurrency, formatDate } from '../../util/format';
+import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
 import {
   TUITION_BILL_STATUS_LABEL,
   TUITION_BILL_STATUS_VARIANT,
@@ -117,7 +117,7 @@ onMounted(() => {
       />
       <SummaryStatCard
         label="장학금"
-        :value="formatCurrency(tuitionStore.currentAllocation?.totalScholarshipAmount ?? 0)"
+        :value="formatDeduction(tuitionStore.currentAllocation?.totalScholarshipAmount ?? 0)"
       />
       <SummaryStatCard
         label="납부 예정액"

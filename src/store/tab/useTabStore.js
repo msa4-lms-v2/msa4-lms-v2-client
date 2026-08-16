@@ -2,14 +2,13 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import router from '../../routes/router';
 import { useAuthStore } from '../auth/useAuthStore';
-import { getMenuTitle } from '../../config/menuConfig';
-import { notify } from '../../composables/useDialog';
+import { getMenuTitle, MENU_TITLES_BY_NAME } from '../../config/menuConfig';
 export const useTabStore = defineStore('tab', () => {
     const tabs = ref([]);
     const activeTab = ref('');
 
     const addTab = (route) => {
-        if (route.path === '/') return; // 로그인 페이지는 탭에 추가하지 않음
+        if (route.path === '/login') return; // 로그인 페이지는 탭에 추가하지 않음
 
         const title = getTitleByPath(route.path, route.name);
         const existingTab = tabs.value.find((tab) => tab.path === route.path);
@@ -17,9 +16,8 @@ export const useTabStore = defineStore('tab', () => {
         if (existingTab) {
             activeTab.value = route.path;
         } else {
+            // 최대 개수 제한(10개) 초과 시 가장 오래된 탭을 조용히 제거하고 새 탭을 연다.
             if (tabs.value.length >= 10) {
-                notify('탭은 최대 10개까지만 열 수 있습니다.');
-                // 최대 개수 제한(10개) 초과 시 가장 오래된 탭을 제거
                 tabs.value.shift();
             }
             tabs.value.push({
@@ -61,7 +59,7 @@ export const useTabStore = defineStore('tab', () => {
         const authStore = useAuthStore();
         const role = authStore.userInfo?.role;
         const title = getMenuTitle(path, role);
-        return title !== '알 수 없음' ? title : name || '알 수 없음';
+        return title !== '알 수 없음' ? title : MENU_TITLES_BY_NAME[name] || name || '알 수 없음';
     };
 
     return {
