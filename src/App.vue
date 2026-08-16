@@ -4,8 +4,11 @@ import { useRoute } from 'vue-router';
 import Header from './components/layout/Header.vue';
 import SideBar from './components/layout/SideBar.vue';
 import TabBar from './components/layout/TabBar.vue';
+import AppDialog from './components/common/AppDialog.vue';
+import { useTabStore } from './store/tab/useTabStore';
 
 const route = useRoute();
+const tabStore = useTabStore();
 const usesAppLayout = computed(() => route.path !== '/login');
 </script>
 
@@ -19,11 +22,17 @@ const usesAppLayout = computed(() => route.path !== '/login');
       <main class="app-content">
         <TabBar />
         <div class="page-content">
-          <router-view />
+          <router-view v-slot="{ Component, route: activeRoute }">
+            <keep-alive :include="tabStore.tabs.map((t) => t.name)">
+              <component :is="Component" :key="activeRoute.path" />
+            </keep-alive>
+          </router-view>
         </div>
       </main>
     </div>
   </div>
+
+  <AppDialog />
 </template>
 
 <style scoped>
