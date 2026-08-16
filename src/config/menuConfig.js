@@ -2,6 +2,10 @@
 export const MENU_TITLES = {
     '/main': { default: '메인 화면' },
     '/profile': { STUDENT: '학적 조회', PROFESSOR: '교적 조회', default: '내 정보' },
+    '/tuition': { default: '등록금 납부' },
+    '/tuition/history': { default: '등록금 납부 내역' },
+    '/admin/tuition': { default: '등록금 관리' },
+    '/payment/health': { default: '결제 상태' },
     '/enrollments': { default: '시간표 조회' },
     '/registration': { default: '수강 신청' },
     '/grade': { default: '성적 조회' },
@@ -21,6 +25,12 @@ export const MENU_TITLES = {
     '/tuition/:tuitionBillId/installment': { default: '분할납부 신청' },
     '/payments/toss/success': { default: '결제 완료' },
     '/payments/toss/fail': { default: '결제 취소' },
+};
+
+// 동적 파라미터가 있어 MENU_TITLES의 경로 일치로 찾을 수 없는 라우트는 route name으로 별도 매핑한다.
+export const MENU_TITLES_BY_NAME = {
+    TuitionShow: '등록금 상세',
+    AdminTuitionShow: '등록금 상세',
 };
 
 // 권한에 따른 메뉴 타이틀 반환 유틸리티

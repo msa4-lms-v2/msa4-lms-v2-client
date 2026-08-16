@@ -1,7 +1,5 @@
 <template>
-  <div class="scholarship-history-page">
-    <h2>장학금 수혜 내역</h2>
-    
+  <MyPageContainer title="장학금 수혜 내역">
     <div v-if="appStore.isLoadingMyScholarships">
       <p class="notice">불러오는 중...</p>
     </div>
@@ -10,7 +8,7 @@
         <label>학기 선택</label>
         <select v-model="selectedSemester">
           <option v-for="semesterId in availableSemesters" :key="semesterId" :value="semesterId">
-            {{ semesterId }} 학기
+            {{ semesterStore.getSemesterLabel(semesterId) }}
           </option>
         </select>
       </div>
@@ -29,9 +27,9 @@
         >
           <tr v-for="item in filteredScholarships" :key="item.id">
             <td>{{ SCHOLARSHIP_TYPE_LABEL[item.type] || item.type }}</td>
-            <td>{{ Number(item.amount || 0).toLocaleString() }}원</td>
+            <td>{{ formatCurrency(item.amount) }}</td>
             <td>{{ item.reason || '-' }}</td>
-            <td>{{ item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-' }}</td>
+            <td>{{ formatDate(item.createdAt) }}</td>
           </tr>
         </MyTable>
 
@@ -45,23 +43,27 @@
         </div>
       </div>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useScholarshipApplicationStore } from '../../store/payment/useScholarshipApplicationStore';
+import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { SCHOLARSHIP_TYPE_LABEL } from '../../util/payment/enumLabels';
+import { formatCurrency, formatDate } from '../../util/format';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 
 const router = useRouter();
 const appStore = useScholarshipApplicationStore();
+const semesterStore = useSemesterStore();
 const selectedSemester = ref(null);
 
 onMounted(async () => {
-  await appStore.fetchMyScholarships();
+  await Promise.all([appStore.fetchMyScholarships(), semesterStore.fetchSemesters()]);
   if (availableSemesters.value.length > 0) {
     selectedSemester.value = availableSemesters.value[0];
   }
@@ -92,42 +94,39 @@ const goToInstallment = () => {
 </script>
 
 <style scoped>
-.scholarship-history-page {
-  padding: 20px;
-  background-color: var(--personal-color-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-h2 {
-  margin-bottom: 20px;
-  color: var(--personal-color-black);
-}
 .form-group {
   margin-bottom: 20px;
+  padding: 16px 20px;
+  background: var(--personal-color-white);
+  border-radius: var(--personal-radius);
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
 }
 label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--personal-color-black);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #64748b;
 }
 select {
-  padding: 10px;
-  width: 250px;
-  border: 1px solid var(--personal-color-gray);
+  padding: 8px 12px;
+  min-width: 200px;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.95rem;
+  background-color: var(--personal-color-white);
+  font-size: 0.9rem;
 }
 .notice {
   padding: 40px;
-  background-color: #f8f9fa;
+  background-color: var(--personal-color-bg-surface);
   color: #4f566b;
   text-align: center;
-  border-radius: 6px;
+  border-radius: var(--personal-radius-card);
   font-weight: 500;
 }
 .action-area {
-  margin-top: 30px;
+  margin-top: 24px;
   display: flex;
   justify-content: flex-end;
 }
