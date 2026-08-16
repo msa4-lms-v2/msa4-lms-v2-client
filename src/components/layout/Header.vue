@@ -43,6 +43,7 @@ const logout = async () => {
           btnType="button"
           color="white"
           size="small"
+          class="logout-btn"
           content="로그아웃"
           @click="logout"
         />
@@ -110,5 +111,11 @@ const logout = async () => {
   color: #ffffffcc;
   font-size: 0.8rem;
   font-weight: bold;
+}
+
+:deep(.logout-btn) {
+  width: auto;
+  padding: 0 16px;
+  white-space: nowrap;
 }
 </style>
