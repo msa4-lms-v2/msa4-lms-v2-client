@@ -2,6 +2,7 @@
 import { onMounted } from 'vue';
 import { usePaymentHealthStore } from '../../store/payment/usePaymentHealthStore';
 import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { formatDate } from '../../util/format';
 import { HEALTH_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
@@ -11,9 +12,7 @@ onMounted(() => paymentHealthStore.fetchHealth());
 </script>
 
 <template>
-  <div class="page">
-    <h1>외부 연동 상태</h1>
-
+  <MyPageContainer title="외부 연동 상태">
     <p v-if="paymentHealthStore.isLoading">확인 중...</p>
 
     <div v-else class="health-list">
@@ -39,20 +38,15 @@ onMounted(() => paymentHealthStore.fetchHealth());
         </span>
       </div>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.page {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
 .health-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-width: 640px;
 }
 
 .health-card {

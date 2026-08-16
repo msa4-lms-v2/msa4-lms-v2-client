@@ -1,97 +1,97 @@
 <template>
-  <div class="installment-apply-page">
-    <h2>분할납부 신청</h2>
-    
-    <div v-if="instStore.isLoadingPlan">
-      <p class="notice">불러오는 중...</p>
-    </div>
-    
-    <!-- 신청 폼 (계획이 없을 때) -->
-    <div v-else-if="!instStore.installmentPlan">
-      <p class="notice">아직 분할납부를 신청하지 않았습니다.</p>
-      
-      <div v-if="submitSuccess">
-        <p class="success-notice">신청 완료, 관리자 승인을 기다려주세요.</p>
+  <MyPageContainer title="분할납부 신청">
+    <article class="form-card">
+      <div v-if="instStore.isLoadingPlan">
+        <p class="notice">불러오는 중...</p>
       </div>
-      <div v-else class="apply-form">
-        <div class="form-group">
-          <label>분할 회차</label>
-          <select v-model="selectedRounds">
-            <option :value="2">2회</option>
-            <option :value="3">3회</option>
-            <option :value="4">4회</option>
-          </select>
+
+      <!-- 신청 폼 (계획이 없을 때) -->
+      <div v-else-if="!instStore.installmentPlan">
+        <p class="notice">아직 분할납부를 신청하지 않았습니다.</p>
+
+        <div v-if="submitSuccess">
+          <p class="success-notice">신청 완료, 관리자 승인을 기다려주세요.</p>
         </div>
-        <div class="action-area">
-          <MyButton 
-            color="deep-blue" 
-            content="신청하기" 
-            size="middle"
-            @click="onSubmit" 
-            :disabled="instStore.isSubmittingPlan"
+        <div v-else class="apply-form">
+          <div class="form-group">
+            <label>분할 회차</label>
+            <select v-model="selectedRounds">
+              <option :value="2">2회</option>
+              <option :value="3">3회</option>
+              <option :value="4">4회</option>
+            </select>
+          </div>
+          <div class="action-area">
+            <MyButton
+              color="deep-blue"
+              content="신청하기"
+              size="middle"
+              @click="onSubmit"
+              :disabled="instStore.isSubmittingPlan"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 계획이 있을 때 -->
+      <div v-else>
+        <div class="status-panel">
+          <StatusBadge
+            :label="INSTALLMENT_PLAN_STATUS_LABEL[instStore.installmentPlan.status]"
+            :variant="INSTALLMENT_PLAN_STATUS_VARIANT[instStore.installmentPlan.status]"
           />
         </div>
-      </div>
-    </div>
-    
-    <!-- 계획이 있을 때 -->
-    <div v-else>
-      <div class="status-panel">
-        <StatusBadge 
-          :label="INSTALLMENT_PLAN_STATUS_LABEL[instStore.installmentPlan.status]" 
-          :variant="INSTALLMENT_PLAN_STATUS_VARIANT[instStore.installmentPlan.status]" 
-        />
-      </div>
 
-      <div v-if="instStore.installmentPlan.status === 'REQUESTED'">
-        <p class="notice">승인 대기 중입니다. 관리자 승인 후 결제가 가능합니다.</p>
-      </div>
-      
-      <div v-else-if="instStore.installmentPlan.status === 'REJECTED'">
-        <p class="error-notice">
-          반려됨: {{ instStore.installmentPlan.rejectReason || '사유 없음' }}
-        </p>
-      </div>
-
-      <div v-else-if="instStore.installmentPlan.status === 'ACTIVE' || instStore.installmentPlan.status === 'COMPLETED'">
-        <div v-if="instStore.installmentPlan.status === 'COMPLETED'" class="success-notice">
-          모든 분할납부가 완료되었습니다.
+        <div v-if="instStore.installmentPlan.status === 'REQUESTED'">
+          <p class="notice">승인 대기 중입니다. 관리자 승인 후 결제가 가능합니다.</p>
         </div>
-        
-        <MyTable
-          :columns="[
-            { key: 'round', label: '회차' },
-            { key: 'amount', label: '금액' },
-            { key: 'dueDate', label: '납부기한' },
-            { key: 'status', label: '상태' },
-            { key: 'action', label: '결제' }
-          ]"
-        >
-          <tr v-for="item in sortedItems" :key="item.id">
-            <td>{{ item.roundNo }}회</td>
-            <td>{{ Number(item.amount || 0).toLocaleString() }}원</td>
-            <td>{{ item.dueDate || '-' }}</td>
-            <td>
-              <StatusBadge 
-                :label="INSTALLMENT_ITEM_STATUS_LABEL[item.status]" 
-                :variant="INSTALLMENT_ITEM_STATUS_VARIANT[item.status]" 
-              />
-            </td>
-            <td>
-              <MyButton 
-                v-if="item.status === 'SCHEDULED' && instStore.installmentPlan.status === 'ACTIVE'"
-                color="deep-blue" 
-                size="small"
-                content="결제하기" 
-                @click="onPayment(item)"
-                :disabled="instStore.isProcessingPayment"
-              />
-            </td>
-          </tr>
-        </MyTable>
+
+        <div v-else-if="instStore.installmentPlan.status === 'REJECTED'">
+          <p class="error-notice">
+            반려됨: {{ instStore.installmentPlan.rejectReason || '사유 없음' }}
+          </p>
+        </div>
+
+        <div v-else-if="instStore.installmentPlan.status === 'ACTIVE' || instStore.installmentPlan.status === 'COMPLETED'">
+          <div v-if="instStore.installmentPlan.status === 'COMPLETED'" class="success-notice">
+            모든 분할납부가 완료되었습니다.
+          </div>
+
+          <MyTable
+            :columns="[
+              { key: 'round', label: '회차' },
+              { key: 'amount', label: '금액' },
+              { key: 'dueDate', label: '납부기한' },
+              { key: 'status', label: '상태' },
+              { key: 'action', label: '결제' }
+            ]"
+          >
+            <tr v-for="item in sortedItems" :key="item.id">
+              <td>{{ item.roundNo }}회</td>
+              <td>{{ Number(item.amount || 0).toLocaleString() }}원</td>
+              <td>{{ item.dueDate || '-' }}</td>
+              <td>
+                <StatusBadge
+                  :label="INSTALLMENT_ITEM_STATUS_LABEL[item.status]"
+                  :variant="INSTALLMENT_ITEM_STATUS_VARIANT[item.status]"
+                />
+              </td>
+              <td>
+                <MyButton
+                  v-if="item.status === 'SCHEDULED' && instStore.installmentPlan.status === 'ACTIVE'"
+                  color="deep-blue"
+                  size="small"
+                  content="결제하기"
+                  @click="onPayment(item)"
+                  :disabled="instStore.isProcessingPayment"
+                />
+              </td>
+            </tr>
+          </MyTable>
+        </div>
       </div>
-    </div>
-  </div>
+    </article>
+  </MyPageContainer>
 </template>
 
 <script setup>
@@ -104,6 +104,7 @@ import {
   INSTALLMENT_ITEM_STATUS_LABEL,
   INSTALLMENT_ITEM_STATUS_VARIANT
 } from '../../util/payment/enumLabels';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -153,15 +154,11 @@ const onPayment = async (item) => {
 </script>
 
 <style scoped>
-.installment-apply-page {
-  padding: 20px;
+.form-card {
+  padding: 26px 30px;
   background-color: var(--personal-color-white);
+  border: 1px solid #e5eaf2;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-h2 {
-  margin-bottom: 20px;
-  color: var(--personal-color-black);
 }
 .form-group {
   margin-bottom: 20px;

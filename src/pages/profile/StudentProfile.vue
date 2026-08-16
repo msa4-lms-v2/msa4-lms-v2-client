@@ -87,6 +87,16 @@ const academicRows = computed(() => [
           </ul>
         </div>
       </div>
+
+      <div class="profile-actions">
+        <PasswordChange />
+        <MyButton
+          color="deep-blue"
+          size="middle"
+          content="정보 변경 신청"
+          @click="router.push('/profile/info-change')"
+        />
+      </div>
     </article>
 
     <div class="info-grid">
@@ -116,40 +126,12 @@ const academicRows = computed(() => [
         </dl>
       </article>
     </div>
-
-    <article class="security-card">
-      <div class="security-copy">
-        <div>
-          <h3>계정 보안</h3>
-          <p>비밀번호를 변경하여 계정을 안전하게 관리하세요.</p>
-        </div>
-      </div>
-
-      <PasswordChange />
-    </article>
-
-    <article class="security-card">
-      <div class="security-copy">
-        <div>
-          <h3>학적 정보 변경</h3>
-          <p>이름, 연락처, 이메일, 주소, 프로필 사진 변경을 신청할 수 있습니다.</p>
-        </div>
-      </div>
-
-      <MyButton
-        color="deep-blue"
-        size="middle"
-        content="정보 변경 신청"
-        @click="router.push('/profile/info-change')"
-      />
-    </article>
   </MyPageContainer>
 </template>
 
 <style scoped>
 .profile-hero,
-.info-card,
-.security-card {
+.info-card {
   background: var(--personal-color-white);
   border: 1px solid #e5eaf2;
   border-radius: 8px;
@@ -158,8 +140,17 @@ const academicRows = computed(() => [
 .profile-hero {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   margin-bottom: 28px;
   padding: 28px 50px;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
 }
 
 .student-intro {
@@ -264,37 +255,19 @@ const academicRows = computed(() => [
   overflow-wrap: anywhere;
 }
 
-.security-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 26px 36px;
-  border-left: 4px solid var(--personal-color-student-primary);
-}
-
-.security-copy h3 {
-  color: var(--primary-text-color);
-  font-size: 1.1rem;
-  margin: 0 0 6px;
-}
-
-.security-copy p {
-  margin: 0;
-  color: #475569;
-  font-size: 0.9rem;
-}
-
 @media (max-width: 720px) {
   .info-grid {
     grid-template-columns: 1fr;
   }
 
-  .profile-hero,
-  .security-card {
+  .profile-hero {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+  }
+
+  .profile-actions {
+    flex-wrap: wrap;
   }
 }
 </style>

@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
@@ -23,9 +24,7 @@ onMounted(() => load());
 </script>
 
 <template>
-  <div class="page">
-    <h1>관리자 등록금 목록</h1>
-
+  <MyPageContainer title="관리자 등록금 목록">
     <div class="filter">
       <label for="status-filter">상태</label>
       <select id="status-filter" v-model="statusFilter" @change="load()">
@@ -80,16 +79,10 @@ onMounted(() => load());
         다음
       </button>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
 .filter {
   display: flex;
   align-items: center;

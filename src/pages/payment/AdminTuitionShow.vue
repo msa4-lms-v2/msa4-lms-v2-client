@@ -5,6 +5,7 @@ import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import TuitionStatusPanel from '../../components/payment/TuitionStatusPanel.vue';
 import ScholarshipAllocationPanel from '../../components/payment/ScholarshipAllocationPanel.vue';
 import ScholarshipApplyForm from '../../components/payment/ScholarshipApplyForm.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 
 const route = useRoute();
 const tuitionBillId = Number(route.params.id);
@@ -21,9 +22,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page">
-    <h1>등록금 고지 #{{ tuitionBillId }}</h1>
-
+  <MyPageContainer :title="`등록금 고지 #${tuitionBillId}`">
     <div class="panels">
       <TuitionStatusPanel v-if="tuitionStore.currentStatus" :status="tuitionStore.currentStatus" />
       <p v-else-if="tuitionStore.isLoadingStatus">불러오는 중...</p>
@@ -39,19 +38,14 @@ onMounted(() => {
         @submit="handleApplyScholarship"
       />
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.page {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
 .panels {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 640px;
 }
 </style>
