@@ -25,6 +25,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/profile/info-change',
+        name: 'InfoChangeRequest',
+        component: () => import('../pages/profile/InfoChangeRequest.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/tuition',
         name: 'TuitionIndex',
         component: () => import('../pages/payment/TuitionIndex.vue'),
@@ -52,6 +58,12 @@ const routes = [
         path: '/admin/tuition/:id',
         name: 'AdminTuitionShow',
         component: () => import('../pages/payment/AdminTuitionShow.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+        path: '/admin/info-change-requests',
+        name: 'AdminInfoChangeRequestIndex',
+        component: () => import('../pages/profile/AdminInfoChangeRequestIndex.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {

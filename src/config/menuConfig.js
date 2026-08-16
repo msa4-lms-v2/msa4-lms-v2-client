@@ -2,6 +2,8 @@
 export const MENU_TITLES = {
     '/main': { default: '메인 화면' },
     '/profile': { STUDENT: '학적 조회', PROFESSOR: '교적 조회', default: '내 정보' },
+    '/profile/info-change': { default: '정보 변경 신청' },
+    '/admin/info-change-requests': { default: '학적 정보 변경 승인' },
     '/tuition': { default: '등록금 납부' },
     '/tuition/history': { default: '등록금 납부 내역' },
     '/admin/tuition': { default: '등록금 관리' },

@@ -1,12 +1,15 @@
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 import PasswordChange from './PasswordChange.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyButton from '../../components/button/MyButton.vue';
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
+const router = useRouter();
 
 onMounted(async () => {
   await profileStore.fetchStudentProfile();
@@ -26,6 +29,7 @@ const formatStatus = (status) => {
 const student = computed(() => ({
   name: user.value.name || '-',
   status: formatStatus(user.value.academicStatus),
+  college: user.value.collegeName || '-',
   department: user.value.departmentName || '-',
   major: user.value.majorName || '-',
   grade: user.value.gradeLevel ? `${user.value.gradeLevel}학년` : '-',
@@ -35,11 +39,13 @@ const student = computed(() => ({
   address: user.value.address || '-',
   advisor: user.value.advisorName || '-',
   entranceYear: user.value.admissionYear || '-',
+  totalCredits: user.value.totalCredits ?? 0,
 }));
 
 const basicRows = computed(() => [
   { label: '이름', value: student.value.name },
   { label: '학번', value: student.value.studentNo },
+  { label: '소속 단과대학', value: student.value.college },
   { label: '학과', value: student.value.department },
   { label: '전공', value: student.value.major },
   { label: '학년', value: student.value.grade },
@@ -52,6 +58,7 @@ const academicRows = computed(() => [
   { label: '학적 상태', value: student.value.status },
   { label: '입학년도', value: student.value.entranceYear },
   { label: '지도교수', value: student.value.advisor },
+  { label: '총 취득 학점', value: `${student.value.totalCredits}학점` },
 ]);
 </script>
 
@@ -119,6 +126,22 @@ const academicRows = computed(() => [
       </div>
 
       <PasswordChange />
+    </article>
+
+    <article class="security-card">
+      <div class="security-copy">
+        <div>
+          <h3>학적 정보 변경</h3>
+          <p>이름, 연락처, 이메일, 주소, 프로필 사진 변경을 신청할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <MyButton
+        color="deep-blue"
+        size="middle"
+        content="정보 변경 신청"
+        @click="router.push('/profile/info-change')"
+      />
     </article>
   </MyPageContainer>
 </template>
