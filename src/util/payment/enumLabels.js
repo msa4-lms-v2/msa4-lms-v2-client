@@ -24,13 +24,22 @@ export const HEALTH_STATUS_VARIANT = {
 };
 
 export const PAYMENT_STATUS_LABEL = {
+  REQUESTED: '처리중',
   SUCCEEDED: '결제 완료',
   FAILED: '결제 실패',
+  CANCELLED: '취소됨',
 };
 
 export const PAYMENT_STATUS_VARIANT = {
+  REQUESTED: 'processing',
   SUCCEEDED: 'success',
   FAILED: 'fail',
+  CANCELLED: 'warning',
+};
+
+export const PAYMENT_TYPE_LABEL = {
+  LUMP_SUM: '일괄납부',
+  INSTALLMENT: '분할납부',
 };
 
 export const REFUND_STATUS_LABEL = {

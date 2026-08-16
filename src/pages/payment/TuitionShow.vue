@@ -2,22 +2,31 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
-import TuitionStatusPanel from '../../components/payment/TuitionStatusPanel.vue';
-import ScholarshipAllocationPanel from '../../components/payment/ScholarshipAllocationPanel.vue';
+import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyButton from '../../components/button/MyButton.vue';
+import MyTable from '../../components/table/MyTable.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
-import { formatCurrency } from '../../util/format';
+import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
+import { formatCurrency, formatDate } from '../../util/format';
 import {
   PAYMENT_STATUS_LABEL,
   PAYMENT_STATUS_VARIANT,
+  TUITION_BILL_STATUS_LABEL,
+  TUITION_BILL_STATUS_VARIANT,
 } from '../../util/payment/enumLabels';
 
 const route = useRoute();
 const tuitionBillId = Number(route.params.id);
 const tuitionStore = useTuitionStore();
+const semesterStore = useSemesterStore();
 const selectedPaymentMethod = ref('CARD');
 const paymentErrorMessage = ref('');
 const refundErrorMessage = ref('');
+
+const currentBill = computed(() => tuitionStore.myBills.find((bill) => bill.id === tuitionBillId));
+const semesterLabel = computed(() => (
+  currentBill.value ? semesterStore.getSemesterLabel(currentBill.value.semesterId) : '-'
+));
 
 const paymentMethods = [
   { value: 'CARD', label: '카드' },
@@ -67,8 +76,10 @@ const handleRefundEstimate = async () => {
 };
 
 onMounted(() => {
+  tuitionStore.fetchMyBills();
   tuitionStore.fetchStatus(tuitionBillId);
   tuitionStore.fetchAllocation(tuitionBillId);
+  semesterStore.fetchSemesters();
 });
 </script>
 
@@ -77,21 +88,49 @@ onMounted(() => {
     <h1>등록금 고지서</h1>
 
     <div class="panels">
-      <TuitionStatusPanel
-        v-if="tuitionStore.currentStatus"
-        :status="tuitionStore.currentStatus"
-      />
-      <p v-else-if="tuitionStore.isLoadingStatus">
+      <section
+        v-if="tuitionStore.currentAllocation"
+        class="summary-bar"
+      >
+        <SummaryStatCard label="학기" :value="semesterLabel" />
+        <SummaryStatCard label="총 등록금" :value="formatCurrency(tuitionStore.currentAllocation.billingAmount)" />
+        <SummaryStatCard
+          label="장학금"
+          :value="`-${formatCurrency(tuitionStore.currentAllocation.totalScholarshipAmount)}`"
+        />
+        <SummaryStatCard
+          label="납부 예정액"
+          :value="formatCurrency(tuitionStore.currentAllocation.actualPaymentAmount)"
+          highlight
+        />
+      </section>
+      <p v-else-if="tuitionStore.isLoadingAllocation || tuitionStore.isLoadingStatus">
         불러오는 중...
       </p>
 
-      <ScholarshipAllocationPanel
-        v-if="tuitionStore.currentAllocation"
-        :allocation="tuitionStore.currentAllocation"
-      />
-      <p v-else-if="tuitionStore.isLoadingAllocation">
-        불러오는 중...
-      </p>
+      <section v-if="tuitionStore.currentStatus" class="notice-section">
+        <h3>납부 고지 내역</h3>
+        <MyTable
+          :columns="[
+            { key: 'division', label: '구분' },
+            { key: 'amount', label: '금액' },
+            { key: 'dueDate', label: '납부기한' },
+            { key: 'status', label: '상태' },
+          ]"
+        >
+          <tr>
+            <td>{{ semesterLabel }} 등록금</td>
+            <td>{{ formatCurrency(tuitionStore.currentStatus.billingAmount) }}</td>
+            <td>{{ formatDate(tuitionStore.currentStatus.dueDate) }}</td>
+            <td>
+              <StatusBadge
+                :label="TUITION_BILL_STATUS_LABEL[tuitionStore.currentStatus.status]"
+                :variant="TUITION_BILL_STATUS_VARIANT[tuitionStore.currentStatus.status]"
+              />
+            </td>
+          </tr>
+        </MyTable>
+      </section>
 
       <section
         class="action-panel"
@@ -207,7 +246,7 @@ onMounted(() => {
 
 <style scoped>
 .page {
-  max-width: 640px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 32px;
 }
@@ -216,6 +255,28 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.notice-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-section h3 {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .summary-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .action-panel {

@@ -7,6 +7,8 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const adminBills = ref([]);
   const adminBillsPage = ref({ totalCount: 0, page: 1, size: 20, hasNext: false });
   const myBills = ref([]);
+  const paymentHistory = ref([]);
+  const isLoadingPaymentHistory = ref(false);
   const currentStatus = ref(null);
   const currentAllocation = ref(null);
   const currentPayment = ref(null);
@@ -50,6 +52,17 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
       myBills.value = res.data.data;
     } finally {
       isLoadingMyBills.value = false;
+    }
+  };
+
+  // 학기/구분/상태 필터는 클라이언트 사이드에서 처리하므로 파라미터 없이 전체 이력을 받아온다.
+  const fetchPaymentHistory = async () => {
+    isLoadingPaymentHistory.value = true;
+    try {
+      const res = await myAxios.get('/api/payment/me/payment-history');
+      paymentHistory.value = res.data.data;
+    } finally {
+      isLoadingPaymentHistory.value = false;
     }
   };
 
@@ -200,6 +213,8 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     adminBills,
     adminBillsPage,
     myBills,
+    paymentHistory,
+    isLoadingPaymentHistory,
     currentStatus,
     currentAllocation,
     currentPayment,
@@ -216,6 +231,7 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     hasNoWithdrawalRequest,
     fetchAdminBills,
     fetchMyBills,
+    fetchPaymentHistory,
     fetchStatus,
     fetchAllocation,
     applyScholarship,
