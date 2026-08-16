@@ -19,6 +19,12 @@ const routes = [
         meta: { ...setMeta(true, false), requiresAuth: true },
     },
     {
+        path: '/profile',
+        name: 'StudentProfile',
+        component: () => import('../pages/profile/StudentProfile.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/tuition',
         name: 'TuitionIndex',
         component: () => import('../pages/payment/TuitionIndex.vue'),
