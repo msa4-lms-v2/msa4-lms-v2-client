@@ -67,7 +67,7 @@ input,
 select {
     padding: 8px 12px;
     border-radius: var(--personal-radius);
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--personal-color-border);
 }
 
 button {

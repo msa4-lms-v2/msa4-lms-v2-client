@@ -37,10 +37,10 @@ defineProps({
 }
 
 .schedule-list {
-    background: #ffffff;
+    background: var(--personal-color-white);
     border-radius: 8px;
     padding: 16px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 14px var(--personal-shadow-soft);
     flex: 1;
 }
 
@@ -51,8 +51,8 @@ defineProps({
 }
 
 .schedule-item {
-    background: #ffffff;
-    border: 1px solid #eeeeee;
+    background: var(--personal-color-white);
+    border: 1px solid var(--personal-color-border-faint);
     border-radius: 10px;
     padding: 14px;
     transition: all 0.2s ease;
@@ -66,6 +66,6 @@ defineProps({
 
 .schedule-date {
     font-size: 14px;
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
 }
 </style>

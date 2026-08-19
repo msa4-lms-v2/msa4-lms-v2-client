@@ -36,14 +36,14 @@ const toggleMenu = (menuKey) => {
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
         <!-- 학사관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentAcademic')">
+          <button type="button" class="menu-header" @click="toggleMenu('studentAcademic')">
             <span>학사 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentAcademic }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.studentAcademic">
             <router-link to="/profile" class="submenu-item">{{
               getMenuTitle("/profile", "STUDENT")
@@ -62,14 +62,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 수강 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentCourse')">
+          <button type="button" class="menu-header" @click="toggleMenu('studentCourse')">
             <span>수강 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentCourse }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.studentCourse">
             <router-link to="/enrollments" class="submenu-item">{{
               getMenuTitle("/enrollments")
@@ -82,14 +82,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 성적 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentGrade')">
+          <button type="button" class="menu-header" @click="toggleMenu('studentGrade')">
             <span>성적 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentGrade }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.studentGrade">
             <router-link to="/grade" class="submenu-item">{{
               getMenuTitle("/grade")
@@ -99,14 +99,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 출결 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentAttendance')">
+          <button type="button" class="menu-header" @click="toggleMenu('studentAttendance')">
             <span>출결 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentAttendance }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.studentAttendance">
             <router-link to="/attendance" class="submenu-item">{{
               getMenuTitle("/attendance")
@@ -119,14 +119,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 등록 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentRegistration')">
+          <button type="button" class="menu-header" @click="toggleMenu('studentRegistration')">
             <span>등록 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentRegistration }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.studentRegistration">
             <router-link to="/tuition" class="submenu-item">{{
               getMenuTitle("/tuition")
@@ -140,14 +140,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 장학 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('studentScholarship')">
+          <button type="button" class="menu-header" @click="toggleMenu('studentScholarship')">
             <span>장학 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentScholarship }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.studentScholarship">
             <router-link to="/scholarships/apply" class="submenu-item">{{
               getMenuTitle("/scholarships/apply")
@@ -162,14 +162,14 @@ const toggleMenu = (menuKey) => {
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
         <!-- 교사관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('professorTeacher')">
+          <button type="button" class="menu-header" @click="toggleMenu('professorTeacher')">
             <span>교사 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorTeacher }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.professorTeacher">
             <router-link to="/profile" class="submenu-item">{{
               getMenuTitle("/profile", "PROFESSOR")
@@ -179,14 +179,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 학생 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('professorStudent')">
+          <button type="button" class="menu-header" @click="toggleMenu('professorStudent')">
             <span>학생 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorStudent }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.professorStudent">
             <router-link to="/professor/leave-return" class="submenu-item">{{
               getMenuTitle("/professor/leave-return")
@@ -196,14 +196,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 강의 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('professorCourse')">
+          <button type="button" class="menu-header" @click="toggleMenu('professorCourse')">
             <span>강의 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorCourse }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
             <router-link to="/professor/lectures/create" class="submenu-item">{{
               getMenuTitle("/professor/lectures/create")
@@ -216,14 +216,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 성적 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('professorGrade')">
+          <button type="button" class="menu-header" @click="toggleMenu('professorGrade')">
             <span>성적 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorGrade }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
             <router-link to="/professor/grades/input" class="submenu-item">{{
               getMenuTitle("/professor/grades/input")
@@ -236,14 +236,14 @@ const toggleMenu = (menuKey) => {
 
         <!-- 출결 관리 -->
         <div class="menu-group">
-          <div class="menu-header" @click="toggleMenu('professorAttendance')">
+          <button type="button" class="menu-header" @click="toggleMenu('professorAttendance')">
             <span>출결 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorAttendance }"
               >▼</span
             >
-          </div>
+          </button>
           <div class="submenu-list" v-show="activeMenus.professorAttendance">
             <router-link
               to="/professor/attendance/approvals"
@@ -279,7 +279,7 @@ const toggleMenu = (menuKey) => {
 <style scoped>
 .sidebar {
   width: 240px;
-  background-color: #fff;
+  background-color: var(--personal-color-white);
   padding-top: 47px;
   height: calc(100vh);
   position: sticky;
@@ -301,7 +301,7 @@ const toggleMenu = (menuKey) => {
 .nav-item {
   padding: 12px 24px;
   text-decoration: none;
-  color: #4a5568;
+  color: var(--personal-color-sidebar-text);
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.2s;
@@ -309,8 +309,8 @@ const toggleMenu = (menuKey) => {
 }
 
 .nav-item:hover {
-  background-color: #f7fafc;
-  color: #1a73e8;
+  background-color: var(--personal-color-bg-hover);
+  color: var(--personal-color-link);
 }
 
 /* 메뉴 그룹 */
@@ -323,18 +323,23 @@ const toggleMenu = (menuKey) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 12px 24px;
   cursor: pointer;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--personal-color-sidebar-text);
   font-size: 0.95rem;
+  font-family: inherit;
   user-select: none;
   transition: all 0.2s;
+  background: none;
+  border: none;
+  text-align: left;
 }
 
 .menu-header:hover {
-  background-color: #f7fafc;
-  color: #1a73e8;
+  background-color: var(--personal-color-bg-hover);
+  color: var(--personal-color-link);
 }
 
 .chevron {
@@ -349,9 +354,9 @@ const toggleMenu = (menuKey) => {
 
 /* 서브메뉴 */
 .submenu-list {
-  background-color: #f7fafc;
-  border-top: 1px solid #edf2f7;
-  border-bottom: 1px solid #edf2f7;
+  background-color: var(--personal-color-bg-hover);
+  border-top: 1px solid var(--personal-color-border-light);
+  border-bottom: 1px solid var(--personal-color-border-light);
   transition: max-height 0.3s ease;
 }
 
@@ -366,17 +371,17 @@ const toggleMenu = (menuKey) => {
 }
 
 .submenu-item:hover {
-  background-color: #edf2f7;
-  color: #1a73e8;
+  background-color: var(--personal-color-border-light);
+  color: var(--personal-color-link);
 }
 
 .router-link-active {
-  background-color: #e8f0fe;
-  color: #1a73e8;
+  background-color: var(--personal-color-bg-info-soft);
+  color: var(--personal-color-link);
   font-weight: 600;
 }
 
 .router-link-active.main-link {
-  border-left: 4px solid #1a73e8;
+  border-left: 4px solid var(--personal-color-link);
 }
 </style>

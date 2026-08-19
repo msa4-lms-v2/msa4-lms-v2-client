@@ -12,7 +12,7 @@ const allMenuItems = [
         description: '개설된 강의를 조회하고 상세 정보를 확인합니다.',
         icon: 'CL',
         path: '/lectures',
-        color: '#e8f0fe',
+        color: 'var(--personal-color-bg-info-soft)',
         roles: ['STUDENT', 'PROFESSOR', 'ADMIN'],
     },
     {
@@ -20,7 +20,7 @@ const allMenuItems = [
         description: '이번 학기 수강 과목과 총 학점을 확인합니다.',
         icon: 'EN',
         path: '/enrollments',
-        color: '#fff9db',
+        color: 'var(--personal-color-bg-yellow-soft)',
         roles: ['STUDENT'],
     },
     {
@@ -44,7 +44,7 @@ const allMenuItems = [
         description: '출결 내역, 출석률, 공결 신청과 승인 결과를 확인합니다.',
         icon: 'AT',
         path: '/attendance',
-        color: '#eef2ff',
+        color: 'var(--personal-color-bg-indigo-soft)',
         roles: ['STUDENT'],
     },
     {
@@ -52,7 +52,7 @@ const allMenuItems = [
         description: '담당 강의 목록을 관리하고 성적을 입력합니다.',
         icon: 'MG',
         path: '/lectures/manage',
-        color: '#e8f0fe',
+        color: 'var(--personal-color-bg-info-soft)',
         roles: ['PROFESSOR'],
     },
     {
@@ -60,7 +60,7 @@ const allMenuItems = [
         description: '학생 공결 신청을 확인하고 승인 또는 반려합니다.',
         icon: 'CK',
         path: '/professor/attendance/approvals',
-        color: '#eef2ff',
+        color: 'var(--personal-color-bg-indigo-soft)',
         roles: ['PROFESSOR'],
     },
     {
@@ -68,7 +68,7 @@ const allMenuItems = [
         description: '학생 목록을 확인하고 관리합니다.',
         icon: 'ST',
         path: '/students',
-        color: '#fff9db',
+        color: 'var(--personal-color-bg-yellow-soft)',
         roles: ['PROFESSOR', 'ADMIN'],
     },
     {
@@ -130,12 +130,12 @@ const navigateTo = (path) => {
 
 .welcome-section h1 {
     font-size: 1.8rem;
-    color: #1a1f36;
+    color: var(--personal-color-heading);
     margin-bottom: 8px;
 }
 
 .welcome-section p {
-    color: #697386;
+    color: var(--personal-color-text-tertiary);
 }
 
 .card-grid {
@@ -146,7 +146,7 @@ const navigateTo = (path) => {
 
 .menu-card {
     background: white;
-    border: 1px solid #edf2f7;
+    border: 1px solid var(--personal-color-border-light);
     border-radius: 8px;
     padding: 24px;
     display: flex;
@@ -159,8 +159,8 @@ const navigateTo = (path) => {
 
 .menu-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border-color: #1a73e8;
+    box-shadow: 0 10px 15px -3px var(--personal-shadow-medium);
+    border-color: var(--personal-color-link);
 }
 
 .card-icon {
@@ -172,7 +172,7 @@ const navigateTo = (path) => {
     justify-content: center;
     font-size: 0.9rem;
     font-weight: 800;
-    color: #1a1f36;
+    color: var(--personal-color-heading);
 }
 
 .card-content {
@@ -183,12 +183,12 @@ const navigateTo = (path) => {
 
 .card-content strong {
     font-size: 1.2rem;
-    color: #1a1f36;
+    color: var(--personal-color-heading);
 }
 
 .card-content span {
     font-size: 0.95rem;
-    color: #4f566b;
+    color: var(--personal-color-text-secondary);
     line-height: 1.5;
 }
 </style>

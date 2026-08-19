@@ -39,7 +39,7 @@ const closeTab = (path, event) => {
 <style scoped>
 .tab-bar {
     display: flex;
-    background-color: #ffffff;
+    background-color: var(--personal-color-white);
     padding: 8px 8px 0 8px;
     gap: 4px;
     overflow-x: auto;
@@ -50,7 +50,7 @@ const closeTab = (path, event) => {
 }
 
 .tab-bar::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    background-color: var(--personal-color-border);
     border-radius: 4px;
 }
 
@@ -73,25 +73,25 @@ const closeTab = (path, event) => {
 
 .tab-item:hover {
     background-color: #eff2f7;
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
 }
 
 .tab-item.role-student.active {
     background-color: var(--personal-color-student-primary);
     color: var(--personal-color-white);
-    border-color: #cbd5e1;
+    border-color: var(--personal-color-border);
 }
 
 .tab-item.role-professor.active {
     background-color: var(--personal-color-professor-primary);
     color: var(--personal-color-white);
-    border-color: #cbd5e1;
+    border-color: var(--personal-color-border);
 }
 
 .tab-item.role-admin.active {
     background-color: var(--personal-color-admin-primary);
     color: var(--personal-color-white);
-    border-color: #cbd5e1;
+    border-color: var(--personal-color-border);
 }
 
 .tab-title {
@@ -120,6 +120,6 @@ const closeTab = (path, event) => {
 
 .close-btn:hover {
     opacity: 1;
-    color: #ef4444;
+    color: var(--personal-color-danger);
 }
 </style>

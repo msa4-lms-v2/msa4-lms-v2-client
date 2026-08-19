@@ -59,12 +59,12 @@ onMounted(() => paymentHealthStore.fetchHealth());
 }
 
 .message {
-  color: #64748b;
+  color: var(--personal-color-text-muted);
 }
 
 .checked-at {
   margin-left: auto;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--personal-color-text-faint);
 }
 </style>

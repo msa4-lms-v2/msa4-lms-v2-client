@@ -12,7 +12,7 @@
           <label>신청 대상 고지 선택</label>
           <select v-model="selectedBillId" @change="onBillChange">
             <option v-for="bill in tuitionStore.myBills" :key="bill.id" :value="bill.id">
-              {{ bill.semesterId }} 학기 | 고지 금액: {{ Number(bill.billingAmount || 0).toLocaleString() }}원
+              {{ bill.semesterId }} 학기 | 고지 금액: {{ formatCurrency(bill.billingAmount) }}
             </option>
           </select>
         </div>
@@ -71,6 +71,7 @@ import { useScholarshipApplicationStore } from '../../store/payment/useScholarsh
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import { formatCurrency } from '../../util/format';
 
 const tuitionStore = useTuitionStore();
 const appStore = useScholarshipApplicationStore();
@@ -136,7 +137,7 @@ const onSubmit = async () => {
 .form-card {
   padding: 26px 30px;
   background-color: var(--personal-color-white);
-  border: 1px solid #e5eaf2;
+  border: 1px solid var(--personal-color-border-soft);
   border-radius: 8px;
 }
 .form-group {
@@ -166,9 +167,9 @@ textarea {
   font-weight: 500;
   text-align: center;
 }
-.notice { background-color: #f8f9fa; color: #4f566b; }
-.success-notice { background-color: #e6ffed; color: #1a7f37; border: 1px solid #1a7f37; }
-.error-notice { background-color: #ffebe9; color: #cf222e; border: 1px solid #cf222e; }
+.notice { background-color: var(--personal-color-bg-subtle); color: var(--personal-color-text-secondary); }
+.success-notice { background-color: var(--personal-color-bg-success-soft); color: var(--personal-color-success-text); border: 1px solid var(--personal-color-success-text); }
+.error-notice { background-color: var(--personal-color-bg-danger-soft); color: var(--personal-color-danger-strong); border: 1px solid var(--personal-color-danger-strong); }
 
 .action-area {
   display: flex;

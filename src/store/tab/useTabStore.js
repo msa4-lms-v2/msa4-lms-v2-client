@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import router from '../../routes/router';
 import { useAuthStore } from '../auth/useAuthStore';
 import { getMenuTitle, MENU_TITLES_BY_NAME } from '../../config/menuConfig';
-export const useTabStore = defineStore('tab', () => {
+export const useTabStore = defineStore('tabStore', () => {
     const tabs = ref([]);
     const activeTab = ref('');
 

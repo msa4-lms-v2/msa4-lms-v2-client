@@ -36,7 +36,7 @@ defineEmits(['search']);
     background: white;
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #edf2f7;
+    border: 1px solid var(--personal-color-border-light);
     margin-bottom: 24px;
 }
 
@@ -55,7 +55,7 @@ defineEmits(['search']);
 }
 
 :deep(.search-group label) {
-    color: #4f566b;
+    color: var(--personal-color-text-secondary);
     font-size: 0.85rem;
     font-weight: 600;
 }
@@ -64,7 +64,7 @@ defineEmits(['search']);
 :deep(.search-group input) {
     min-width: 160px;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--personal-color-border-input);
     border-radius: 4px;
     background-color: white;
     box-sizing: border-box;

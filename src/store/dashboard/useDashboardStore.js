@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import myAxios from "../../api/myAxios";
 
-export const useDashboardStore = defineStore("dashboard", () => {
+export const useDashboardStore = defineStore("dashboardStore", () => {
   const schedules = ref([]);
   const notices = ref([]);
 

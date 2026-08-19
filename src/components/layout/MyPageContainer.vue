@@ -27,7 +27,7 @@ defineProps({
     margin: 0 auto;
     padding: 20px;
     padding-bottom: 50px;
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
 }
 
 .page-heading {
@@ -36,14 +36,14 @@ defineProps({
 
 .page-heading h2 {
     margin-bottom: 8px;
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
     letter-spacing: 0;
     font-size: 1.5rem;
     font-weight: 800;
 }
 
 .page-heading p {
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
     font-size: 1rem;
 }
 </style>

@@ -250,8 +250,8 @@ const handleLogin = async () => {
     min-height: 100vh;
     display: grid;
     grid-template-columns: minmax(430px, 0.95fr) minmax(580px, 1.05fr);
-    color: #1e293b;
-    background: #f8fafc;
+    color: var(--personal-color-primary-text);
+    background: var(--personal-color-bg-surface);
 }
 .brand-panel {
     position: relative;
@@ -261,17 +261,17 @@ const handleLogin = async () => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    color: #fff;
-    background: linear-gradient(145deg, #0b3d91, #061f4d);
+    color: var(--personal-color-white);
+    background: linear-gradient(145deg, var(--personal-color-login-primary), #061f4d);
 }
 .brand-panel:before {
     content: '';
     position: absolute;
     inset: 0;
     opacity: 0.11;
-    background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px);
+    background-image: linear-gradient(var(--personal-color-white) 1px, transparent 1px), linear-gradient(90deg, var(--personal-color-white) 1px, transparent 1px);
     background-size: 55px 55px;
-    mask-image: linear-gradient(to bottom, #000, transparent 88%);
+    mask-image: linear-gradient(to bottom, var(--personal-color-black), transparent 88%);
 }
 .brand-decoration {
     position: absolute;
@@ -283,14 +283,14 @@ const handleLogin = async () => {
     height: 520px;
     right: -270px;
     top: -250px;
-    box-shadow: 0 0 0 70px #60a5fa0b, 0 0 0 140px #60a5fa08;
+    box-shadow: 0 0 0 70px var(--personal-color-login-glow), 0 0 0 140px #60a5fa08;
 }
 .decoration-two {
     width: 330px;
     height: 330px;
     left: -210px;
     bottom: -170px;
-    box-shadow: 0 0 0 55px #60a5fa0b;
+    box-shadow: 0 0 0 55px var(--personal-color-login-glow);
 }
 .brand-content {
     position: relative;
@@ -306,7 +306,7 @@ const handleLogin = async () => {
     place-items: center;
     border: 1px solid #ffffff50;
     border-radius: 36px;
-    background: #fff;
+    background: var(--personal-color-white);
     box-shadow: 0 25px 60px #00133370;
 }
 .logo-frame img {
@@ -333,7 +333,7 @@ const handleLogin = async () => {
     width: 42px;
     height: 3px;
     margin: 24px 0;
-    background: #60a5fa;
+    background: var(--personal-color-student-accent);
 }
 .brand-text h2 {
     font-size: 22px;
@@ -360,13 +360,13 @@ const handleLogin = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 90% 0, #dbeafe 0, transparent 32%), #f8fafc;
+    background: radial-gradient(circle at 90% 0, var(--personal-color-status-processing-bg) 0, transparent 32%), var(--personal-color-bg-surface);
 }
 .login-container {
     width: min(500px, 100%);
 }
 .welcome {
-    color: #2563eb;
+    color: var(--personal-color-secondary-blue);
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 0.2em;
@@ -379,7 +379,7 @@ const handleLogin = async () => {
 }
 .login-header p {
     margin-top: 8px;
-    color: #64748b;
+    color: var(--personal-color-text-muted);
     font-size: 15px;
 }
 
@@ -404,15 +404,15 @@ const handleLogin = async () => {
     gap: 8px;
     border: 0;
     border-radius: 11px;
-    color: #64748b;
+    color: var(--personal-color-text-muted);
     background: transparent;
     text-align: left;
     cursor: pointer;
     transition: 0.2s;
 }
 .login-tabs button.active {
-    color: #0b3d91;
-    background: #fff;
+    color: var(--personal-color-login-primary);
+    background: var(--personal-color-white);
     box-shadow: 0 5px 15px #0b3d9118;
 }
 .tab-icon {
@@ -425,8 +425,8 @@ const handleLogin = async () => {
     background: #ffffff88;
 }
 .active .tab-icon {
-    color: #fff;
-    background: linear-gradient(135deg, #0b3d91, #2563eb);
+    color: var(--personal-color-white);
+    background: linear-gradient(135deg, var(--personal-color-login-primary), var(--personal-color-secondary-blue));
 }
 .tab-icon svg {
     width: 16px;
@@ -452,7 +452,7 @@ const handleLogin = async () => {
 form > label {
     display: block;
     margin: 0 0 8px;
-    color: #334155;
+    color: var(--personal-color-admin-primary);
     font-size: 11px;
     font-weight: 800;
 }
@@ -465,18 +465,18 @@ form > label {
     padding: 0 15px;
     border: 1px solid #dbe3ee;
     border-radius: 11px;
-    background: #fff;
+    background: var(--personal-color-white);
     transition: 0.2s;
 }
 .input-box:focus-within {
-    border-color: #2563eb;
+    border-color: var(--personal-color-secondary-blue);
     box-shadow: 0 0 0 4px #2563eb12;
 }
 .input-box > svg {
     width: 18px;
     flex: none;
     fill: none;
-    stroke: #94a3b8;
+    stroke: var(--personal-color-text-faint);
     stroke-width: 1.7;
     stroke-linecap: round;
 }
@@ -485,7 +485,7 @@ form > label {
     flex: 1;
     border: 0;
     outline: 0;
-    color: #1e293b;
+    color: var(--personal-color-primary-text);
     background: transparent;
     font-size: 15px;
 }
@@ -502,12 +502,12 @@ form > label {
 .password-toggle svg {
     width: 17px;
     fill: none;
-    stroke: #94a3b8;
+    stroke: var(--personal-color-text-faint);
     stroke-width: 1.7;
 }
 .error-message {
     margin: -6px 0 14px;
-    color: #ef4444;
+    color: var(--personal-color-danger);
     font-size: 10px;
 }
 .form-options {
@@ -515,7 +515,7 @@ form > label {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #64748b;
+    color: var(--personal-color-text-muted);
     font-size: 12px;
 }
 .remember {
@@ -531,18 +531,18 @@ form > label {
 .remember span {
     width: 14px;
     height: 14px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--personal-color-border);
     border-radius: 4px;
-    background: #fff;
+    background: var(--personal-color-white);
 }
 .remember input:checked + span {
-    border-color: #2563eb;
-    background: #2563eb;
-    box-shadow: inset 0 0 0 3px #fff;
+    border-color: var(--personal-color-secondary-blue);
+    background: var(--personal-color-secondary-blue);
+    box-shadow: inset 0 0 0 3px var(--personal-color-white);
 }
 .form-options a,
 .policy-links a {
-    color: #64748b;
+    color: var(--personal-color-text-muted);
     text-decoration: none;
 }
 .login-button {
@@ -554,8 +554,8 @@ form > label {
     gap: 7px;
     border: 0;
     border-radius: 11px;
-    color: #fff;
-    background: linear-gradient(135deg, #0b3d91, #2563eb);
+    color: var(--personal-color-white);
+    background: linear-gradient(135deg, var(--personal-color-login-primary), var(--personal-color-secondary-blue));
     box-shadow: 0 14px 26px #2563eb3d;
     font-size: 15px;
     font-weight: 800;
@@ -581,9 +581,9 @@ form > label {
     display: flex;
     align-items: center;
     gap: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--personal-color-border-subtle);
     border-radius: 11px;
-    background: #fff;
+    background: var(--personal-color-white);
 }
 .support-box > span {
     width: 30px;
@@ -592,7 +592,7 @@ form > label {
     place-items: center;
     flex: none;
     border-radius: 50%;
-    color: #2563eb;
+    color: var(--personal-color-secondary-blue);
     background: #eff6ff;
     font-size: 14px;
     font-weight: 800;
@@ -605,16 +605,16 @@ form > label {
     display: block;
 }
 .support-box strong {
-    color: #334155;
+    color: var(--personal-color-admin-primary);
     font-size: 13px;
 }
 .support-box small {
     margin-top: 3px;
-    color: #94a3b8;
+    color: var(--personal-color-text-faint);
     font-size: 11px;
 }
 .support-box a {
-    color: #2563eb;
+    color: var(--personal-color-secondary-blue);
     text-decoration: none;
     font-size: 10px;
     font-weight: 800;
@@ -630,7 +630,7 @@ form > label {
 .policy-links i {
     width: 1px;
     height: 8px;
-    background: #cbd5e1;
+    background: var(--personal-color-border);
 }
 @media (max-width: 850px) {
     .login-page {
@@ -687,7 +687,7 @@ form > label {
 .temp-logo {
     font-size: 48px;
     font-weight: 900;
-    color: #0b3d91;
+    color: var(--personal-color-login-primary);
     letter-spacing: -2px;
 }
 </style>

@@ -79,6 +79,6 @@ onMounted(async () => {
   padding: 12px 16px;
   border-radius: var(--personal-radius);
   background: var(--personal-color-status-fail-bg);
-  color: #991b1b;
+  color: var(--personal-color-status-fail-text);
 }
 </style>

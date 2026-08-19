@@ -1,6 +1,7 @@
 <script setup>
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import dayjs from 'dayjs';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -15,14 +16,8 @@ const calendarRef = ref(null);
 const calendarTitle = ref('');
 
 const addOneDay = (date) => {
-    if (!date) return null;
-
-    const d = new Date(date);
-    if (Number.isNaN(d.getTime())) return null;
-
-    d.setDate(d.getDate() + 1);
-
-    return d.toISOString().split('T')[0];
+    const parsed = dayjs(date);
+    return parsed.isValid() ? parsed.add(1, 'day').format('YYYY-MM-DD') : null;
 };
 
 const events = computed(() =>
@@ -34,7 +29,7 @@ const events = computed(() =>
             schedule.targetRole === 'STUDENT'
                 ? 'var(--personal-color-green)'
                 : schedule.targetRole === 'PROFESSOR'
-                ? 'var(--secondary-blue)'
+                ? 'var(--personal-color-secondary-blue)'
                 : 'var(--personal-color-red)',
         borderColor: 'transparent',
     }))
@@ -91,10 +86,10 @@ const calendarOptions = {
 .calendar-card {
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: var(--personal-color-white);
     border-radius: 8px;
     padding: 18px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 14px var(--personal-shadow-soft);
     height: 100%;
     min-height: 0;
     overflow: hidden;
@@ -118,7 +113,7 @@ const calendarOptions = {
 
 .calendar-title {
     width: 260px;
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
     font-size: 25px;
     font-weight: 700;
     line-height: 1;
@@ -131,14 +126,14 @@ const calendarOptions = {
     height: 28px;
     border: none;
     background: transparent;
-    color: var(--primary-text-color);
+    color: var(--personal-color-primary-text);
     cursor: pointer;
     font-size: 30px;
     line-height: 1;
 }
 
 .calendar-nav-button:hover {
-    color: var(--secondary-blue);
+    color: var(--personal-color-secondary-blue);
 }
 
 .calendar-body {

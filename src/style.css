@@ -6,7 +6,7 @@
     --personal-color-gray: #b1b1b1;
 
     /* 색상 - 브랜드/버튼 */
-    --primary-color: #00278b;
+    --personal-color-primary: #00278b;
 
     /* 색상 - 관리자 역할 (Figma Foundations & Components, Dev Mode 실측) */
     --personal-color-admin-primary: #334155;
@@ -23,8 +23,8 @@
     --personal-color-professor-secondary: #5b7fc4;
 
     /* 그 외 색상상 */
-    --primary-text-color: #1e293b;
-    --secondary-blue: #2563eb;
+    --personal-color-primary-text: #1e293b;
+    --personal-color-secondary-blue: #2563eb;
     --personal-color-green: #16a34a;
     --personal-color-red: #dc2626;
 
@@ -33,6 +33,48 @@
     --personal-color-status-processing-bg: #dbeafe;
     --personal-color-status-warning-bg: #fef3c7;
     --personal-color-status-fail-bg: #fee2e2;
+    --personal-color-status-fail-text: #991b1b;
+
+    /* 색상 - 텍스트(회색조 단계) */
+    --personal-color-text-muted: #64748b;
+    --personal-color-text-secondary: #4f566b;
+    --personal-color-text-tertiary: #697386;
+    --personal-color-text-faint: #94a3b8;
+    --personal-color-heading: #1a1f36;
+
+    /* 색상 - 테두리(회색조 단계) */
+    --personal-color-border: #cbd5e1;
+    --personal-color-border-soft: #e5eaf2;
+    --personal-color-border-light: #edf2f7;
+    --personal-color-border-subtle: #e2e8f0;
+    --personal-color-border-input: #dddddd;
+    --personal-color-border-faint: #eeeeee;
+
+    /* 색상 - 배경(옅은 톤) */
+    --personal-color-bg-hover: #f7fafc;
+    --personal-color-bg-subtle: #f8f9fa;
+    --personal-color-bg-info-soft: #e8f0fe;
+    --personal-color-bg-indigo-soft: #eef2ff;
+    --personal-color-bg-yellow-soft: #fff9db;
+    --personal-color-bg-success-soft: #e6ffed;
+    --personal-color-bg-danger-soft: #ffebe9;
+
+    /* 색상 - 상태/강조 */
+    --personal-color-danger: #ef4444;
+    --personal-color-danger-strong: #cf222e;
+    --personal-color-success-text: #1a7f37;
+    --personal-color-link: #1a73e8;
+
+    /* 색상 - 로그인 화면 전용 */
+    --personal-color-login-primary: #0b3d91;
+    --personal-color-login-glow: #60a5fa0b;
+
+    /* 색상 - 사이드바 전용 */
+    --personal-color-sidebar-text: #4a5568;
+
+    /* 그림자 */
+    --personal-shadow-soft: rgba(0, 0, 0, 0.06);
+    --personal-shadow-medium: rgba(0, 0, 0, 0.1);
 
     /* 모서리 */
     --personal-radius: 12px;

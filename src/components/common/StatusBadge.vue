@@ -39,6 +39,6 @@ const props = defineProps({
 
 .status-badge--fail {
   background: var(--personal-color-status-fail-bg);
-  color: #991b1b;
+  color: var(--personal-color-status-fail-text);
 }
 </style>

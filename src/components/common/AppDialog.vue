@@ -36,7 +36,7 @@ const { state, confirm, cancel } = useDialog();
 .dialog-message {
   white-space: pre-wrap;
   line-height: 1.6;
-  color: #334155;
+  color: var(--personal-color-admin-primary);
   font-size: 0.98rem;
   margin: 4px 0;
 }
