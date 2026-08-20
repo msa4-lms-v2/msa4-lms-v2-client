@@ -137,12 +137,12 @@ onMounted(() => {
   padding: 16px 20px;
   background: var(--personal-color-white);
   border-radius: var(--personal-radius);
-  border: 1px solid var(--personal-color-border-subtle);
+  border: 1px solid var(--personal-color-border-mist);
 }
 
 .stat-label {
   font-size: 0.85rem;
-  color: var(--personal-color-text-muted);
+  color: var(--personal-color-text-muted-slate);
 }
 
 .bill-list-section h3 {
@@ -177,7 +177,7 @@ onMounted(() => {
 }
 
 .due {
-  color: var(--personal-color-text-muted);
+  color: var(--personal-color-text-muted-slate);
   font-size: 0.85rem;
 }
 

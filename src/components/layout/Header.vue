@@ -55,7 +55,7 @@ const logout = async () => {
 <style scoped>
 .header {
   height: 64px;
-  background-color: var(--personal-color-student-primary);
+  background-color: var(--personal-color-student-primary-cyan);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -67,15 +67,15 @@ const logout = async () => {
 }
 
 .header.role-student {
-  background-color: var(--personal-color-student-primary);
+  background-color: var(--personal-color-student-primary-cyan);
 }
 
 .header.role-professor {
-  background-color: var(--personal-color-professor-primary);
+  background-color: var(--personal-color-professor-primary-navy);
 }
 
 .header.role-admin {
-  background-color: var(--personal-color-admin-primary);
+  background-color: var(--personal-color-admin-primary-slate);
 }
 
 .header-left {

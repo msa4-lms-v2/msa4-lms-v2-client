@@ -36,7 +36,7 @@ defineEmits(['search']);
     background: white;
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid var(--personal-color-border-light);
+    border: 1px solid var(--personal-color-border-mist);
     margin-bottom: 24px;
 }
 
@@ -55,7 +55,7 @@ defineEmits(['search']);
 }
 
 :deep(.search-group label) {
-    color: var(--personal-color-text-secondary);
+    color: var(--personal-color-text-secondary-steel);
     font-size: 0.85rem;
     font-weight: 600;
 }
@@ -64,7 +64,7 @@ defineEmits(['search']);
 :deep(.search-group input) {
     min-width: 160px;
     padding: 8px 12px;
-    border: 1px solid var(--personal-color-border-input);
+    border: 1px solid var(--personal-color-border-mist);
     border-radius: 4px;
     background-color: white;
     box-sizing: border-box;

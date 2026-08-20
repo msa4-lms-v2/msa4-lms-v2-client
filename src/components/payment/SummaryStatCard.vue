@@ -24,21 +24,21 @@ defineProps({
   padding: 16px 20px;
   background: var(--personal-color-white);
   border-radius: var(--personal-radius);
-  border: 1px solid var(--personal-color-border-subtle);
+  border: 1px solid var(--personal-color-border-mist);
 }
 
 .stat-label {
   font-size: 0.85rem;
-  color: var(--personal-color-text-muted);
+  color: var(--personal-color-text-muted-slate);
 }
 
 .stat-value {
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--personal-color-primary-text);
+  color: var(--personal-color-primary-text-navy);
 }
 
 .stat-value.highlight {
-  color: var(--personal-color-student-secondary);
+  color: var(--personal-color-secondary-blue);
 }
 </style>

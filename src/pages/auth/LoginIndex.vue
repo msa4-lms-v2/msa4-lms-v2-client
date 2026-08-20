@@ -250,8 +250,8 @@ const handleLogin = async () => {
     min-height: 100vh;
     display: grid;
     grid-template-columns: minmax(430px, 0.95fr) minmax(580px, 1.05fr);
-    color: var(--personal-color-primary-text);
-    background: var(--personal-color-bg-surface);
+    color: var(--personal-color-primary-text-navy);
+    background: var(--personal-color-bg-surface-frost);
 }
 .brand-panel {
     position: relative;
@@ -262,7 +262,7 @@ const handleLogin = async () => {
     flex-direction: column;
     justify-content: center;
     color: var(--personal-color-white);
-    background: linear-gradient(145deg, var(--personal-color-login-primary), #061f4d);
+    background: linear-gradient(145deg, var(--personal-color-login-primary-navy), #061f4d);
 }
 .brand-panel:before {
     content: '';
@@ -283,14 +283,14 @@ const handleLogin = async () => {
     height: 520px;
     right: -270px;
     top: -250px;
-    box-shadow: 0 0 0 70px var(--personal-color-login-glow), 0 0 0 140px #60a5fa08;
+    box-shadow: 0 0 0 70px var(--personal-color-login-glow-azure), 0 0 0 140px var(--personal-color-login-glow-azure-outer);
 }
 .decoration-two {
     width: 330px;
     height: 330px;
     left: -210px;
     bottom: -170px;
-    box-shadow: 0 0 0 55px var(--personal-color-login-glow);
+    box-shadow: 0 0 0 55px var(--personal-color-login-glow-azure);
 }
 .brand-content {
     position: relative;
@@ -333,7 +333,7 @@ const handleLogin = async () => {
     width: 42px;
     height: 3px;
     margin: 24px 0;
-    background: var(--personal-color-student-accent);
+    background: var(--personal-color-student-accent-azure);
 }
 .brand-text h2 {
     font-size: 22px;
@@ -360,7 +360,7 @@ const handleLogin = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 90% 0, var(--personal-color-status-processing-bg) 0, transparent 32%), var(--personal-color-bg-surface);
+    background: radial-gradient(circle at 90% 0, var(--personal-color-status-processing-bg-sky) 0, transparent 32%), var(--personal-color-bg-surface-frost);
 }
 .login-container {
     width: min(500px, 100%);
@@ -379,7 +379,7 @@ const handleLogin = async () => {
 }
 .login-header p {
     margin-top: 8px;
-    color: var(--personal-color-text-muted);
+    color: var(--personal-color-text-muted-slate);
     font-size: 15px;
 }
 
@@ -404,14 +404,14 @@ const handleLogin = async () => {
     gap: 8px;
     border: 0;
     border-radius: 11px;
-    color: var(--personal-color-text-muted);
+    color: var(--personal-color-text-muted-slate);
     background: transparent;
     text-align: left;
     cursor: pointer;
     transition: 0.2s;
 }
 .login-tabs button.active {
-    color: var(--personal-color-login-primary);
+    color: var(--personal-color-login-primary-navy);
     background: var(--personal-color-white);
     box-shadow: 0 5px 15px #0b3d9118;
 }
@@ -426,7 +426,7 @@ const handleLogin = async () => {
 }
 .active .tab-icon {
     color: var(--personal-color-white);
-    background: linear-gradient(135deg, var(--personal-color-login-primary), var(--personal-color-secondary-blue));
+    background: linear-gradient(135deg, var(--personal-color-login-primary-navy), var(--personal-color-secondary-blue));
 }
 .tab-icon svg {
     width: 16px;
@@ -452,7 +452,7 @@ const handleLogin = async () => {
 form > label {
     display: block;
     margin: 0 0 8px;
-    color: var(--personal-color-admin-primary);
+    color: var(--personal-color-admin-primary-slate);
     font-size: 11px;
     font-weight: 800;
 }
@@ -476,7 +476,7 @@ form > label {
     width: 18px;
     flex: none;
     fill: none;
-    stroke: var(--personal-color-text-faint);
+    stroke: var(--personal-color-text-faint-fog);
     stroke-width: 1.7;
     stroke-linecap: round;
 }
@@ -485,7 +485,7 @@ form > label {
     flex: 1;
     border: 0;
     outline: 0;
-    color: var(--personal-color-primary-text);
+    color: var(--personal-color-primary-text-navy);
     background: transparent;
     font-size: 15px;
 }
@@ -502,12 +502,12 @@ form > label {
 .password-toggle svg {
     width: 17px;
     fill: none;
-    stroke: var(--personal-color-text-faint);
+    stroke: var(--personal-color-text-faint-fog);
     stroke-width: 1.7;
 }
 .error-message {
     margin: -6px 0 14px;
-    color: var(--personal-color-danger);
+    color: var(--personal-color-danger-coral);
     font-size: 10px;
 }
 .form-options {
@@ -515,7 +515,7 @@ form > label {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: var(--personal-color-text-muted);
+    color: var(--personal-color-text-muted-slate);
     font-size: 12px;
 }
 .remember {
@@ -531,7 +531,7 @@ form > label {
 .remember span {
     width: 14px;
     height: 14px;
-    border: 1px solid var(--personal-color-border);
+    border: 1px solid var(--personal-color-border-mist);
     border-radius: 4px;
     background: var(--personal-color-white);
 }
@@ -542,7 +542,7 @@ form > label {
 }
 .form-options a,
 .policy-links a {
-    color: var(--personal-color-text-muted);
+    color: var(--personal-color-text-muted-slate);
     text-decoration: none;
 }
 .login-button {
@@ -555,7 +555,7 @@ form > label {
     border: 0;
     border-radius: 11px;
     color: var(--personal-color-white);
-    background: linear-gradient(135deg, var(--personal-color-login-primary), var(--personal-color-secondary-blue));
+    background: linear-gradient(135deg, var(--personal-color-login-primary-navy), var(--personal-color-secondary-blue));
     box-shadow: 0 14px 26px #2563eb3d;
     font-size: 15px;
     font-weight: 800;
@@ -581,7 +581,7 @@ form > label {
     display: flex;
     align-items: center;
     gap: 10px;
-    border: 1px solid var(--personal-color-border-subtle);
+    border: 1px solid var(--personal-color-border-mist);
     border-radius: 11px;
     background: var(--personal-color-white);
 }
@@ -605,12 +605,12 @@ form > label {
     display: block;
 }
 .support-box strong {
-    color: var(--personal-color-admin-primary);
+    color: var(--personal-color-admin-primary-slate);
     font-size: 13px;
 }
 .support-box small {
     margin-top: 3px;
-    color: var(--personal-color-text-faint);
+    color: var(--personal-color-text-faint-fog);
     font-size: 11px;
 }
 .support-box a {
@@ -630,7 +630,7 @@ form > label {
 .policy-links i {
     width: 1px;
     height: 8px;
-    background: var(--personal-color-border);
+    background: var(--personal-color-border-mist);
 }
 @media (max-width: 850px) {
     .login-page {
@@ -687,7 +687,7 @@ form > label {
 .temp-logo {
     font-size: 48px;
     font-weight: 900;
-    color: var(--personal-color-login-primary);
+    color: var(--personal-color-login-primary-navy);
     letter-spacing: -2px;
 }
 </style>

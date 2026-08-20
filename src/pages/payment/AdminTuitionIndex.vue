@@ -84,7 +84,7 @@ onMounted(() => load());
 select {
   padding: 6px 10px;
   border-radius: var(--personal-radius);
-  border: 1px solid var(--personal-color-border);
+  border: 1px solid var(--personal-color-border-mist);
 }
 
 table {
@@ -99,12 +99,12 @@ th,
 td {
   text-align: left;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--personal-color-border-subtle);
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 th {
-  background: var(--personal-color-admin-primary);
-  color: var(--personal-color-white);
+  background: var(--personal-color-table-header-smoke);
+  color: var(--personal-color-primary-text-navy);
 }
 
 .error {

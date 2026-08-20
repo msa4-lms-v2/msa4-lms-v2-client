@@ -52,7 +52,7 @@ defineProps({
 
 .schedule-item {
     background: var(--personal-color-white);
-    border: 1px solid var(--personal-color-border-faint);
+    border: 1px solid var(--personal-color-border-mist);
     border-radius: 10px;
     padding: 14px;
     transition: all 0.2s ease;
@@ -66,6 +66,6 @@ defineProps({
 
 .schedule-date {
     font-size: 14px;
-    color: var(--personal-color-primary-text);
+    color: var(--personal-color-primary-text-navy);
 }
 </style>

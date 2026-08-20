@@ -287,7 +287,7 @@ onMounted(() => {
 }
 
 .description {
-  color: var(--personal-color-student-primary);
+  color: var(--personal-color-student-primary-cyan);
 }
 
 .payment-methods {
@@ -307,28 +307,28 @@ onMounted(() => {
   gap: 8px;
   align-items: center;
   padding: 12px;
-  background: var(--personal-color-bg-surface);
+  background: var(--personal-color-bg-surface-frost);
   border-radius: var(--personal-radius);
   cursor: pointer;
 }
 
 .payment-method input {
-  accent-color: var(--personal-color-student-secondary);
+  accent-color: var(--personal-color-secondary-blue);
 }
 
 .notice {
   padding: 12px;
-  background: var(--personal-color-bg-surface);
+  background: var(--personal-color-bg-surface-frost);
   border-radius: var(--personal-radius);
 }
 
 .notice--warning {
-  background: var(--personal-color-status-warning-bg);
+  background: var(--personal-color-status-warning-bg-butter);
 }
 
 .notice--error {
   color: var(--personal-color-red);
-  background: var(--personal-color-status-fail-bg);
+  background: var(--personal-color-status-fail-bg-blush);
 }
 
 .result-row {
@@ -345,7 +345,7 @@ onMounted(() => {
 }
 
 .refund-details dt {
-  color: var(--personal-color-student-primary);
+  color: var(--personal-color-student-primary-cyan);
 }
 
 .refund-details dd {

@@ -110,19 +110,19 @@ onMounted(async () => {
     background: var(--personal-color-white);
     border-radius: 8px;
     text-align: center;
-    color: var(--personal-color-text-muted);
+    color: var(--personal-color-text-muted-slate);
     box-shadow: 0 4px 14px var(--personal-shadow-soft);
 }
 
 .status-msg.error {
-    color: var(--personal-color-danger);
+    color: var(--personal-color-danger-coral);
 }
 .status-msg.error button {
     margin-left: 10px;
     padding: 4px 8px;
-    border: 1px solid var(--personal-color-danger);
+    border: 1px solid var(--personal-color-danger-coral);
     background: var(--personal-color-white);
-    color: var(--personal-color-danger);
+    color: var(--personal-color-danger-coral);
     border-radius: 4px;
     cursor: pointer;
 }

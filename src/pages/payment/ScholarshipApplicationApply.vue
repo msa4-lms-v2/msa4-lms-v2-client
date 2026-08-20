@@ -137,7 +137,7 @@ const onSubmit = async () => {
 .form-card {
   padding: 26px 30px;
   background-color: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-soft);
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
 }
 .form-group {
@@ -167,9 +167,9 @@ textarea {
   font-weight: 500;
   text-align: center;
 }
-.notice { background-color: var(--personal-color-bg-subtle); color: var(--personal-color-text-secondary); }
-.success-notice { background-color: var(--personal-color-bg-success-soft); color: var(--personal-color-success-text); border: 1px solid var(--personal-color-success-text); }
-.error-notice { background-color: var(--personal-color-bg-danger-soft); color: var(--personal-color-danger-strong); border: 1px solid var(--personal-color-danger-strong); }
+.notice { background-color: var(--personal-color-bg-subtle-snow); color: var(--personal-color-text-secondary-steel); }
+.success-notice { background-color: var(--personal-color-bg-success-soft-honeydew); color: var(--personal-color-success-text-forest); border: 1px solid var(--personal-color-success-text-forest); }
+.error-notice { background-color: var(--personal-color-bg-danger-soft-rose); color: var(--personal-color-danger-strong-crimson); border: 1px solid var(--personal-color-danger-strong-crimson); }
 
 .action-area {
   display: flex;

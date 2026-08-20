@@ -47,7 +47,7 @@ const tuitionBillId = Number(route.query.tuitionBillId);
 .notice--error {
   padding: 12px 16px;
   border-radius: var(--personal-radius);
-  background: var(--personal-color-status-fail-bg);
-  color: var(--personal-color-status-fail-text);
+  background: var(--personal-color-status-fail-bg-blush);
+  color: var(--personal-color-status-fail-text-maroon);
 }
 </style>

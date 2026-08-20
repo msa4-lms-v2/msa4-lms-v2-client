@@ -67,7 +67,7 @@ input,
 select {
     padding: 8px 12px;
     border-radius: var(--personal-radius);
-    border: 1px solid var(--personal-color-border);
+    border: 1px solid var(--personal-color-border-mist);
 }
 
 button {
@@ -75,7 +75,7 @@ button {
     padding: 10px 20px;
     border: none;
     border-radius: var(--personal-radius);
-    background: var(--personal-color-admin-secondary);
+    background: var(--personal-color-admin-secondary-indigo);
     color: var(--personal-color-white);
     cursor: pointer;
 }

@@ -133,7 +133,7 @@ const academicRows = computed(() => [
 .profile-hero,
 .info-card {
   background: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-soft);
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
 }
 
@@ -164,7 +164,7 @@ const academicRows = computed(() => [
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  background: var(--personal-color-bg-surface);
+  background: var(--personal-color-bg-surface-frost);
   flex: 0 0 96px;
 }
 
@@ -181,7 +181,7 @@ const academicRows = computed(() => [
 }
 
 .name-row h2 {
-  color: var(--personal-color-primary-text);
+  color: var(--personal-color-primary-text-navy);
   font-size: 1.5rem;
 }
 
@@ -191,7 +191,7 @@ const academicRows = computed(() => [
   min-height: 28px;
   padding: 4px 12px;
   border-radius: 999px;
-  background: var(--personal-color-status-processing-bg);
+  background: var(--personal-color-status-processing-bg-sky);
   color: #1756b8;
   font-size: 0.88rem;
   font-weight: 500;
@@ -206,7 +206,7 @@ const academicRows = computed(() => [
 }
 
 .quick-list li {
-  color: var(--personal-color-primary-text);
+  color: var(--personal-color-primary-text-navy);
   font-size: 0.95rem;
 }
 
@@ -222,7 +222,7 @@ const academicRows = computed(() => [
 }
 
 .info-card h3 {
-  color: var(--personal-color-primary-text);
+  color: var(--personal-color-primary-text-navy);
   font-size: 1.1rem;
   margin: 0 0 16px;
 }
@@ -237,7 +237,7 @@ const academicRows = computed(() => [
   grid-template-columns: minmax(92px, 0.36fr) minmax(0, 1fr);
   min-height: 44px;
   padding: 13px 0;
-  border-bottom: 1px solid var(--personal-color-border-soft);
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 .info-row:last-child {
@@ -245,13 +245,13 @@ const academicRows = computed(() => [
 }
 
 .info-row dt {
-  color: var(--personal-color-text-muted);
+  color: var(--personal-color-text-muted-slate);
 }
 
 .info-row dd {
   min-width: 0;
   margin: 0;
-  color: var(--personal-color-primary-text);
+  color: var(--personal-color-primary-text-navy);
   overflow-wrap: anywhere;
 }
 

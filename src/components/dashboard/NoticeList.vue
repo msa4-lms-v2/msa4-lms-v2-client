@@ -41,7 +41,7 @@ defineProps({
 
 .notice-item {
     padding: 15px 0px;
-    border-bottom: 1px solid var(--personal-color-border-faint);
+    border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 .notice-item:last-child {

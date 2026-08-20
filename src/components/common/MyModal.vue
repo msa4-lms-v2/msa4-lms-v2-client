@@ -82,9 +82,9 @@ onUnmounted(() => {
 .modal-header h2 {
   font-size: 1.3rem;
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--personal-color-border-light);
+  border-bottom: 1px solid var(--personal-color-border-mist);
   padding-bottom: 12px;
-  color: var(--personal-color-primary-text);
+  color: var(--personal-color-primary-text-navy);
 }
 
 .modal-body {

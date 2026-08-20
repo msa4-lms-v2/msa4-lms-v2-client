@@ -113,7 +113,7 @@ const calendarOptions = {
 
 .calendar-title {
     width: 260px;
-    color: var(--personal-color-primary-text);
+    color: var(--personal-color-primary-text-navy);
     font-size: 25px;
     font-weight: 700;
     line-height: 1;
@@ -126,7 +126,7 @@ const calendarOptions = {
     height: 28px;
     border: none;
     background: transparent;
-    color: var(--personal-color-primary-text);
+    color: var(--personal-color-primary-text-navy);
     cursor: pointer;
     font-size: 30px;
     line-height: 1;

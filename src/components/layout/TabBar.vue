@@ -50,14 +50,14 @@ const closeTab = (path, event) => {
 }
 
 .tab-bar::-webkit-scrollbar-thumb {
-    background-color: var(--personal-color-border);
+    background-color: var(--personal-color-border-mist);
     border-radius: 4px;
 }
 
 .tab-item {
     display: flex;
     align-items: center;
-    background-color: #b5bdc9;
+    background-color: var(--personal-color-tab-inactive-silver);
     color: var(--personal-color-white);
     padding: 8px 8px 8px 16px;
     border-radius: 8px 8px 0 0;
@@ -73,25 +73,25 @@ const closeTab = (path, event) => {
 
 .tab-item:hover {
     background-color: #eff2f7;
-    color: var(--personal-color-primary-text);
+    color: var(--personal-color-primary-text-navy);
 }
 
 .tab-item.role-student.active {
-    background-color: var(--personal-color-student-primary);
+    background-color: var(--personal-color-student-primary-cyan);
     color: var(--personal-color-white);
-    border-color: var(--personal-color-border);
+    border-color: var(--personal-color-border-mist);
 }
 
 .tab-item.role-professor.active {
-    background-color: var(--personal-color-professor-primary);
+    background-color: var(--personal-color-professor-primary-navy);
     color: var(--personal-color-white);
-    border-color: var(--personal-color-border);
+    border-color: var(--personal-color-border-mist);
 }
 
 .tab-item.role-admin.active {
-    background-color: var(--personal-color-admin-primary);
+    background-color: var(--personal-color-admin-primary-slate);
     color: var(--personal-color-white);
-    border-color: var(--personal-color-border);
+    border-color: var(--personal-color-border-mist);
 }
 
 .tab-title {
@@ -120,6 +120,6 @@ const closeTab = (path, event) => {
 
 .close-btn:hover {
     opacity: 1;
-    color: var(--personal-color-danger);
+    color: var(--personal-color-danger-coral);
 }
 </style>

@@ -183,13 +183,13 @@ onMounted(() => load());
 <style scoped>
 .list-card {
   background: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-soft);
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
   padding: 26px 30px;
 }
 
 .empty {
-  color: var(--personal-color-text-muted);
+  color: var(--personal-color-text-muted-slate);
 }
 
 table {
@@ -201,11 +201,12 @@ th,
 td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid var(--personal-color-border-soft);
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 th {
-  color: var(--personal-color-text-muted);
+  background: var(--personal-color-table-header-smoke);
+  color: var(--personal-color-text-muted-slate);
   font-weight: 500;
 }
 
@@ -225,11 +226,11 @@ th {
   display: grid;
   grid-template-columns: minmax(96px, 0.32fr) minmax(0, 1fr);
   padding: 10px 0;
-  border-bottom: 1px solid var(--personal-color-border-light);
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 .detail-row dt {
-  color: var(--personal-color-text-muted);
+  color: var(--personal-color-text-muted-slate);
 }
 
 .detail-row dd {
@@ -254,7 +255,7 @@ th {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
-  border: 1px solid var(--personal-color-border-input);
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;

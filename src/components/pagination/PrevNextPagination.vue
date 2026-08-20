@@ -26,7 +26,7 @@ const emit = defineEmits(['page-change']);
 .pagination button {
   padding: 6px 12px;
   border-radius: var(--personal-radius);
-  border: 1px solid var(--personal-color-border);
+  border: 1px solid var(--personal-color-border-mist);
   background: var(--personal-color-white);
   cursor: pointer;
 }

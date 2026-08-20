@@ -45,7 +45,7 @@ const selectTab = (value) => {
   border-radius: 4px;
   padding: 0 14px;
   background: var(--personal-color-white);
-  color: var(--personal-color-text-tertiary);
+  color: var(--personal-color-text-tertiary-slate);
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
@@ -53,12 +53,12 @@ const selectTab = (value) => {
 }
 
 .tab-button:hover {
-  background: var(--personal-color-bg-subtle);
+  background: var(--personal-color-bg-subtle-snow);
 }
 
 .tab-button.active {
-  border-color: var(--personal-color-primary);
-  background: var(--personal-color-primary);
+  border-color: var(--personal-color-primary-navy);
+  background: var(--personal-color-primary-navy);
   color: var(--personal-color-white);
 }
 

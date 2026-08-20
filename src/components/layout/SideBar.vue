@@ -301,7 +301,7 @@ const toggleMenu = (menuKey) => {
 .nav-item {
   padding: 12px 24px;
   text-decoration: none;
-  color: var(--personal-color-sidebar-text);
+  color: var(--personal-color-sidebar-text-slate);
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.2s;
@@ -309,8 +309,8 @@ const toggleMenu = (menuKey) => {
 }
 
 .nav-item:hover {
-  background-color: var(--personal-color-bg-hover);
-  color: var(--personal-color-link);
+  background-color: var(--personal-color-bg-hover-frost);
+  color: var(--personal-color-link-blue);
 }
 
 /* 메뉴 그룹 */
@@ -327,7 +327,7 @@ const toggleMenu = (menuKey) => {
   padding: 12px 24px;
   cursor: pointer;
   font-weight: 600;
-  color: var(--personal-color-sidebar-text);
+  color: var(--personal-color-sidebar-text-slate);
   font-size: 0.95rem;
   font-family: inherit;
   user-select: none;
@@ -338,8 +338,8 @@ const toggleMenu = (menuKey) => {
 }
 
 .menu-header:hover {
-  background-color: var(--personal-color-bg-hover);
-  color: var(--personal-color-link);
+  background-color: var(--personal-color-bg-hover-frost);
+  color: var(--personal-color-link-blue);
 }
 
 .chevron {
@@ -354,9 +354,9 @@ const toggleMenu = (menuKey) => {
 
 /* 서브메뉴 */
 .submenu-list {
-  background-color: var(--personal-color-bg-hover);
-  border-top: 1px solid var(--personal-color-border-light);
-  border-bottom: 1px solid var(--personal-color-border-light);
+  background-color: var(--personal-color-bg-hover-frost);
+  border-top: 1px solid var(--personal-color-border-mist);
+  border-bottom: 1px solid var(--personal-color-border-mist);
   transition: max-height 0.3s ease;
 }
 
@@ -364,24 +364,24 @@ const toggleMenu = (menuKey) => {
   display: block;
   padding: 10px 24px 10px 38px;
   text-decoration: none;
-  color: #718096;
+  color: var(--personal-color-sidebar-text-muted-slate);
   font-size: 0.88rem;
   font-weight: 500;
   transition: all 0.2s;
 }
 
 .submenu-item:hover {
-  background-color: var(--personal-color-border-light);
-  color: var(--personal-color-link);
+  background-color: var(--personal-color-border-mist);
+  color: var(--personal-color-link-blue);
 }
 
 .router-link-active {
-  background-color: var(--personal-color-bg-info-soft);
-  color: var(--personal-color-link);
+  background-color: var(--personal-color-sidebar-active-bg-sky);
+  color: var(--personal-color-link-blue);
   font-weight: 600;
 }
 
 .router-link-active.main-link {
-  border-left: 4px solid var(--personal-color-link);
+  border-left: 4px solid var(--personal-color-link-blue);
 }
 </style>

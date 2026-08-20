@@ -1,76 +1,89 @@
 :root {
     /* 색상 - 배경 */
-    --personal-color-bg-surface: #f8fafc;
+    --personal-color-bg-surface-frost: #f8fafc;
     --personal-color-white: #ffffff;
     --personal-color-black: #000000;
     --personal-color-gray: #b1b1b1;
 
     /* 색상 - 브랜드/버튼 */
-    --personal-color-primary: #00278b;
+    --personal-color-primary-navy: #00278b;
 
     /* 색상 - 관리자 역할 (Figma Foundations & Components, Dev Mode 실측) */
-    --personal-color-admin-primary: #334155;
-    --personal-color-admin-secondary: #4f46e5;
-    --personal-color-admin-accent: #f59e0b;
+    --personal-color-admin-primary-slate: #334155;
+    --personal-color-admin-secondary-indigo: #4f46e5;
 
     /* 색상 - 학생 역할 */
-    --personal-color-student-primary: #0284c7;
-    --personal-color-student-secondary: #2563eb;
-    --personal-color-student-accent: #60a5fa;
+    --personal-color-student-primary-cyan: #0b86c6;
+    --personal-color-student-accent-azure: #60a5fa;
 
-    /* 색상 - 교수 역할할 */
-    --personal-color-professor-primary: #234792;
-    --personal-color-professor-secondary: #5b7fc4;
+    /* 색상 - 교수 역할 */
+    --personal-color-professor-primary-navy: #234792;
 
-    /* 그 외 색상상 */
-    --personal-color-primary-text: #1e293b;
+    /* 그 외 색상 */
+    --personal-color-primary-text-navy: #1e293b;
     --personal-color-secondary-blue: #2563eb;
     --personal-color-green: #16a34a;
     --personal-color-red: #dc2626;
 
     /* 색상 - 상태 배지 배경 (TuitionBillStatus/RefundStatus/PaymentStatus/VirtualAccountStatus 공용) */
-    --personal-color-status-success-bg: #dcfce7;
-    --personal-color-status-processing-bg: #dbeafe;
-    --personal-color-status-warning-bg: #fef3c7;
-    --personal-color-status-fail-bg: #fee2e2;
-    --personal-color-status-fail-text: #991b1b;
+    --personal-color-status-success-bg-mint: #dcfce7;
+    --personal-color-status-processing-bg-sky: #dbeafe;
+    --personal-color-status-warning-bg-butter: #fef3c7;
+    --personal-color-status-fail-bg-blush: #fee2e2;
+    --personal-color-status-fail-text-maroon: #991b1b;
 
     /* 색상 - 텍스트(회색조 단계) */
-    --personal-color-text-muted: #64748b;
-    --personal-color-text-secondary: #4f566b;
-    --personal-color-text-tertiary: #697386;
-    --personal-color-text-faint: #94a3b8;
-    --personal-color-heading: #1a1f36;
+    --personal-color-text-muted-slate: #64748b;
+    --personal-color-text-secondary-steel: #4f566b;
+    --personal-color-text-tertiary-slate: #697386;
+    --personal-color-text-faint-fog: #94a3b8;
+    --personal-color-heading-midnight: #1a1f36;
 
-    /* 색상 - 테두리(회색조 단계) */
-    --personal-color-border: #cbd5e1;
-    --personal-color-border-soft: #e5eaf2;
-    --personal-color-border-light: #edf2f7;
-    --personal-color-border-subtle: #e2e8f0;
-    --personal-color-border-input: #dddddd;
-    --personal-color-border-faint: #eeeeee;
+    /* 색상 - 테두리 (기존 6종을 스펙 값 #D9E2EC 하나로 통합, 2026-08-20) */
+    --personal-color-border-mist: #d9e2ec;
 
     /* 색상 - 배경(옅은 톤) */
-    --personal-color-bg-hover: #f7fafc;
-    --personal-color-bg-subtle: #f8f9fa;
-    --personal-color-bg-info-soft: #e8f0fe;
-    --personal-color-bg-indigo-soft: #eef2ff;
-    --personal-color-bg-yellow-soft: #fff9db;
-    --personal-color-bg-success-soft: #e6ffed;
-    --personal-color-bg-danger-soft: #ffebe9;
+    --personal-color-bg-hover-frost: #f7fafc;
+    --personal-color-bg-subtle-snow: #f8f9fa;
+    --personal-color-info-soft-ice: #e8f0fe;
+    --personal-color-indigo-soft-lavender: #eef2ff;
+    --personal-color-yellow-soft-cream: #fff9db;
+    --personal-color-bg-success-soft-honeydew: #e6ffed;
+    --personal-color-bg-danger-soft-rose: #ffebe9;
 
     /* 색상 - 상태/강조 */
-    --personal-color-danger: #ef4444;
-    --personal-color-danger-strong: #cf222e;
-    --personal-color-success-text: #1a7f37;
-    --personal-color-link: #1a73e8;
+    --personal-color-danger-coral: #ef4444;
+    --personal-color-danger-strong-crimson: #cf222e;
+    --personal-color-success-text-forest: #1a7f37;
+    --personal-color-link-blue: #1a73e8;
 
     /* 색상 - 로그인 화면 전용 */
-    --personal-color-login-primary: #0b3d91;
-    --personal-color-login-glow: #60a5fa0b;
+    --personal-color-login-primary-navy: #0b3d91;
+    --personal-color-login-glow-azure: #60a5fa0b;
+    --personal-color-login-glow-azure-outer: #60a5fa08;
 
     /* 색상 - 사이드바 전용 */
-    --personal-color-sidebar-text: #4a5568;
+    --personal-color-sidebar-text-slate: #4a5568;
+    --personal-color-sidebar-text-muted-slate: #718096;
+    --personal-color-sidebar-active-bg-sky: #e8f1ff;
+
+    /* 색상 - 탭 바 전용 */
+    --personal-color-tab-inactive-silver: #b5bdc9;
+
+    /* 색상 - 표 헤더 (전체 테이블 공용) */
+    --personal-color-table-header-smoke: #f6f6f6;
+
+    /* 색상 - 시간표 팔레트 */
+    --personal-color-timetable-lilac: #f4e8fe;
+    --personal-color-timetable-blush: #ffe6e7;
+    --personal-color-timetable-sage: #d3ead4;
+    --personal-color-timetable-sky: #e8effe;
+    --personal-color-timetable-sand: #eeefe0;
+    --personal-color-timetable-apricot: #f9e2cc;
+    --personal-color-timetable-lime: #f7f9e5;
+    --personal-color-timetable-aqua: #cbe9f7;
+    --personal-color-timetable-pink: #fdcedf;
+    --personal-color-timetable-periwinkle: #d4d5ff;
 
     /* 그림자 */
     --personal-shadow-soft: rgba(0, 0, 0, 0.06);
@@ -94,7 +107,7 @@
 
 body {
     margin: 0;
-    background: var(--personal-color-bg-surface);
+    background: var(--personal-color-bg-surface-frost);
 }
 
 html,

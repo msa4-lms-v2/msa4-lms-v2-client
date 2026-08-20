@@ -42,7 +42,7 @@ dl {
 }
 
 dt {
-    color: var(--personal-color-text-muted);
+    color: var(--personal-color-text-muted-slate);
 }
 
 dd {
