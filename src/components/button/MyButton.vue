@@ -76,7 +76,7 @@ button:hover {
 }
 
 .deep-blue {
-    background-color: var(--primary-color);
+    background-color: var(--personal-color-primary-navy);
     color: var(--personal-color-white);
 }
 

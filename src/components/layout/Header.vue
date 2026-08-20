@@ -25,10 +25,10 @@ const logout = async () => {
 
 <template>
   <header class="header" :class="roleClass">
-    <div class="header-left" @click="goHome">
+    <button type="button" class="header-left" @click="goHome">
       <img :src="'/로고-흰.png'" alt="로고" class="logo" />
       <img :src="'/이름-흰.png'" alt="대학이름" class="logo-name" />
-    </div>
+    </button>
 
     <div class="header-right">
       <template v-if="authStore.isLoggedIn">
@@ -55,7 +55,7 @@ const logout = async () => {
 <style scoped>
 .header {
   height: 64px;
-  background-color: var(--personal-color-student-primary);
+  background-color: var(--personal-color-student-primary-cyan);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -67,21 +67,25 @@ const logout = async () => {
 }
 
 .header.role-student {
-  background-color: var(--personal-color-student-primary);
+  background-color: var(--personal-color-student-primary-cyan);
 }
 
 .header.role-professor {
-  background-color: var(--personal-color-professor-primary);
+  background-color: var(--personal-color-professor-primary-navy);
 }
 
 .header.role-admin {
-  background-color: var(--personal-color-admin-primary);
+  background-color: var(--personal-color-admin-primary-slate);
 }
 
 .header-left {
   display: flex;
   align-items: center;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
 }
 
 .logo {
@@ -101,7 +105,7 @@ const logout = async () => {
 
 .user-info {
   font-size: 0.9rem;
-  color: #fff;
+  color: var(--personal-color-white);
   display: flex;
   gap: 8px;
   align-items: center;

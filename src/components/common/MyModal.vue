@@ -74,7 +74,7 @@ onUnmounted(() => {
   border-radius: 12px;
   width: 100%;
   padding: 24px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px var(--personal-shadow-medium);
   display: flex;
   flex-direction: column;
 }
@@ -82,9 +82,9 @@ onUnmounted(() => {
 .modal-header h2 {
   font-size: 1.3rem;
   margin-bottom: 20px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--personal-color-border-mist);
   padding-bottom: 12px;
-  color: #1e293b;
+  color: var(--personal-color-primary-text-navy);
 }
 
 .modal-body {

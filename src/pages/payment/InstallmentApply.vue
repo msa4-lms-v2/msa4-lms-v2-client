@@ -68,7 +68,7 @@
           >
             <tr v-for="item in sortedItems" :key="item.id">
               <td>{{ item.roundNo }}회</td>
-              <td>{{ Number(item.amount || 0).toLocaleString() }}원</td>
+              <td>{{ formatCurrency(item.amount) }}</td>
               <td>{{ item.dueDate || '-' }}</td>
               <td>
                 <StatusBadge
@@ -108,6 +108,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import MyTable from '../../components/table/MyTable.vue';
+import { formatCurrency } from '../../util/format';
 
 const route = useRoute();
 const instStore = useInstallmentStore();
@@ -138,7 +139,7 @@ const onSubmit = async () => {
 };
 
 const onPayment = async (item) => {
-  if (!confirm(`${item.roundNo}회차 금액 ${Number(item.amount).toLocaleString()}원을 결제하시겠습니까?`)) {
+  if (!confirm(`${item.roundNo}회차 금액 ${formatCurrency(item.amount)}을 결제하시겠습니까?`)) {
     return;
   }
   try {
@@ -157,7 +158,7 @@ const onPayment = async (item) => {
 .form-card {
   padding: 26px 30px;
   background-color: var(--personal-color-white);
-  border: 1px solid #e5eaf2;
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
 }
 .form-group {
@@ -183,9 +184,9 @@ select {
   font-weight: 500;
   text-align: center;
 }
-.notice { background-color: #f8f9fa; color: #4f566b; }
-.success-notice { background-color: #e6ffed; color: #1a7f37; border: 1px solid #1a7f37; }
-.error-notice { background-color: #ffebe9; color: #cf222e; border: 1px solid #cf222e; }
+.notice { background-color: var(--personal-color-bg-subtle-snow); color: var(--personal-color-text-secondary-steel); }
+.success-notice { background-color: var(--personal-color-bg-success-soft-honeydew); color: var(--personal-color-success-text-forest); border: 1px solid var(--personal-color-success-text-forest); }
+.error-notice { background-color: var(--personal-color-bg-danger-soft-rose); color: var(--personal-color-danger-strong-crimson); border: 1px solid var(--personal-color-danger-strong-crimson); }
 
 .status-panel {
   margin-bottom: 20px;

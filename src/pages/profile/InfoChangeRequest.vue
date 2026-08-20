@@ -168,7 +168,7 @@ onMounted(() => {
 .form-card,
 .history-card {
   background: var(--personal-color-white);
-  border: 1px solid #e5eaf2;
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
   padding: 26px 30px;
   margin-bottom: 26px;
@@ -200,7 +200,7 @@ onMounted(() => {
 
 .reason-field textarea {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;
@@ -213,12 +213,12 @@ onMounted(() => {
 }
 
 .error {
-  color: #dc2626;
+  color: var(--personal-color-red);
   margin-bottom: 12px;
 }
 
 .empty {
-  color: #64748b;
+  color: var(--personal-color-text-muted-slate);
 }
 
 table {
@@ -230,11 +230,12 @@ th,
 td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid #e5eaf2;
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 th {
-  color: #64748b;
+  background: var(--personal-color-table-header-smoke);
+  color: var(--personal-color-text-muted-slate);
   font-weight: 500;
 }
 

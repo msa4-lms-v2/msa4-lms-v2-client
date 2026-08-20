@@ -22,7 +22,7 @@ const formattedSchedule = () => {
 
 <style scoped>
 .time-text {
-    color: var(--primary-text-color, #333);
+    color: var(--personal-color-primary-text-navy, #333);
     font-size: 0.85rem;
     line-height: 1.5;
 }

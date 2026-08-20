@@ -40,7 +40,7 @@ const usesAppLayout = computed(() => route.path !== '/login');
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--personal-color-bg-surface);
+  background: var(--personal-color-bg-surface-frost);
 }
 
 .app-body {

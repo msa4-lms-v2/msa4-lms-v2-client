@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
+import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import { useInfoChangeStore } from '../../store/infochange/useInfoChangeStore';
 import { INFO_CHANGE_STATUS_LABEL, INFO_CHANGE_STATUS_VARIANT } from '../../util/academic/enumLabels';
@@ -94,21 +95,11 @@ onMounted(() => load());
         </tbody>
       </table>
 
-      <div class="pagination">
-        <button
-          :disabled="infoChangeStore.adminRequestsPage.page <= 1"
-          @click="load(infoChangeStore.adminRequestsPage.page - 1)"
-        >
-          이전
-        </button>
-        <span>{{ infoChangeStore.adminRequestsPage.page }} 페이지</span>
-        <button
-          :disabled="!infoChangeStore.adminRequestsPage.hasNext"
-          @click="load(infoChangeStore.adminRequestsPage.page + 1)"
-        >
-          다음
-        </button>
-      </div>
+      <PrevNextPagination
+        :page="infoChangeStore.adminRequestsPage.page"
+        :has-next="infoChangeStore.adminRequestsPage.hasNext"
+        @page-change="load"
+      />
     </article>
 
     <MyModal :is-open="isModalOpen" title="학적 정보 변경 신청 상세" max-width="560px" @close="closeDetail">
@@ -192,13 +183,13 @@ onMounted(() => load());
 <style scoped>
 .list-card {
   background: var(--personal-color-white);
-  border: 1px solid #e5eaf2;
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
   padding: 26px 30px;
 }
 
 .empty {
-  color: #64748b;
+  color: var(--personal-color-text-muted-slate);
 }
 
 table {
@@ -210,11 +201,12 @@ th,
 td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid #e5eaf2;
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 th {
-  color: #64748b;
+  background: var(--personal-color-table-header-smoke);
+  color: var(--personal-color-text-muted-slate);
   font-weight: 500;
 }
 
@@ -223,26 +215,6 @@ th {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.pagination button {
-  padding: 6px 12px;
-  border-radius: var(--personal-radius);
-  border: 1px solid #cbd5e1;
-  background: var(--personal-color-white);
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .detail-list {
@@ -254,11 +226,11 @@ th {
   display: grid;
   grid-template-columns: minmax(96px, 0.32fr) minmax(0, 1fr);
   padding: 10px 0;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 .detail-row dt {
-  color: #64748b;
+  color: var(--personal-color-text-muted-slate);
 }
 
 .detail-row dd {
@@ -283,7 +255,7 @@ th {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;

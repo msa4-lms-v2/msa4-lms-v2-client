@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/auth/useAuthStore';
+import { useErrorStore } from '../store/error/useErrorStore';
 import { isJwtExpiringSoon } from '../util/jwt';
 
 const AUTH_EXEMPT_PATHS = [
@@ -53,6 +54,8 @@ myAxios.interceptors.response.use(
       config.headers.Authorization = `Bearer ${newToken}`;
       return myAxios(config);
     }
+
+    useErrorStore().setError(error);
 
     return Promise.reject(error);
   },

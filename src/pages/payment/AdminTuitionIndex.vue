@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
@@ -64,21 +65,11 @@ onMounted(() => load());
       </tbody>
     </table>
 
-    <div class="pagination">
-      <button
-        :disabled="tuitionStore.adminBillsPage.page <= 1"
-        @click="load(tuitionStore.adminBillsPage.page - 1)"
-      >
-        이전
-      </button>
-      <span>{{ tuitionStore.adminBillsPage.page }} 페이지</span>
-      <button
-        :disabled="!tuitionStore.adminBillsPage.hasNext"
-        @click="load(tuitionStore.adminBillsPage.page + 1)"
-      >
-        다음
-      </button>
-    </div>
+    <PrevNextPagination
+      :page="tuitionStore.adminBillsPage.page"
+      :has-next="tuitionStore.adminBillsPage.hasNext"
+      @page-change="load"
+    />
   </MyPageContainer>
 </template>
 
@@ -93,7 +84,7 @@ onMounted(() => load());
 select {
   padding: 6px 10px;
   border-radius: var(--personal-radius);
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--personal-color-border-mist);
 }
 
 table {
@@ -108,35 +99,15 @@ th,
 td {
   text-align: left;
   padding: 12px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 th {
-  background: var(--personal-color-admin-primary);
-  color: var(--personal-color-white);
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-button {
-  padding: 6px 12px;
-  border-radius: var(--personal-radius);
-  border: 1px solid #cbd5e1;
-  background: var(--personal-color-white);
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background: var(--personal-color-table-header-smoke);
+  color: var(--personal-color-primary-text-navy);
 }
 
 .error {
-  color: #dc2626;
+  color: var(--personal-color-red);
 }
 </style>

@@ -52,7 +52,7 @@ const updateValue = (event) => {
 <style scoped>
 input {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--personal-color-border-mist);
     border-radius: 4px;
     font-size: 0.9rem;
 }

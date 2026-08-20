@@ -31,17 +31,17 @@ defineProps({
 }
 
 .notice-list {
-    background: #ffffff;
+    background: var(--personal-color-white);
     border-radius: 8px;
     padding: 16px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 14px var(--personal-shadow-soft);
     flex: 1;
     overflow-y: auto;
 }
 
 .notice-item {
     padding: 15px 0px;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 .notice-item:last-child {

@@ -99,7 +99,7 @@ const goToInstallment = () => {
   padding: 16px 20px;
   background: var(--personal-color-white);
   border-radius: var(--personal-radius);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--personal-color-border-mist);
   display: inline-flex;
   flex-direction: column;
   gap: 6px;
@@ -107,20 +107,20 @@ const goToInstallment = () => {
 label {
   font-weight: 600;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--personal-color-text-muted-slate);
 }
 select {
   padding: 8px 12px;
   min-width: 200px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background-color: var(--personal-color-white);
   font-size: 0.9rem;
 }
 .notice {
   padding: 40px;
-  background-color: var(--personal-color-bg-surface);
-  color: #4f566b;
+  background-color: var(--personal-color-bg-surface-frost);
+  color: var(--personal-color-text-secondary-steel);
   text-align: center;
   border-radius: var(--personal-radius-card);
   font-weight: 500;
