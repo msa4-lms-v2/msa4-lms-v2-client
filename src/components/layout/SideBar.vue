@@ -281,9 +281,10 @@ const toggleMenu = (menuKey) => {
   width: 240px;
   background-color: var(--personal-color-white);
   padding-top: 47px;
-  height: calc(100vh);
+  height: calc(100vh - 64px);
   position: sticky;
   top: 64px;
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
