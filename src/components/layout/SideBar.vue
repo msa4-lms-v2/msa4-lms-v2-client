@@ -288,6 +288,15 @@ const toggleMenu = (menuKey) => {
   box-sizing: border-box;
 }
 
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--personal-color-scrollbar-thumb-haze);
+  border-radius: 4px;
+}
+
 .sidebar-nav {
   display: flex;
   flex-direction: column;
