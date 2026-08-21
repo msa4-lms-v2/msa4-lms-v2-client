@@ -286,15 +286,12 @@ const toggleMenu = (menuKey) => {
   top: 64px;
   overflow-y: auto;
   box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: var(--personal-color-scrollbar-thumb-haze);
-  border-radius: 4px;
+  display: none;
 }
 
 .sidebar-nav {

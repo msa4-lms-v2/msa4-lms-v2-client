@@ -73,9 +73,6 @@
     /* 색상 - 표 헤더 (전체 테이블 공용) */
     --personal-color-table-header-smoke: #f6f6f6;
 
-    /* 색상 - 스크롤바 전용 */
-    --personal-color-scrollbar-thumb-haze: #bcccdf;
-
     /* 색상 - 시간표 팔레트 */
     --personal-color-timetable-lilac: #f4e8fe;
     --personal-color-timetable-blush: #ffe6e7;
