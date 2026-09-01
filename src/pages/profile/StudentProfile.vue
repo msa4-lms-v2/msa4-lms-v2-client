@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/auth/useAuthStore';
 import PasswordChange from './PasswordChange.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import StatusBadge from '../../components/common/StatusBadge.vue';
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -42,6 +43,14 @@ const student = computed(() => ({
   totalCredits: user.value.totalCredits ?? 0,
 }));
 
+const statusVariant = computed(() => ({
+  ENROLLED: 'processing',
+  GRADUATED: 'success',
+  ON_LEAVE: 'warning',
+  WITHDRAWN: 'fail',
+  DISMISSED: 'fail',
+}[user.value.academicStatus] || 'processing'));
+
 const basicRows = computed(() => [
   { label: '이름', value: student.value.name },
   { label: '학번', value: student.value.studentNo },
@@ -71,7 +80,10 @@ const academicRows = computed(() => [
         <div class="student-main">
           <div class="name-row">
             <h2>{{ student.name }}</h2>
-            <span class="status-badge">{{ student.status }}</span>
+            <StatusBadge
+              :label="student.status"
+              :variant="statusVariant"
+            />
           </div>
 
           <ul class="quick-list" aria-label="학생 기본 요약">
@@ -92,7 +104,7 @@ const academicRows = computed(() => [
         <PasswordChange />
         <MyButton
           color="deep-blue"
-          size="middle"
+          size="big"
           content="정보 변경 신청"
           @click="router.push('/profile/info-change')"
         />
@@ -183,18 +195,6 @@ const academicRows = computed(() => [
 .name-row h2 {
   color: var(--personal-color-primary-text-navy);
   font-size: 1.5rem;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--personal-color-status-processing-bg-sky);
-  color: #1756b8;
-  font-size: 0.88rem;
-  font-weight: 500;
 }
 
 .quick-list {

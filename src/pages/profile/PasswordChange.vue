@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import MyButton from "../../components/button/MyButton.vue";
+import MyModal from "../../components/common/MyModal.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import { useAuthStore } from "../../store/auth/useAuthStore.js";
 import passwordChangeValidator from "../../util/validator/domain/passwordChangeValidator.js";
@@ -62,33 +63,45 @@ const updatePassword = async () => {
 <template>
   <MyButton
     color="deep-blue"
-    size="middle"
+    size="big"
     content="비밀번호 변경"
     @click="openPasswordModal"
   />
 
-  <div v-if="isPasswordModalOpen" class="modal-backdrop">
-    <form class="modal-box" @submit.prevent="updatePassword">
-      <h2>비밀번호 변경</h2>
-
+  <MyModal
+    :is-open="isPasswordModalOpen"
+    title="비밀번호 변경"
+    max-width="400px"
+    @close="closePasswordModal"
+  >
+    <form
+      id="password-change-form"
+      class="password-form"
+      @submit.prevent="updatePassword"
+    >
       <MyInput
         v-model="passwordChangeData.currentPassword"
+        class="password-input"
         type="password"
         placeholder="현재 비밀번호"
       />
 
       <MyInput
         v-model="passwordChangeData.newPassword"
+        class="password-input"
         type="password"
         placeholder="새 비밀번호"
       />
 
       <MyInput
         v-model="passwordChangeData.confirmPassword"
+        class="password-input"
         type="password"
         placeholder="새 비밀번호 확인"
       />
+    </form>
 
+    <template #footer>
       <div class="modal-buttons">
         <MyButton
           type="button"
@@ -98,34 +111,27 @@ const updatePassword = async () => {
           @click="closePasswordModal"
         />
 
-        <MyButton type="submit" color="deep-blue" size="small" content="변경" />
+        <MyButton
+          type="submit"
+          form="password-change-form"
+          color="deep-blue"
+          size="small"
+          content="변경"
+        />
       </div>
-    </form>
-  </div>
+    </template>
+  </MyModal>
 </template>
 
 <style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-box {
-  width: 400px;
-  background-color: white;
-  border-radius: 16px;
-  padding: 30px;
+.password-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.modal-box :deep(input) {
+.password-input {
+  width: 100%;
   height: 42px;
   padding: 0 12px;
   border: 1px solid var(--personal-color-border-mist);

@@ -55,23 +55,23 @@ button:hover {
 }
 
 .big {
-    width: 180px;
-    height: 40px;
+    width: 132px;
+    height: 38px;
     font-size: 16px;
     font-weight: 500;
 }
 
 .middle {
-    width: 120px;
+    width: 77px;
     height: 38px;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
 }
 
 .small {
-    width: 62px;
-    height: 38px;
-    font-size: 14px;
+    width: 57px;
+    height: 29px;
+    font-size: 12px;
     font-weight: 500;
 }
 
