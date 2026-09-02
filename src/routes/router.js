@@ -37,6 +37,18 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/leave-return/military',
+        name: 'StudentMilitaryLeave',
+        component: () => import('../pages/leaveReturn/StudentMilitaryLeavePage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/double-major',
+        name: 'StudentDoubleMajor',
+        component: () => import('../pages/doubleMajor/StudentDoubleMajorPage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/tuition',
         name: 'TuitionIndex',
         component: () => import('../pages/payment/TuitionIndex.vue'),

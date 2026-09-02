@@ -19,6 +19,7 @@ export const MENU_TITLES = {
     '/professor/grades/correct': { default: '성적 정정' },
     '/leave-return/general': { default: '일반휴학/복학 신청' },
     '/leave-return/military': { default: '군휴학 신청' },
+    '/double-major': { default: '복수전공 신청' },
     '/professor/leave-return': { default: '휴/복학 결재' },
     '/professor/attendance/approvals': { default: '출결 승인' },
     '/professor/attendance': { default: '출결 확인' },

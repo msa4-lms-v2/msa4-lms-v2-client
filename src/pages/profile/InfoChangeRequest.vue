@@ -346,11 +346,15 @@ onUnmounted(revokePreview);
                   content="파일 선택"
                   @click="openAttachmentPicker"
                 />
+                <span
+                  v-if="attachments.length > 0"
+                  class="file-count"
+                >{{ attachments.length }}개 파일 첨부됨</span>
+                <span
+                  v-else
+                  class="file-empty"
+                >선택된 파일 없음</span>
                 <div class="file-chips" aria-live="polite">
-                  <span
-                    v-if="attachments.length === 0"
-                    class="file-empty"
-                  >선택된 파일 없음</span>
                   <span
                     v-for="(file, index) in attachments"
                     :key="`${file.name}-${file.lastModified}`"
@@ -608,6 +612,13 @@ onUnmounted(revokePreview);
   justify-content: flex-end;
   gap: 8px;
   overflow-x: auto;
+}
+
+.file-count {
+  flex: none;
+  color: var(--personal-color-primary-navy);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .file-chip {
