@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -396,7 +396,7 @@ onMounted(async () => {
               <td>{{ request.sourceDepartmentName || '-' }}</td>
               <td>{{ request.targetDepartmentName || '-' }}</td>
               <td>
-                <StatusBadge
+                <MyStatusBadge
                   :class="['double-major-status', { 'double-major-status--rejected': request.status === 'REJECTED' }]"
                   :label="formatStatus(request.status)"
                   :variant="statusVariant(request.status)"
