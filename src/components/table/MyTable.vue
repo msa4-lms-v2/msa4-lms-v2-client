@@ -51,7 +51,7 @@ defineProps({
 .table-container {
     background: white;
     border-radius: 8px;
-    border: 1px solid var(--personal-color-border-mist);
+    border: 1px solid var(--personal-color-table-border-frost);
     overflow: hidden;
 }
 
@@ -64,7 +64,7 @@ defineProps({
 .my-table :deep(td) {
     padding: 20px 16px;
     font-size: 0.9rem;
-    border-bottom: 1px solid var(--personal-color-border-mist);
+    border-bottom: 1px solid var(--personal-color-table-border-frost);
     vertical-align: middle;
 }
 
@@ -83,14 +83,14 @@ defineProps({
     padding: 18px 16px;
     font-size: 0.85rem;
     color: var(--personal-color-text-secondary-steel);
-    border-bottom: 2px solid var(--personal-color-border-mist);
+    border-bottom: 2px solid var(--personal-color-table-border-frost);
     white-space: nowrap;
 }
 
 .my-table :deep(td) {
     padding: 20px 16px;
     font-size: 0.9rem;
-    border-bottom: 1px solid var(--personal-color-border-mist);
+    border-bottom: 1px solid var(--personal-color-table-border-frost);
 }
 .loading-text,
 .empty-text {

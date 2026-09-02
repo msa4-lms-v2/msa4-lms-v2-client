@@ -6,7 +6,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_VARIANT, PAYMENT_TYPE_LABEL } from '../../util/payment/enumLabels';
 
@@ -108,7 +108,7 @@ onMounted(() => {
         <td>{{ row.paymentDate ? formatDate(row.paymentDate) : '-' }}</td>
         <td>{{ formatCurrency(row.amount) }}</td>
         <td>
-          <StatusBadge
+          <MyStatusBadge
             :label="PAYMENT_STATUS_LABEL[row.status]"
             :variant="PAYMENT_STATUS_VARIANT[row.status]"
           />

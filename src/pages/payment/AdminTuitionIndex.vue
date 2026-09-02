@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { formatCurrency, formatDate } from '../../util/format';
@@ -56,7 +56,7 @@ onMounted(() => load());
           <td>{{ formatCurrency(bill.billingAmount) }}</td>
           <td>{{ formatDate(bill.dueDate) }}</td>
           <td>
-            <StatusBadge
+            <MyStatusBadge
               :label="TUITION_BILL_STATUS_LABEL[bill.status]"
               :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
             />

@@ -4,7 +4,7 @@ import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
@@ -90,7 +90,7 @@ onMounted(() => {
       />
       <div class="stat-card">
         <span class="stat-label">현재 납부 상태</span>
-        <StatusBadge
+        <MyStatusBadge
           :label="TUITION_BILL_STATUS_LABEL[latestBill.status]"
           :variant="TUITION_BILL_STATUS_VARIANT[latestBill.status]"
         />
@@ -111,7 +111,7 @@ onMounted(() => {
             <span class="semester">{{ semesterStore.getSemesterLabel(bill.semesterId) }}</span>
             <span class="amount">{{ formatCurrency(bill.billingAmount) }}</span>
             <span class="due">{{ formatDate(bill.dueDate) }} 까지</span>
-            <StatusBadge
+            <MyStatusBadge
               :label="TUITION_BILL_STATUS_LABEL[bill.status]"
               :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
             />

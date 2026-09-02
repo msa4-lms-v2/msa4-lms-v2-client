@@ -31,6 +31,9 @@
     --personal-color-status-warning-bg-butter: #fef3c7;
     --personal-color-status-fail-bg-blush: #fee2e2;
     --personal-color-status-fail-text-maroon: #991b1b;
+    --personal-color-status-success-text-forest: #166534;
+    --personal-color-status-processing-text-navy: #1e40af;
+    --personal-color-status-warning-text-amber: #92400e;
 
     /* 색상 - 텍스트(회색조 단계) */
     --personal-color-text-muted-slate: #64748b;
@@ -41,6 +44,9 @@
 
     /* 색상 - 테두리 (기존 6종을 스펙 값 #D9E2EC 하나로 통합, 2026-08-20) */
     --personal-color-border-mist: #d9e2ec;
+
+    /* 색상 - 표 전용 테두리 (v1 MyTable.vue와 동일한 색상 유지) */
+    --personal-color-table-border-frost: #edf2f7;
 
     /* 색상 - 배경(옅은 톤) */
     --personal-color-bg-hover-frost: #f7fafc;
@@ -71,7 +77,7 @@
     --personal-color-tab-inactive-silver: #b5bdc9;
 
     /* 색상 - 표 헤더 (전체 테이블 공용) */
-    --personal-color-table-header-smoke: #f6f6f6;
+    --personal-color-table-header-smoke: #f8f9fa;
 
     /* 색상 - 시간표 팔레트 */
     --personal-color-timetable-lilac: #f4e8fe;

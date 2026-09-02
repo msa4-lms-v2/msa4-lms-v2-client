@@ -1,5 +1,5 @@
 <script setup>
-import StatusBadge from '../common/StatusBadge.vue';
+import MyStatusBadge from '../common/MyStatusBadge.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
@@ -18,7 +18,7 @@ const props = defineProps({
             <dd>{{ formatDate(props.status.dueDate) }}</dd>
             <dt>상태</dt>
             <dd>
-                <StatusBadge
+                <MyStatusBadge
                     :label="TUITION_BILL_STATUS_LABEL[props.status.status]"
                     :variant="TUITION_BILL_STATUS_VARIANT[props.status.status]"
                 />

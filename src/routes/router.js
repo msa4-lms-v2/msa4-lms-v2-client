@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth/useAuthStore';
 import { notify } from '../composables/useDialog';
-import Dashboard from '../pages/dashboard/Dashboard.vue';
 const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
     return {
         isAuthenticated, // 인증된 사용자
@@ -15,7 +14,7 @@ const routes = [
     {
         path: '/main',
         name: 'Dashboard',
-        component: Dashboard,
+        component: () => import('../pages/dashboard/Dashboard.vue'),
         meta: { ...setMeta(true, false), requiresAuth: true },
     },
     {

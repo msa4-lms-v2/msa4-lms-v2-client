@@ -4,7 +4,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import { useInfoChangeStore } from '../../store/infochange/useInfoChangeStore';
 import { INFO_CHANGE_STATUS_LABEL, INFO_CHANGE_STATUS_VARIANT } from '../../util/academic/enumLabels';
 import { formatDate } from '../../util/format';
@@ -83,7 +83,7 @@ onMounted(() => load());
             <td>{{ item.studentName }}</td>
             <td class="reason-cell">{{ item.reason }}</td>
             <td>
-              <StatusBadge
+              <MyStatusBadge
                 :label="INFO_CHANGE_STATUS_LABEL[item.status]"
                 :variant="INFO_CHANGE_STATUS_VARIANT[item.status]"
               />
@@ -112,7 +112,7 @@ onMounted(() => load());
           <div class="detail-row">
             <dt>상태</dt>
             <dd>
-              <StatusBadge
+              <MyStatusBadge
                 :label="INFO_CHANGE_STATUS_LABEL[infoChangeStore.currentRequest.status]"
                 :variant="INFO_CHANGE_STATUS_VARIANT[infoChangeStore.currentRequest.status]"
               />

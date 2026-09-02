@@ -6,7 +6,7 @@ import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
 import {
@@ -122,7 +122,7 @@ onMounted(() => {
             <td>{{ formatCurrency(tuitionStore.currentStatus.billingAmount) }}</td>
             <td>{{ formatDate(tuitionStore.currentStatus.dueDate) }}</td>
             <td>
-              <StatusBadge
+              <MyStatusBadge
                 :label="TUITION_BILL_STATUS_LABEL[tuitionStore.currentStatus.status]"
                 :variant="TUITION_BILL_STATUS_VARIANT[tuitionStore.currentStatus.status]"
               />
@@ -175,7 +175,7 @@ onMounted(() => {
           role="status"
         >
           <span>결제 결과</span>
-          <StatusBadge
+          <MyStatusBadge
             :label="PAYMENT_STATUS_LABEL[tuitionStore.currentPayment.status]"
             :variant="PAYMENT_STATUS_VARIANT[tuitionStore.currentPayment.status]"
           />

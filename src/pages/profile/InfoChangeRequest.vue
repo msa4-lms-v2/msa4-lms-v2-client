@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -428,7 +428,7 @@ onUnmounted(revokePreview);
               <td class="reason-cell" :title="item.reason">{{ item.reason }}</td>
               <td>{{ formatFileCount(item) }}</td>
               <td>
-                <StatusBadge
+                <MyStatusBadge
                   class="status-text"
                   :label="statusLabels[item.status] || item.status"
                   :variant="statusVariants[item.status] || 'processing'"

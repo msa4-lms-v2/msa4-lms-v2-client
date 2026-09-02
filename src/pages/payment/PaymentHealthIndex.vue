@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { usePaymentHealthStore } from '../../store/payment/usePaymentHealthStore';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { formatDate } from '../../util/format';
 import { HEALTH_STATUS_VARIANT } from '../../util/payment/enumLabels';
@@ -18,7 +18,7 @@ onMounted(() => paymentHealthStore.fetchHealth());
     <div v-else class="health-list">
       <div v-if="paymentHealthStore.pgHealth" class="health-card">
         <span>{{ paymentHealthStore.pgHealth.feature }}</span>
-        <StatusBadge
+        <MyStatusBadge
           :label="paymentHealthStore.pgHealth.status"
           :variant="HEALTH_STATUS_VARIANT[paymentHealthStore.pgHealth.status]"
         />
@@ -28,7 +28,7 @@ onMounted(() => paymentHealthStore.fetchHealth());
 
       <div v-if="paymentHealthStore.virtualAccountHealth" class="health-card">
         <span>{{ paymentHealthStore.virtualAccountHealth.feature }}</span>
-        <StatusBadge
+        <MyStatusBadge
           :label="paymentHealthStore.virtualAccountHealth.status"
           :variant="HEALTH_STATUS_VARIANT[paymentHealthStore.virtualAccountHealth.status]"
         />
