@@ -1,296 +1,141 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    /* 색상 - 배경 */
+    --personal-color-bg-surface-frost: #f8fafc;
+    --personal-color-white: #ffffff;
+    --personal-color-black: #000000;
+    --personal-color-gray: #b1b1b1;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+    /* 색상 - 브랜드/버튼 */
+    --personal-color-primary-navy: #00278b;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    /* 색상 - 관리자 역할 (Figma Foundations & Components, Dev Mode 실측) */
+    --personal-color-admin-primary-slate: #334155;
+    --personal-color-admin-secondary-indigo: #4f46e5;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
+    /* 색상 - 학생 역할 */
+    --personal-color-student-primary-cyan: #0b86c6;
+    --personal-color-student-accent-azure: #60a5fa;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+    /* 색상 - 교수 역할 */
+    --personal-color-professor-primary-navy: #234792;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+    /* 그 외 색상 */
+    --personal-color-primary-text-navy: #1e293b;
+    --personal-color-secondary-blue: #2563eb;
+    --personal-color-green: #16a34a;
+    --personal-color-red: #dc2626;
+
+    /* 색상 - 상태 배지 배경 (TuitionBillStatus/RefundStatus/PaymentStatus/VirtualAccountStatus 공용) */
+    --personal-color-status-success-bg-mint: #dcfce7;
+    --personal-color-status-processing-bg-sky: #dbeafe;
+    --personal-color-status-warning-bg-butter: #fef3c7;
+    --personal-color-status-fail-bg-blush: #fee2e2;
+    --personal-color-status-fail-text-maroon: #991b1b;
+    --personal-color-status-success-text-forest: #166534;
+    --personal-color-status-processing-text-navy: #1e40af;
+    --personal-color-status-warning-text-amber: #92400e;
+
+    /* 색상 - 텍스트(회색조 단계) */
+    --personal-color-text-muted-slate: #64748b;
+    --personal-color-text-secondary-steel: #4f566b;
+    --personal-color-text-tertiary-slate: #697386;
+    --personal-color-text-faint-fog: #94a3b8;
+    --personal-color-heading-midnight: #1a1f36;
+
+    /* 색상 - 테두리 (기존 6종을 스펙 값 #D9E2EC 하나로 통합, 2026-08-20) */
+    --personal-color-border-mist: #d9e2ec;
+
+    /* 색상 - 표 전용 테두리 (v1 MyTable.vue와 동일한 색상 유지) */
+    --personal-color-table-border-frost: #edf2f7;
+
+    /* 색상 - 배경(옅은 톤) */
+    --personal-color-bg-hover-frost: #f7fafc;
+    --personal-color-bg-subtle-snow: #f8f9fa;
+    --personal-color-info-soft-ice: #e8f0fe;
+    --personal-color-indigo-soft-lavender: #eef2ff;
+    --personal-color-yellow-soft-cream: #fff9db;
+    --personal-color-bg-success-soft-honeydew: #e6ffed;
+    --personal-color-bg-danger-soft-rose: #ffebe9;
+
+    /* 색상 - 상태/강조 */
+    --personal-color-danger-coral: #ef4444;
+    --personal-color-danger-strong-crimson: #cf222e;
+    --personal-color-success-text-forest: #1a7f37;
+    --personal-color-link-blue: #1a73e8;
+
+    /* 색상 - 로그인 화면 전용 */
+    --personal-color-login-primary-navy: #0b3d91;
+    --personal-color-login-glow-azure: #60a5fa0b;
+    --personal-color-login-glow-azure-outer: #60a5fa08;
+    --personal-color-login-shadow-navy: #0b3d9118;
+    --personal-color-login-shadow-blue-soft: #2563eb12;
+    --personal-color-login-shadow-blue-medium: #2563eb3d;
+    --personal-color-login-shadow-blue-strong: #2563eb4a;
+    --personal-color-login-text-sky: #93c5fd;
+    --personal-color-login-text-sky-soft: #93c5fd80;
+
+    /* 색상 - 사이드바 전용 */
+    --personal-color-sidebar-text-slate: #4a5568;
+    --personal-color-sidebar-text-muted-slate: #718096;
+    --personal-color-sidebar-active-bg-sky: #e8f1ff;
+
+    /* 색상 - 탭 바 전용 */
+    --personal-color-tab-inactive-silver: #b5bdc9;
+
+    /* 색상 - 표 헤더 (전체 테이블 공용) */
+    --personal-color-table-header-smoke: #f8f9fa;
+
+    /* 색상 - 시간표 팔레트 */
+    --personal-color-timetable-lilac: #f4e8fe;
+    --personal-color-timetable-blush: #ffe6e7;
+    --personal-color-timetable-sage: #d3ead4;
+    --personal-color-timetable-sky: #e8effe;
+    --personal-color-timetable-sand: #eeefe0;
+    --personal-color-timetable-apricot: #f9e2cc;
+    --personal-color-timetable-lime: #f7f9e5;
+    --personal-color-timetable-aqua: #cbe9f7;
+    --personal-color-timetable-pink: #fdcedf;
+    --personal-color-timetable-periwinkle: #d4d5ff;
+
+    /* 그림자 */
+    --personal-shadow-soft: rgba(0, 0, 0, 0.06);
+    --personal-shadow-medium: rgba(0, 0, 0, 0.1);
+
+    /* 모서리 */
+    --personal-radius: 12px;
+    --personal-radius-card: 28px;
+    --personal-radius-badge: 24px;
+
+    /* 뱃지 크기 */
+    --personal-badge-padding: 4px 12px;
+    --personal-badge-font-size: 0.8rem;
+
+    /* 폰트 */
+    --personal-font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+
+    font-family: var(--personal-font-family);
+    color-scheme: light dark;
 }
 
 body {
-  margin: 0;
+    margin: 0;
+    background: var(--personal-color-bg-surface-frost);
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
+html,
+body,
 #app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+    min-width: 320px;
+    min-height: 100%;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+* {
+    box-sizing: border-box;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
-  width: 100%;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
-
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+button,
+input,
+textarea,
+select {
+    font: inherit;
 }
