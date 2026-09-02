@@ -57,6 +57,9 @@ const toggleMenu = (menuKey) => {
             <router-link to="/leave-return/military" class="submenu-item">{{
               getMenuTitle("/leave-return/military")
             }}</router-link>
+            <router-link to="/double-major" class="submenu-item">{{
+              getMenuTitle("/double-major")
+            }}</router-link>
           </div>
         </div>
 

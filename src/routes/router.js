@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth/useAuthStore';
 import { notify } from '../composables/useDialog';
-import Dashboard from '../pages/dashboard/Dashboard.vue';
 const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
     return {
         isAuthenticated, // 인증된 사용자
@@ -11,7 +10,7 @@ const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
 };
 const routes = [
     { path: '/', redirect: '/login' },
-    { path: '/login', component: () => import('../pages/auth/LoginIndex.vue') },
+    { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {
         path: '/initial-password',
         name: 'InitialPasswordChange',
@@ -21,7 +20,7 @@ const routes = [
     {
         path: '/main',
         name: 'Dashboard',
-        component: Dashboard,
+        component: () => import('../pages/dashboard/Dashboard.vue'),
         meta: { ...setMeta(true, false), requiresAuth: true },
     },
     {
@@ -40,6 +39,18 @@ const routes = [
         path: '/leave-return/general',
         name: 'StudentLeaveReturn',
         component: () => import('../pages/leaveReturn/StudentLeaveReturnPage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/leave-return/military',
+        name: 'StudentMilitaryLeave',
+        component: () => import('../pages/leaveReturn/StudentMilitaryLeavePage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/double-major',
+        name: 'StudentDoubleMajor',
+        component: () => import('../pages/doubleMajor/StudentDoubleMajorPage.vue'),
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {

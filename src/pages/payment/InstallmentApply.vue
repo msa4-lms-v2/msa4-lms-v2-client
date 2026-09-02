@@ -36,7 +36,7 @@
       <!-- 계획이 있을 때 -->
       <div v-else>
         <div class="status-panel">
-          <StatusBadge
+          <MyStatusBadge
             :label="INSTALLMENT_PLAN_STATUS_LABEL[instStore.installmentPlan.status]"
             :variant="INSTALLMENT_PLAN_STATUS_VARIANT[instStore.installmentPlan.status]"
           />
@@ -71,7 +71,7 @@
               <td>{{ formatCurrency(item.amount) }}</td>
               <td>{{ item.dueDate || '-' }}</td>
               <td>
-                <StatusBadge
+                <MyStatusBadge
                   :label="INSTALLMENT_ITEM_STATUS_LABEL[item.status]"
                   :variant="INSTALLMENT_ITEM_STATUS_VARIANT[item.status]"
                 />
@@ -106,7 +106,7 @@ import {
 } from '../../util/payment/enumLabels';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { formatCurrency } from '../../util/format';
 

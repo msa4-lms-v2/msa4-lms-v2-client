@@ -22,7 +22,7 @@ import MyModal from "../../components/common/MyModal.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
-import StatusBadge from "../../components/common/StatusBadge.vue";
+import MyStatusBadge from "../../components/common/MyStatusBadge.vue";
 
 const lectures = ref([]);
 const selectedClassId = ref("");
@@ -282,7 +282,7 @@ onBeforeUnmount(stopLiveUpdates);
       <section class="current-section">
         <div class="section-title-row">
           <h2>현재 출석 세션</h2>
-          <StatusBadge
+          <MyStatusBadge
             v-if="hasOpenSession"
             label="진행 중"
             variant="success"
@@ -292,7 +292,7 @@ onBeforeUnmount(stopLiveUpdates);
         <div v-if="hasOpenSession" class="session-panel panel">
           <div class="summary-card">
             <p class="muted-label">진행 상태</p>
-            <StatusBadge label="출석 진행 중" variant="success" />
+            <MyStatusBadge label="출석 진행 중" variant="success" />
             <p class="muted-label count-label">현재 참여</p>
             <div class="count">
               <strong>{{ currentSession.attendedCount || 0 }}</strong
@@ -394,7 +394,7 @@ onBeforeUnmount(stopLiveUpdates);
             />
           </header>
           <div class="expanded-summary">
-            <StatusBadge label="출석 진행 중" variant="success" />
+            <MyStatusBadge label="출석 진행 중" variant="success" />
             <div>
               <span>현재 참여</span
               ><b

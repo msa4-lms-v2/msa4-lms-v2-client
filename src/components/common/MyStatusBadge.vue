@@ -24,17 +24,17 @@ const props = defineProps({
 
 .status-badge--success {
   background: var(--personal-color-status-success-bg-mint);
-  color: #166534;
+  color: var(--personal-color-status-success-text-forest);
 }
 
 .status-badge--processing {
   background: var(--personal-color-status-processing-bg-sky);
-  color: #1e40af;
+  color: var(--personal-color-status-processing-text-navy);
 }
 
 .status-badge--warning {
   background: var(--personal-color-status-warning-bg-butter);
-  color: #92400e;
+  color: var(--personal-color-status-warning-text-amber);
 }
 
 .status-badge--fail {

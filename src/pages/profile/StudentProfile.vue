@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/auth/useAuthStore';
 import PasswordChange from './PasswordChange.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -80,7 +80,7 @@ const academicRows = computed(() => [
         <div class="student-main">
           <div class="name-row">
             <h2>{{ student.name }}</h2>
-            <StatusBadge
+            <MyStatusBadge
               :label="student.status"
               :variant="statusVariant"
             />

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -13,6 +13,7 @@ import { formatDate } from '../../util/format';
 defineOptions({ name: 'StudentLeaveReturnPage' });
 
 const PDF_MAX_SIZE = 10 * 1024 * 1024;
+const ATTACHMENT_MAX_COUNT = 5;
 const GENERAL_LEAVE = 'GENERAL_LEAVE';
 const GENERAL_RETURN = 'GENERAL_RETURN';
 
@@ -52,7 +53,7 @@ const form = reactive({
 });
 
 const fileInput = ref(null);
-const attachment = ref(null);
+const attachments = ref([]);
 const periods = ref([]);
 const requests = ref([]);
 const requestPage = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
@@ -108,7 +109,7 @@ const visibleRequests = computed(() => requests.value.filter(
 ));
 
 const resetAttachment = () => {
-  attachment.value = null;
+  attachments.value = [];
   if (fileInput.value) fileInput.value.value = '';
 };
 
@@ -124,16 +125,31 @@ const validatePdf = (file) => {
 };
 
 const onFileChange = (event) => {
-  const file = event.target.files?.[0] || null;
-  const validationMessage = validatePdf(file);
+  const selected = Array.from(event.target.files || []);
+  const validationMessage = selected.map(validatePdf).find(Boolean) || '';
   if (validationMessage) {
     formError.value = validationMessage;
-    resetAttachment();
+    event.target.value = '';
     return;
   }
-  attachment.value = file;
+  const combined = [...attachments.value, ...selected].filter(
+    (file, index, files) => files.findIndex((candidate) => (
+      candidate.name === file.name
+      && candidate.size === file.size
+      && candidate.lastModified === file.lastModified
+    )) === index,
+  );
+  if (combined.length > ATTACHMENT_MAX_COUNT) {
+    formError.value = '증빙 파일은 최대 5개까지 첨부할 수 있습니다.';
+    event.target.value = '';
+    return;
+  }
+  attachments.value = combined;
+  event.target.value = '';
   formError.value = '';
 };
+
+const removeAttachment = (index) => attachments.value.splice(index, 1);
 
 const loadPeriods = async () => {
   isLoadingPeriods.value = true;
@@ -181,7 +197,7 @@ const validateForm = () => {
   if (!selectedPeriod.value || !targetSemester.value) return '현재 접수 가능한 신청 기간이 없습니다.';
   if (isLeave.value && !form.reason.trim()) return '휴학 신청 사유를 입력해 주세요.';
   if (form.reason.trim().length > 500) return '신청 사유는 500자 이하로 입력해 주세요.';
-  return validatePdf(attachment.value);
+  return attachments.value.map(validatePdf).find(Boolean) || '';
 };
 
 const submitRequest = async () => {
@@ -205,7 +221,7 @@ const submitRequest = async () => {
 
   const formData = new FormData();
   formData.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
-  if (attachment.value) formData.append('file', attachment.value);
+  attachments.value.forEach((file) => formData.append('files', file));
 
   isSubmitting.value = true;
   try {
@@ -301,6 +317,7 @@ onMounted(async () => {
                 ref="fileInput"
                 class="visually-hidden"
                 type="file"
+                multiple
                 accept=".pdf,application/pdf"
                 @change="onFileChange"
               >
@@ -313,11 +330,36 @@ onMounted(async () => {
                 @click="openFilePicker"
               />
               <span
-                class="file-name"
-                :title="attachment?.name || ''"
+                class="file-count"
+                :class="{ 'file-count--attached': attachments.length > 0 }"
               >
-                {{ attachment?.name || '선택된 파일 없음' }}
+                {{ attachments.length ? `${attachments.length}개 파일 첨부됨` : '선택된 파일 없음' }}
               </span>
+              <div
+                v-if="attachments.length"
+                class="file-chips"
+              >
+                <span
+                  v-for="(file, index) in attachments"
+                  :key="`${file.name}-${file.size}-${file.lastModified}`"
+                  class="file-chip"
+                >
+                  <span
+                    class="file-icon"
+                    aria-hidden="true"
+                  >▣</span>
+                  <span
+                    class="file-name"
+                    :title="file.name"
+                  >{{ file.name }}</span>
+                  <MyButton
+                    btn-type="button"
+                    :content="'×'"
+                    :aria-label="`${file.name} 삭제`"
+                    @click="removeAttachment(index)"
+                  />
+                </span>
+              </div>
             </div>
           </div>
 
@@ -381,7 +423,7 @@ onMounted(async () => {
                 {{ request.reason || '-' }}
               </td>
               <td>
-                <StatusBadge
+                <MyStatusBadge
                   :class="['leave-status', { 'leave-status--rejected': request.status === 'REJECTED' }]"
                   :label="formatStatus(request.status)"
                   :variant="statusVariant(request.status)"
@@ -497,11 +539,45 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
+.file-count {
+  flex: 0 0 auto;
+  color: var(--personal-color-text-faint-fog);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.file-count--attached {
+  color: var(--personal-color-login-primary-navy);
+  font-weight: 500;
+}
+
+.file-chips {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.file-chip {
+  min-width: 0;
+  max-width: 230px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 3px;
+  color: var(--personal-color-primary-navy);
+  background: var(--personal-color-bg-surface-frost);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
 .file-name {
   min-width: 0;
   overflow: hidden;
-  color: var(--personal-color-text-faint-fog);
-  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
