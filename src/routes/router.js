@@ -10,7 +10,7 @@ const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
 };
 const routes = [
     { path: '/', redirect: '/login' },
-    { path: '/login', component: () => import('../pages/auth/LoginIndex.vue') },
+    { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {
         path: '/main',
         name: 'Dashboard',

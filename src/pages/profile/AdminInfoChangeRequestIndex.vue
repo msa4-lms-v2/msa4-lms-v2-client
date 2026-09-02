@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
+import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import { useInfoChangeStore } from '../../store/infochange/useInfoChangeStore';
@@ -64,36 +65,34 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="학적 정보 변경 승인" subtitle="학생이 신청한 정보 변경 요청을 확인하고 승인/반려합니다.">
-    <article class="list-card">
-      <p v-if="infoChangeStore.isLoadingAdminRequests">불러오는 중...</p>
-      <p v-else-if="infoChangeStore.adminRequests.length === 0" class="empty">신청 내역이 없습니다.</p>
-      <table v-else>
-        <thead>
-          <tr>
-            <th>신청일</th>
-            <th>학생</th>
-            <th>사유</th>
-            <th>상태</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in infoChangeStore.adminRequests" :key="item.id">
-            <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
-            <td>{{ item.studentName }}</td>
-            <td class="reason-cell">{{ item.reason }}</td>
-            <td>
-              <MyStatusBadge
-                :label="INFO_CHANGE_STATUS_LABEL[item.status]"
-                :variant="INFO_CHANGE_STATUS_VARIANT[item.status]"
-              />
-            </td>
-            <td>
-              <MyButton color="deep-blue" size="small" content="상세" @click="openDetail(item.id)" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <article>
+      <MyTable
+        :loading="infoChangeStore.isLoadingAdminRequests"
+        :empty="!infoChangeStore.isLoadingAdminRequests && infoChangeStore.adminRequests.length === 0"
+        empty-message="신청 내역이 없습니다."
+        :columns="[
+          { key: 'createdAt', label: '신청일' },
+          { key: 'studentName', label: '학생' },
+          { key: 'reason', label: '사유' },
+          { key: 'status', label: '상태' },
+          { key: 'action', label: '' },
+        ]"
+      >
+        <tr v-for="item in infoChangeStore.adminRequests" :key="item.id">
+          <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
+          <td>{{ item.studentName }}</td>
+          <td class="reason-cell">{{ item.reason }}</td>
+          <td>
+            <MyStatusBadge
+              :label="INFO_CHANGE_STATUS_LABEL[item.status]"
+              :variant="INFO_CHANGE_STATUS_VARIANT[item.status]"
+            />
+          </td>
+          <td>
+            <MyButton color="deep-blue" size="small" content="상세" @click="openDetail(item.id)" />
+          </td>
+        </tr>
+      </MyTable>
 
       <PrevNextPagination
         :page="infoChangeStore.adminRequestsPage.page"
@@ -181,35 +180,6 @@ onMounted(() => load());
 </template>
 
 <style scoped>
-.list-card {
-  background: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  padding: 26px 30px;
-}
-
-.empty {
-  color: var(--personal-color-text-muted-slate);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  text-align: left;
-  padding: 12px 10px;
-  border-bottom: 1px solid var(--personal-color-border-mist);
-}
-
-th {
-  background: var(--personal-color-table-header-smoke);
-  color: var(--personal-color-text-muted-slate);
-  font-weight: 500;
-}
-
 .reason-cell {
   max-width: 320px;
   overflow: hidden;

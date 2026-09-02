@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
@@ -37,33 +38,32 @@ onMounted(() => load());
     </div>
 
     <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
-    <p v-else-if="tuitionStore.isLoadingAdminBills">불러오는 중...</p>
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th>학생 ID</th>
-          <th>학기 ID</th>
-          <th>고지 금액</th>
-          <th>납부 기한</th>
-          <th>상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="bill in tuitionStore.adminBills" :key="bill.id">
-          <td><RouterLink :to="`/admin/tuition/${bill.id}`">{{ bill.studentId }}</RouterLink></td>
-          <td>{{ bill.semesterId }}</td>
-          <td>{{ formatCurrency(bill.billingAmount) }}</td>
-          <td>{{ formatDate(bill.dueDate) }}</td>
-          <td>
-            <MyStatusBadge
-              :label="TUITION_BILL_STATUS_LABEL[bill.status]"
-              :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <MyTable
+      :loading="tuitionStore.isLoadingAdminBills"
+      :empty="!tuitionStore.isLoadingAdminBills && tuitionStore.adminBills.length === 0"
+      empty-message="조회된 등록금 목록이 없습니다."
+      :columns="[
+        { key: 'studentId', label: '학생 ID' },
+        { key: 'semesterId', label: '학기 ID' },
+        { key: 'billingAmount', label: '고지 금액' },
+        { key: 'dueDate', label: '납부 기한' },
+        { key: 'status', label: '상태' },
+      ]"
+    >
+      <tr v-for="bill in tuitionStore.adminBills" :key="bill.id">
+        <td><RouterLink :to="`/admin/tuition/${bill.id}`">{{ bill.studentId }}</RouterLink></td>
+        <td>{{ bill.semesterId }}</td>
+        <td>{{ formatCurrency(bill.billingAmount) }}</td>
+        <td>{{ formatDate(bill.dueDate) }}</td>
+        <td>
+          <MyStatusBadge
+            :label="TUITION_BILL_STATUS_LABEL[bill.status]"
+            :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
+          />
+        </td>
+      </tr>
+    </MyTable>
 
     <PrevNextPagination
       :page="tuitionStore.adminBillsPage.page"
@@ -85,26 +85,6 @@ select {
   padding: 6px 10px;
   border-radius: var(--personal-radius);
   border: 1px solid var(--personal-color-border-mist);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--personal-color-white);
-  border-radius: var(--personal-radius-card);
-  overflow: hidden;
-}
-
-th,
-td {
-  text-align: left;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--personal-color-border-mist);
-}
-
-th {
-  background: var(--personal-color-table-header-smoke);
-  color: var(--personal-color-primary-text-navy);
 }
 
 .error {
