@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
-import StatusBadge from '../../components/common/StatusBadge.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -350,7 +350,7 @@ onMounted(async () => {
                 {{ request.reason || '-' }}
               </td>
               <td>
-                <StatusBadge
+                <MyStatusBadge
                   :class="['leave-status', { 'leave-status--rejected': request.status === 'REJECTED' }]"
                   :label="formatStatus(request.status)"
                   :variant="statusVariant(request.status)"
@@ -515,7 +515,7 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-.leave-status.status-badge {
+.leave-status.my-status-badge {
   padding: 0;
   border: 0;
   color: var(--personal-color-primary-text-navy);
