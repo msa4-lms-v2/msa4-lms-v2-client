@@ -13,6 +13,9 @@ const rememberId = ref(false);
 const showPassword = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref('');
+const successMessage = computed(() => route.query.passwordChanged === 'true'
+    ? '비밀번호가 변경되었습니다. 새 비밀번호로 다시 로그인해 주세요.'
+    : '');
 
 const loginForm = reactive({
     loginId: '',
@@ -70,13 +73,18 @@ const handleLogin = async () => {
     isLoading.value = true;
 
     try {
-        await authStore.login(
+        const result = await authStore.login(
             {
                 loginId: loginForm.loginId,
                 password: loginForm.password,
             },
             loginType.value
         );
+
+        if (result.requiresPasswordChange) {
+            await router.replace('/initial-password');
+            return;
+        }
 
         const redirect = typeof route.query.redirect === 'string'
             && route.query.redirect.startsWith('/')
@@ -216,6 +224,9 @@ const handleLogin = async () => {
 
                     <p v-if="errorMessage" class="error-message" role="alert">
                         {{ errorMessage }}
+                    </p>
+                    <p v-if="successMessage" class="success-message" role="status">
+                        {{ successMessage }}
                     </p>
 
                     <div class="form-options">
@@ -516,6 +527,12 @@ form > label {
     margin: -6px 0 14px;
     color: var(--personal-color-danger-coral);
     font-size: 10px;
+}
+.success-message {
+    margin: -6px 0 14px;
+    color: var(--personal-color-success-text-forest);
+    font-size: 11px;
+    font-weight: 700;
 }
 .form-options {
     margin: 1px 0 22px;
