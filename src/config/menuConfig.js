@@ -22,6 +22,7 @@ export const MENU_TITLES = {
     '/professor/leave-return': { default: '휴/복학 결재' },
     '/professor/attendance/approvals': { default: '출결 승인' },
     '/professor/attendance': { default: '출결 확인' },
+    '/professor/attendance/qr': { default: 'QR 출석 관리' },
     '/scholarships/apply': { default: '장학금 신청' },
     '/scholarships/history': { default: '장학금 수혜 내역' },
     '/tuition/:tuitionBillId/installment': { default: '분할납부 신청' },

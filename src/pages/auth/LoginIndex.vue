@@ -1,11 +1,12 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import MyInput from '../../components/input/MyInput.vue';
 import loginValidator from '../../util/validator/domain/loginValidator';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const loginType = ref('student');
 const rememberId = ref(false);
@@ -77,7 +78,13 @@ const handleLogin = async () => {
             loginType.value
         );
 
-        router.replace('/main');
+        const redirect = typeof route.query.redirect === 'string'
+            && route.query.redirect.startsWith('/')
+            && !route.query.redirect.startsWith('//')
+            ? route.query.redirect
+            : '/main';
+
+        router.replace(redirect);
     } catch (error) {
         errorMessage.value = error.response?.data?.message || error.message || '로그인에 실패했습니다.';
     } finally {
