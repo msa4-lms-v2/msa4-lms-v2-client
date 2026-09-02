@@ -246,6 +246,11 @@ const toggleMenu = (menuKey) => {
           </button>
           <div class="submenu-list" v-show="activeMenus.professorAttendance">
             <router-link
+              to="/professor/attendance/qr"
+              class="submenu-item"
+              >{{ getMenuTitle("/professor/attendance/qr") }}</router-link
+            >
+            <router-link
               to="/professor/attendance/approvals"
               class="submenu-item"
               >{{ getMenuTitle("/professor/attendance/approvals") }}</router-link
