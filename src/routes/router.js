@@ -79,6 +79,18 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT', 'ADMIN'] },
     },
     {
+        path: '/professor/attendance/qr',
+        name: 'ProfessorQrAttendance',
+        component: () => import('../pages/attendance/ProfessorQrAttendance.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/attendance/check-in',
+        name: 'AttendanceCheckIn',
+        component: () => import('../pages/attendance/AttendanceCheckIn.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/scholarships/apply',
         name: 'ScholarshipApplicationApply',
         component: () => import('../pages/payment/ScholarshipApplicationApply.vue'),
@@ -130,7 +142,10 @@ router.beforeEach(async (to) => {
     }
 
     if (to.meta.requiresAuth && !authStore.isLoggedIn) {
-        return '/login';
+        return {
+            path: '/login',
+            query: { redirect: to.fullPath },
+        };
     }
     if (to.meta.roles?.length && !to.meta.roles.includes(authStore.userInfo?.role)) {
         await notify('접근 권한이 없습니다.');

@@ -9,7 +9,7 @@ import { useTabStore } from './store/tab/useTabStore';
 
 const route = useRoute();
 const tabStore = useTabStore();
-const usesAppLayout = computed(() => route.path !== '/login');
+const usesAppLayout = computed(() => !['/login', '/attendance/check-in'].includes(route.path));
 </script>
 
 <template>
