@@ -67,6 +67,12 @@
     --personal-color-login-primary-navy: #0b3d91;
     --personal-color-login-glow-azure: #60a5fa0b;
     --personal-color-login-glow-azure-outer: #60a5fa08;
+    --personal-color-login-shadow-navy: #0b3d9118;
+    --personal-color-login-shadow-blue-soft: #2563eb12;
+    --personal-color-login-shadow-blue-medium: #2563eb3d;
+    --personal-color-login-shadow-blue-strong: #2563eb4a;
+    --personal-color-login-text-sky: #93c5fd;
+    --personal-color-login-text-sky-soft: #93c5fd80;
 
     /* 색상 - 사이드바 전용 */
     --personal-color-sidebar-text-slate: #4a5568;

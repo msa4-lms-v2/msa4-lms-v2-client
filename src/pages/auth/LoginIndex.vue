@@ -319,7 +319,7 @@ const handleLogin = async () => {
   margin-top: 42px;
 }
 .brand-text p {
-  color: #93c5fd;
+  color: var(--personal-color-login-text-sky);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.28em;
@@ -351,7 +351,7 @@ const handleLogin = async () => {
   z-index: 1;
   display: flex;
   justify-content: space-between;
-  color: #93c5fd80;
+  color: var(--personal-color-login-text-sky-soft);
   font-size: 9px;
 }
 .login-panel {
@@ -413,7 +413,7 @@ const handleLogin = async () => {
 .login-tabs button.active {
   color: var(--personal-color-login-primary-navy);
   background: var(--personal-color-white);
-  box-shadow: 0 5px 15px #0b3d9118;
+  box-shadow: 0 5px 15px var(--personal-color-login-shadow-navy);
 }
 .tab-icon {
   width: 32px;
@@ -470,7 +470,7 @@ form > label {
 }
 .input-box:focus-within {
   border-color: var(--personal-color-secondary-blue);
-  box-shadow: 0 0 0 4px #2563eb12;
+  box-shadow: 0 0 0 4px var(--personal-color-login-shadow-blue-soft);
 }
 .input-box > svg {
   width: 18px;
@@ -556,7 +556,7 @@ form > label {
   border-radius: 11px;
   color: var(--personal-color-white);
   background: linear-gradient(135deg, var(--personal-color-login-primary-navy), var(--personal-color-secondary-blue));
-  box-shadow: 0 14px 26px #2563eb3d;
+  box-shadow: 0 14px 26px var(--personal-color-login-shadow-blue-medium);
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
@@ -564,7 +564,7 @@ form > label {
 }
 .login-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 18px 30px #2563eb4a;
+  box-shadow: 0 18px 30px var(--personal-color-login-shadow-blue-strong);
 }
 .login-button:disabled {
   opacity: 0.65;
