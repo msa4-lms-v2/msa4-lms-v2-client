@@ -31,6 +31,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/leave-return/general',
+        name: 'StudentLeaveReturn',
+        component: () => import('../pages/leaveReturn/StudentLeaveReturnPage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/tuition',
         name: 'TuitionIndex',
         component: () => import('../pages/payment/TuitionIndex.vue'),
