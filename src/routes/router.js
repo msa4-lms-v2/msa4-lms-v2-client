@@ -12,6 +12,12 @@ const routes = [
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {
+        path: '/initial-password',
+        name: 'InitialPasswordChange',
+        component: () => import('../pages/auth/InitialPasswordChange.vue'),
+        meta: { passwordChangeOnly: true },
+    },
+    {
         path: '/main',
         name: 'Dashboard',
         component: () => import('../pages/dashboard/Dashboard.vue'),
@@ -152,6 +158,14 @@ router.beforeEach(async (to) => {
         isInitChecked = true;
     }
 
+    if (authStore.requiresInitialPasswordChange && !to.meta.passwordChangeOnly) {
+        return '/initial-password';
+    }
+
+    if (to.meta.passwordChangeOnly && !authStore.requiresInitialPasswordChange) {
+        return authStore.isLoggedIn ? '/main' : '/login';
+    }
+
     if (to.meta.requiresAuth && !authStore.isLoggedIn) {
         return {
             path: '/login',
@@ -165,6 +179,9 @@ router.beforeEach(async (to) => {
 });
 
 router.afterEach((to) => {
+    if (['/login', '/initial-password', '/attendance/check-in'].includes(to.path)) {
+        return;
+    }
     // 컴포넌트 외부에서 호출되므로 콜백 내부에서 동적으로 스토어를 임포트하여 사용
     import('../store/tab/useTabStore.js').then(({ useTabStore }) => {
         const tabStore = useTabStore();

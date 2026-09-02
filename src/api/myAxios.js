@@ -8,6 +8,7 @@ const AUTH_EXEMPT_PATHS = [
   '/api/auth/professor/login',
   '/api/auth/admin/login',
   '/api/auth/reissue-token',
+  '/api/auth/initial-password',
 ];
 
 const myAxios = axios.create({
