@@ -13,7 +13,7 @@ import { formatDate } from '../../util/format';
 defineOptions({ name: 'StudentLeaveReturnPage' });
 
 const PDF_MAX_SIZE = 10 * 1024 * 1024;
-const ATTACHMENT_MAX_COUNT = 5;
+const ATTACHMENTS_MAX_COUNT = 5;
 const GENERAL_LEAVE = 'GENERAL_LEAVE';
 const GENERAL_RETURN = 'GENERAL_RETURN';
 
@@ -115,12 +115,12 @@ const resetAttachment = () => {
 
 const openFilePicker = () => fileInput.value?.click();
 
-const validatePdf = (file) => {
-  if (!file) return '';
+const validatePdf = (file, documentName) => {
+  if (!file) return `${documentName} PDF를 첨부해 주세요.`;
   if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
-    return '증빙 파일은 PDF 형식만 선택할 수 있습니다.';
+    return `${documentName}는 PDF 형식만 선택할 수 있습니다.`;
   }
-  if (file.size > PDF_MAX_SIZE) return '증빙 파일은 10MB 이하만 선택할 수 있습니다.';
+  if (file.size > PDF_MAX_SIZE) return `${documentName}는 10MB 이하만 선택할 수 있습니다.`;
   return '';
 };
 
@@ -139,7 +139,7 @@ const onFileChange = (event) => {
       && candidate.lastModified === file.lastModified
     )) === index,
   );
-  if (combined.length > ATTACHMENT_MAX_COUNT) {
+  if (combined.length > ATTACHMENTS_MAX_COUNT) {
     formError.value = '증빙 파일은 최대 5개까지 첨부할 수 있습니다.';
     event.target.value = '';
     return;
@@ -188,9 +188,9 @@ const loadRequests = async (page = 1) => {
   }
 };
 
-const createIdempotencyKey = () => {
+const createIdempotencyKey = (prefix) => {
   const suffix = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  return `general-leave-return-${suffix}`;
+  return `${prefix}-${suffix}`;
 };
 
 const validateForm = () => {

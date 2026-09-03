@@ -15,6 +15,7 @@ const canUseLeaveReturn = computed(() =>
   ["ENROLLED", "ON_LEAVE"].includes(academicStatus.value)
 );
 const canApplyForMilitaryLeave = computed(() => academicStatus.value === "ENROLLED");
+const canApplyForDepartmentTransfer = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDoubleMajor = computed(() => academicStatus.value === "ENROLLED");
 
 onMounted(async () => {
@@ -78,6 +79,9 @@ const toggleMenu = (menuKey) => {
             }}</router-link>
             <router-link v-if="canApplyForMilitaryLeave" to="/leave-return/military" class="submenu-item">{{
               getMenuTitle("/leave-return/military")
+            }}</router-link>
+            <router-link v-if="canApplyForDepartmentTransfer" to="/department-transfer" class="submenu-item">{{
+              getMenuTitle("/department-transfer")
             }}</router-link>
             <router-link v-if="canApplyForDoubleMajor" to="/double-major" class="submenu-item">{{
               getMenuTitle("/double-major")
