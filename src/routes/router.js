@@ -71,6 +71,16 @@ const routes = [
         },
     },
     {
+        path: '/department-transfer',
+        name: 'StudentDepartmentTransfer',
+        component: () => import('../pages/departmentTransfer/StudentDepartmentTransferPage.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
+    },
+    {
         path: '/tuition',
         name: 'TuitionIndex',
         component: () => import('../pages/payment/TuitionIndex.vue'),
