@@ -11,6 +11,7 @@
     /* 색상 - 관리자 역할 (Figma Foundations & Components, Dev Mode 실측) */
     --personal-color-admin-primary-slate: #334155;
     --personal-color-admin-secondary-indigo: #4f46e5;
+    --personal-color-admin-accent-azure: #F59E0B;
 
     /* 색상 - 학생 역할 */
     --personal-color-student-primary-cyan: #0b86c6;
@@ -115,6 +116,9 @@
 
     font-family: var(--personal-font-family);
     color-scheme: light dark;
+    
+
+  
 }
 
 body {
