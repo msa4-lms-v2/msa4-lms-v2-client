@@ -1,9 +1,32 @@
 <script setup>
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
+import { useProfileStore } from "../../store/profile/useProfileStore";
 import { getMenuTitle } from "../../config/menuConfig";
 
 const authStore = useAuthStore();
+const profileStore = useProfileStore();
+
+const academicStatus = computed(() => profileStore.profile?.academicStatus);
+const canChangeInfo = computed(() =>
+  ["ENROLLED", "ON_LEAVE"].includes(academicStatus.value)
+);
+const canUseLeaveReturn = computed(() =>
+  ["ENROLLED", "ON_LEAVE"].includes(academicStatus.value)
+);
+const canApplyForMilitaryLeave = computed(() => academicStatus.value === "ENROLLED");
+const canApplyForDepartmentTransfer = computed(() => academicStatus.value === "ENROLLED");
+const canApplyForDoubleMajor = computed(() => academicStatus.value === "ENROLLED");
+
+onMounted(async () => {
+  if (authStore.userInfo?.role !== "STUDENT") return;
+
+  try {
+    await profileStore.fetchStudentProfile();
+  } catch {
+    // 프로필 조회 실패 시 제한 메뉴를 노출하지 않는다.
+  }
+});
 
 const activeMenus = ref({
   studentAcademic: false,
@@ -48,16 +71,19 @@ const toggleMenu = (menuKey) => {
             <router-link to="/profile" class="submenu-item">{{
               getMenuTitle("/profile", "STUDENT")
             }}</router-link>
-            <router-link to="/profile/info-change" class="submenu-item">{{
+            <router-link v-if="canChangeInfo" to="/profile/info-change" class="submenu-item">{{
               getMenuTitle("/profile/info-change")
             }}</router-link>
-            <router-link to="/leave-return/general" class="submenu-item">{{
+            <router-link v-if="canUseLeaveReturn" to="/leave-return/general" class="submenu-item">{{
               getMenuTitle("/leave-return/general")
             }}</router-link>
-            <router-link to="/leave-return/military" class="submenu-item">{{
+            <router-link v-if="canApplyForMilitaryLeave" to="/leave-return/military" class="submenu-item">{{
               getMenuTitle("/leave-return/military")
             }}</router-link>
-            <router-link to="/double-major" class="submenu-item">{{
+            <router-link v-if="canApplyForDepartmentTransfer" to="/department-transfer" class="submenu-item">{{
+              getMenuTitle("/department-transfer")
+            }}</router-link>
+            <router-link v-if="canApplyForDoubleMajor" to="/double-major" class="submenu-item">{{
               getMenuTitle("/double-major")
             }}</router-link>
           </div>

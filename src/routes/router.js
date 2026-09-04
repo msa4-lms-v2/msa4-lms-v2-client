@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth/useAuthStore';
+import { useProfileStore } from '../store/profile/useProfileStore';
 import { notify } from '../composables/useDialog';
 const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
     return {
@@ -33,25 +34,51 @@ const routes = [
         path: '/profile/info-change',
         name: 'InfoChangeRequest',
         component: () => import('../pages/profile/InfoChangeRequest.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED', 'ON_LEAVE'],
+        },
     },
     {
         path: '/leave-return/general',
         name: 'StudentLeaveReturn',
         component: () => import('../pages/leaveReturn/StudentLeaveReturnPage.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED', 'ON_LEAVE'],
+        },
     },
     {
         path: '/leave-return/military',
         name: 'StudentMilitaryLeave',
         component: () => import('../pages/leaveReturn/StudentMilitaryLeavePage.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/double-major',
         name: 'StudentDoubleMajor',
         component: () => import('../pages/doubleMajor/StudentDoubleMajorPage.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
+    },
+    {
+        path: '/department-transfer',
+        name: 'StudentDepartmentTransfer',
+        component: () => import('../pages/departmentTransfer/StudentDepartmentTransferPage.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/tuition',
@@ -105,7 +132,11 @@ const routes = [
         path: '/attendance/check-in',
         name: 'AttendanceCheckIn',
         component: () => import('../pages/attendance/AttendanceCheckIn.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/scholarships/apply',
@@ -175,6 +206,22 @@ router.beforeEach(async (to) => {
     if (to.meta.roles?.length && !to.meta.roles.includes(authStore.userInfo?.role)) {
         await notify('접근 권한이 없습니다.');
         return '/main';
+    }
+
+    if (authStore.userInfo?.role === 'STUDENT' && to.meta.academicStatuses?.length) {
+        const profileStore = useProfileStore();
+
+        try {
+            await profileStore.fetchStudentProfile();
+        } catch {
+            await notify('학적 상태를 확인할 수 없습니다.');
+            return '/main';
+        }
+
+        if (!to.meta.academicStatuses.includes(profileStore.profile?.academicStatus)) {
+            await notify('현재 학적 상태에서는 해당 기능을 이용할 수 없습니다.');
+            return '/main';
+        }
     }
 });
 

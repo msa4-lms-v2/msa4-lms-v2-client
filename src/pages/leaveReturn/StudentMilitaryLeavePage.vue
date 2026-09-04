@@ -13,6 +13,7 @@ import { formatDate } from '../../util/format';
 defineOptions({ name: 'StudentMilitaryLeavePage' });
 
 const PDF_MAX_SIZE = 10 * 1024 * 1024;
+const ATTACHMENTS_MAX_COUNT = 5;
 const MILITARY_LEAVE = 'MILITARY_LEAVE';
 
 const columns = [
@@ -39,7 +40,7 @@ const statusVariants = {
 };
 
 const fileInput = ref(null);
-const attachment = ref(null);
+const attachments = ref([]);
 const periods = ref([]);
 const requests = ref([]);
 const requestPage = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
@@ -85,7 +86,7 @@ const returnSemesterLabel = computed(() => (
 ));
 
 const resetAttachment = () => {
-  attachment.value = null;
+  attachments.value = [];
   if (fileInput.value) fileInput.value.value = '';
 };
 
@@ -101,16 +102,31 @@ const validatePdf = (file) => {
 };
 
 const onFileChange = (event) => {
-  const file = event.target.files?.[0] || null;
-  const validationMessage = validatePdf(file);
+  const selected = Array.from(event.target.files || []);
+  const validationMessage = selected.map(validatePdf).find(Boolean) || '';
   if (validationMessage) {
     formError.value = validationMessage;
-    resetAttachment();
+    event.target.value = '';
     return;
   }
-  attachment.value = file;
+  const combined = [...attachments.value, ...selected].filter(
+    (file, index, files) => files.findIndex((candidate) => (
+      candidate.name === file.name
+      && candidate.size === file.size
+      && candidate.lastModified === file.lastModified
+    )) === index,
+  );
+  if (combined.length > ATTACHMENTS_MAX_COUNT) {
+    formError.value = '증빙 파일은 최대 5개까지 첨부할 수 있습니다.';
+    event.target.value = '';
+    return;
+  }
+  attachments.value = combined;
+  event.target.value = '';
   formError.value = '';
 };
+
+const removeAttachment = (index) => attachments.value.splice(index, 1);
 
 const loadPeriods = async () => {
   isLoadingPeriods.value = true;
@@ -189,7 +205,7 @@ const submitRequest = async () => {
 
   const formData = new FormData();
   formData.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
-  formData.append('files', attachment.value);
+  attachments.value.forEach((file) => formData.append('files', file));
 
   isSubmitting.value = true;
   try {
@@ -275,9 +291,8 @@ onMounted(async () => {
               ref="fileInput"
               class="visually-hidden"
               type="file"
+              multiple
               accept=".pdf,application/pdf"
-              aria-hidden="true"
-              tabindex="-1"
               @change="onFileChange"
             >
             <MyButton
@@ -289,11 +304,36 @@ onMounted(async () => {
               @click="openFilePicker"
             />
             <span
-              class="file-name"
-              :title="attachment?.name || ''"
-            >
-              {{ attachment ? '1개 파일 첨부됨' : '선택된 파일 없음' }}
-            </span>
+                class="file-count"
+                :class="{ 'file-count--attached': attachments.length > 0 }"
+              >
+                {{ attachments.length ? `${attachments.length}개 파일 첨부됨` : '선택된 파일 없음' }}
+              </span>
+            <div
+                v-if="attachments.length"
+                class="file-chips"
+              >
+                <span
+                  v-for="(file, index) in attachments"
+                  :key="`${file.name}-${file.size}-${file.lastModified}`"
+                  class="file-chip"
+                >
+                  <span
+                    class="file-icon"
+                    aria-hidden="true"
+                  >▣</span>
+                  <span
+                    class="file-name"
+                    :title="file.name"
+                  >{{ file.name }}</span>
+                  <MyButton
+                    btn-type="button"
+                    :content="'×'"
+                    :aria-label="`${file.name} 삭제`"
+                    @click="removeAttachment(index)"
+                  />
+                </span>
+              </div>
           </div>
           <span class="file-required">* 군휴학 신청 시 입영통지서 첨부는 필수입니다.</span>
         </div>
@@ -455,8 +495,49 @@ onMounted(async () => {
 .file-name {
   min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-count {
+  flex: 0 0 auto;
   color: var(--personal-color-text-faint-fog);
   font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.file-count--attached {
+  color: var(--personal-color-login-primary-navy);
+  font-weight: 500;
+}
+
+.file-chips {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.file-chip {
+  min-width: 0;
+  max-width: 230px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 3px;
+  color: var(--personal-color-primary-navy);
+  background: var(--personal-color-bg-surface-frost);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.file-name {
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
