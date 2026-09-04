@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -270,14 +271,14 @@ onMounted(async () => {
               for="leave-request-type"
             >
               <span>신청 유형</span>
-              <select
+              <MySelect
                 id="leave-request-type"
                 v-model="form.requestType"
                 class="form-select"
               >
                 <option :value="GENERAL_LEAVE">휴학</option>
                 <option :value="GENERAL_RETURN">복학</option>
-              </select>
+              </MySelect>
             </label>
 
             <label

@@ -5,6 +5,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -361,7 +362,7 @@ onMounted(async () => {
               for="target-college"
             >
               <span>희망 단과대학</span>
-              <select
+              <MySelect
                 id="target-college"
                 v-model="selectedCollegeId"
                 class="form-select"
@@ -374,7 +375,7 @@ onMounted(async () => {
                 >
                   {{ college.name }}
                 </option>
-              </select>
+              </MySelect>
             </label>
 
             <label
@@ -382,7 +383,7 @@ onMounted(async () => {
               for="target-department"
             >
               <span>희망 학과</span>
-              <select
+              <MySelect
                 id="target-department"
                 v-model="selectedDepartmentId"
                 class="form-select"
@@ -395,7 +396,7 @@ onMounted(async () => {
                 >
                   {{ department.name }}
                 </option>
-              </select>
+              </MySelect>
             </label>
           </div>
 
@@ -405,7 +406,7 @@ onMounted(async () => {
               for="target-semester"
             >
               <span>적용 희망 학기</span>
-              <select
+              <MySelect
                 id="target-semester"
                 v-model="selectedSemesterId"
                 class="form-select"
@@ -418,7 +419,7 @@ onMounted(async () => {
                 >
                   {{ formatSemester(period.academicYear, period.term) }}
                 </option>
-              </select>
+              </MySelect>
             </label>
 
             <div class="form-field file-field">

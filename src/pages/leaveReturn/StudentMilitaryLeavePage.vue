@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -246,13 +247,13 @@ onMounted(async () => {
             for="military-leave-type"
           >
             <span>신청 유형</span>
-            <select
+            <MySelect
               id="military-leave-type"
               class="form-select"
-              :value="MILITARY_LEAVE"
+              :model-value="MILITARY_LEAVE"
             >
               <option :value="MILITARY_LEAVE">군휴학</option>
-            </select>
+            </MySelect>
           </label>
 
           <label

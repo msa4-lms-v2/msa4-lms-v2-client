@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -262,7 +263,7 @@ onMounted(async () => {
               for="double-major-college"
             >
               <span>희망 단과대학</span>
-              <select
+              <MySelect
                 id="double-major-college"
                 v-model="selectedCollegeId"
                 class="form-select"
@@ -275,7 +276,7 @@ onMounted(async () => {
                 >
                   {{ college.name }}
                 </option>
-              </select>
+              </MySelect>
             </label>
 
             <label
@@ -283,7 +284,7 @@ onMounted(async () => {
               for="double-major-department"
             >
               <span>희망 복수전공</span>
-              <select
+              <MySelect
                 id="double-major-department"
                 v-model="selectedDepartmentId"
                 class="form-select"
@@ -296,7 +297,7 @@ onMounted(async () => {
                 >
                   {{ department.name }}
                 </option>
-              </select>
+              </MySelect>
             </label>
           </div>
 

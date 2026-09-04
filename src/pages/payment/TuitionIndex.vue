@@ -4,6 +4,7 @@ import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
@@ -57,20 +58,20 @@ onMounted(() => {
     <MySearchFilter submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="filter-year">연도</label>
-        <select id="filter-year" v-model="filters.academicYear">
+        <MySelect id="filter-year" v-model="filters.academicYear">
           <option value="">전체</option>
           <option v-for="year in semesterStore.academicYears" :key="year" :value="year">
             {{ year }}학년도
           </option>
-        </select>
+        </MySelect>
       </div>
       <div class="search-group">
         <label for="filter-term">학기</label>
-        <select id="filter-term" v-model="filters.term">
+        <MySelect id="filter-term" v-model="filters.term">
           <option value="">전체</option>
           <option value="FIRST">1학기</option>
           <option value="SECOND">2학기</option>
-        </select>
+        </MySelect>
       </div>
     </MySearchFilter>
 
