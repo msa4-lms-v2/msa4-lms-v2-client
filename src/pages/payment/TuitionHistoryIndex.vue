@@ -6,6 +6,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_VARIANT, PAYMENT_TYPE_LABEL } from '../../util/payment/enumLabels';
@@ -55,37 +56,37 @@ onMounted(() => {
     <MySearchFilter submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="filter-year">연도</label>
-        <select id="filter-year" v-model="filters.academicYear">
+        <MySelect id="filter-year" v-model="filters.academicYear">
           <option value="">전체</option>
           <option v-for="year in semesterStore.academicYears" :key="year" :value="year">
             {{ year }}학년도
           </option>
-        </select>
+        </MySelect>
       </div>
       <div class="search-group">
         <label for="filter-term">학기</label>
-        <select id="filter-term" v-model="filters.term">
+        <MySelect id="filter-term" v-model="filters.term">
           <option value="">전체</option>
           <option value="FIRST">1학기</option>
           <option value="SECOND">2학기</option>
-        </select>
+        </MySelect>
       </div>
       <div class="search-group">
         <label for="filter-type">신청 구분</label>
-        <select id="filter-type" v-model="filters.paymentType">
+        <MySelect id="filter-type" v-model="filters.paymentType">
           <option value="">전체</option>
           <option value="LUMP_SUM">일괄납부</option>
           <option value="INSTALLMENT">분할납부</option>
-        </select>
+        </MySelect>
       </div>
       <div class="search-group">
         <label for="filter-status">처리 상태</label>
-        <select id="filter-status" v-model="filters.status">
+        <MySelect id="filter-status" v-model="filters.status">
           <option value="">전체</option>
           <option v-for="(label, value) in PAYMENT_STATUS_LABEL" :key="value" :value="value">
             {{ label }}
           </option>
-        </select>
+        </MySelect>
       </div>
     </MySearchFilter>
 

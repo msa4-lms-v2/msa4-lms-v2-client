@@ -6,11 +6,11 @@
     <div v-else>
       <div class="form-group" v-if="availableSemesters.length > 0">
         <label>학기 선택</label>
-        <select v-model="selectedSemester">
+        <MySelect v-model="selectedSemester">
           <option v-for="semesterId in availableSemesters" :key="semesterId" :value="semesterId">
             {{ semesterStore.getSemesterLabel(semesterId) }}
           </option>
-        </select>
+        </MySelect>
       </div>
 
       <div v-if="availableSemesters.length === 0 || filteredScholarships.length === 0">
@@ -56,6 +56,7 @@ import { formatCurrency, formatDate } from '../../util/format';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MySelect from '../../components/input/MySelect.vue';
 
 const router = useRouter();
 const appStore = useScholarshipApplicationStore();

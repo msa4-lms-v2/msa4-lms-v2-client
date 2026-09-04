@@ -4,6 +4,7 @@ import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
@@ -29,12 +30,12 @@ onMounted(() => load());
   <MyPageContainer title="관리자 등록금 목록">
     <div class="filter">
       <label for="status-filter">상태</label>
-      <select id="status-filter" v-model="statusFilter" @change="load()">
+      <MySelect id="status-filter" v-model="statusFilter" @change="load()">
         <option :value="null">전체</option>
         <option v-for="(label, value) in TUITION_BILL_STATUS_LABEL" :key="value" :value="value">
           {{ label }}
         </option>
-      </select>
+      </MySelect>
     </div>
 
     <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>

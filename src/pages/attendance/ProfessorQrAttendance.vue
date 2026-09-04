@@ -21,6 +21,7 @@ import { confirmDialog, notify } from "../../composables/useDialog";
 import MyModal from "../../components/common/MyModal.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
+import MySelect from "../../components/input/MySelect.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyStatusBadge from "../../components/common/MyStatusBadge.vue";
 
@@ -52,6 +53,12 @@ const selectedLecture = computed(() =>
   lectures.value.find(
     (lecture) => String(lecture.classId) === String(selectedClassId.value)
   )
+);
+const lectureOptions = computed(() =>
+  lectures.value.map((lecture) => ({
+    value: String(lecture.classId),
+    label: lectureLabel(lecture),
+  })),
 );
 const hasOpenSession = computed(() => currentSession.value?.status === "OPEN");
 
@@ -252,20 +259,13 @@ onBeforeUnmount(stopLiveUpdates);
       <div class="lecture-panel panel">
         <label for="lecture-select">강의 선택</label>
         <div class="lecture-controls">
-          <select
+          <MySelect
             id="lecture-select"
             v-model="selectedClassId"
+            :options="lectureOptions"
+            placeholder="강의를 선택해 주세요"
             :disabled="isLoading || hasOpenSession"
-          >
-            <option value="" disabled>강의를 선택해 주세요</option>
-            <option
-              v-for="lecture in lectures"
-              :key="lecture.classId"
-              :value="String(lecture.classId)"
-            >
-              {{ lectureLabel(lecture) }}
-            </option>
-          </select>
+          />
           <MyButton
             color="deep-blue"
             size="big"
@@ -453,15 +453,9 @@ onBeforeUnmount(stopLiveUpdates);
   display: flex;
   gap: 12px;
 }
-.lecture-controls select {
+.lecture-controls > :first-child {
   min-width: 0;
   flex: 1;
-  height: 38px;
-  padding: 0 14px;
-  color: var(--personal-color-primary-text-navy);
-  background: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: var(--personal-radius);
 }
 .current-section,
 .history-section {
