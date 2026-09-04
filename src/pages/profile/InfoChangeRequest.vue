@@ -17,8 +17,14 @@ const PROFILE_IMAGE_MAX_SIZE = 5 * 1024 * 1024;
 const ATTACHMENT_MAX_SIZE = 10 * 1024 * 1024;
 const REQUEST_MAX_SIZE = 20 * 1024 * 1024;
 const ATTACHMENT_MAX_COUNT = 5;
-const PROFILE_IMAGE_TYPES = new Set(['image/jpeg', 'image/png']);
-const ATTACHMENT_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png']);
+const PROFILE_IMAGE_EXTENSIONS = new Set([
+  'jpg', 'jpeg', 'png', 'gif', 'webp',
+]);
+const ATTACHMENT_EXTENSIONS = new Set([
+  ...PROFILE_IMAGE_EXTENSIONS, 'pdf', 'hwp', 'hwpx',
+]);
+const PROFILE_IMAGE_ACCEPT = '.jpg,.jpeg,.png,.gif,.webp';
+const ATTACHMENT_ACCEPT = `${PROFILE_IMAGE_ACCEPT},.pdf,.hwp,.hwpx`;
 
 const columns = [
   { key: 'createdAt', label: '신청일' },
@@ -73,6 +79,7 @@ const profile = computed(() => profileStore.profile || {});
 const displayedProfileImage = computed(() => previewUrl.value || profile.value.profileImageUrl || '');
 
 const normalize = (value) => value?.trim() || '';
+const fileExtension = (file) => file.name.split('.').pop()?.toLowerCase() || '';
 
 const revokePreview = () => {
   if (!previewUrl.value) return;
@@ -120,8 +127,8 @@ const validatePayload = (payload) => {
   if (payload.newEmail && (payload.newEmail.length > 100 || !/^\S+@\S+\.\S+$/.test(payload.newEmail))) {
     return '올바른 이메일 형식을 입력해 주세요.';
   }
-  if (payload.profileImage && !PROFILE_IMAGE_TYPES.has(payload.profileImage.type)) {
-    return '프로필 사진은 JPEG 또는 PNG 형식만 선택할 수 있습니다.';
+  if (payload.profileImage && !PROFILE_IMAGE_EXTENSIONS.has(fileExtension(payload.profileImage))) {
+    return '프로필 사진은 JPEG, PNG, GIF 또는 WebP 형식만 선택할 수 있습니다.';
   }
   if (payload.profileImage?.size > PROFILE_IMAGE_MAX_SIZE) {
     return '프로필 사진은 5MB 이하만 선택할 수 있습니다.';
@@ -130,8 +137,8 @@ const validatePayload = (payload) => {
     return '증빙파일은 최대 5개까지 선택할 수 있습니다.';
   }
   for (const file of payload.attachments) {
-    if (!ATTACHMENT_TYPES.has(file.type)) {
-      return '증빙파일은 PDF, JPEG 또는 PNG 형식만 선택할 수 있습니다.';
+    if (!ATTACHMENT_EXTENSIONS.has(fileExtension(file))) {
+      return '증빙파일은 PDF, 이미지, HWP 또는 HWPX 형식만 선택할 수 있습니다.';
     }
     if (file.size > ATTACHMENT_MAX_SIZE) {
       return '증빙파일은 파일당 10MB 이하만 선택할 수 있습니다.';
@@ -272,7 +279,7 @@ onUnmounted(revokePreview);
               ref="profileImageInput"
               class="visually-hidden"
               type="file"
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              :accept="PROFILE_IMAGE_ACCEPT"
               @change="onProfileImageChange"
             >
             <MyButton
@@ -328,14 +335,14 @@ onUnmounted(revokePreview);
             </label>
 
             <div class="field">
-              <span>증빙파일 (pdf, png, jpeg 가능)</span>
+              <span>증빙파일 (PDF, JPG/PNG/GIF/WebP, HWP/HWPX 가능)</span>
               <div class="attachment-picker">
                 <input
                   ref="attachmentInput"
                   class="visually-hidden"
                   type="file"
                   multiple
-                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  :accept="ATTACHMENT_ACCEPT"
                   @change="onAttachmentsChange"
                 >
                 <MyButton
