@@ -15,11 +15,11 @@
         <div v-else class="apply-form">
           <div class="form-group">
             <label>분할 회차</label>
-            <select v-model="selectedRounds">
+            <MySelect v-model="selectedRounds">
               <option :value="2">2회</option>
               <option :value="3">3회</option>
               <option :value="4">4회</option>
-            </select>
+            </MySelect>
           </div>
           <div class="action-area">
             <MyButton
@@ -106,6 +106,7 @@ import {
 } from '../../util/payment/enumLabels';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { formatCurrency } from '../../util/format';

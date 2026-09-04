@@ -10,11 +10,11 @@
       <div v-else>
         <div class="form-group">
           <label>신청 대상 고지 선택</label>
-          <select v-model="selectedBillId" @change="onBillChange">
+          <MySelect v-model="selectedBillId" @change="onBillChange">
             <option v-for="bill in tuitionStore.myBills" :key="bill.id" :value="bill.id">
               {{ bill.semesterId }} 학기 | 고지 금액: {{ formatCurrency(bill.billingAmount) }}
             </option>
-          </select>
+          </MySelect>
         </div>
 
         <div v-if="!appStore.applicationPeriod || !appStore.applicationPeriod.open">
@@ -35,11 +35,11 @@
         <div v-else class="apply-form">
           <div class="form-group">
             <label>장학금 유형</label>
-            <select v-model="form.type">
+            <MySelect v-model="form.type">
               <option value="MERIT">성적우수</option>
               <option value="NEED_BASED">가계곤란</option>
               <option value="OTHER">기타</option>
-            </select>
+            </MySelect>
           </div>
           <div class="form-group">
             <label>신청 금액</label>
@@ -71,6 +71,7 @@ import { useScholarshipApplicationStore } from '../../store/payment/useScholarsh
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import { formatCurrency } from '../../util/format';
 
 const tuitionStore = useTuitionStore();

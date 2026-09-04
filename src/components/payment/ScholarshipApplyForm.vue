@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { SCHOLARSHIP_TYPE_LABEL } from '../../util/payment/enumLabels';
+import MySelect from '../input/MySelect.vue';
 
 const props = defineProps({
   isSubmitting: { type: Boolean, default: false },
@@ -24,11 +25,11 @@ const handleSubmit = () => {
 
     <div class="field">
       <label for="scholarship-type">장학금 유형</label>
-      <select id="scholarship-type" v-model="type">
+      <MySelect id="scholarship-type" v-model="type">
         <option v-for="(label, value) in SCHOLARSHIP_TYPE_LABEL" :key="value" :value="value">
           {{ label }}
         </option>
-      </select>
+      </MySelect>
     </div>
 
     <div class="field">

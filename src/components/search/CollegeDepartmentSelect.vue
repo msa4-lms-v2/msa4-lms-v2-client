@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import MySelect from '../input/MySelect.vue';
 
 const props = defineProps({
   collegeName: { type: String, default: '' },
@@ -57,20 +58,20 @@ const onDepartmentChange = () => {
 <template>
   <div class="search-group">
     <label>단과대</label>
-    <select v-model="localCollege" @change="onCollegeChange">
+    <MySelect v-model="localCollege" @change="onCollegeChange">
       <option value="">전체</option>
       <option v-for="college in colleges" :key="college.id" :value="college.name">
         {{ college.name }}
       </option>
-    </select>
+    </MySelect>
   </div>
   <div class="search-group">
     <label>학과</label>
-    <select v-model="localDepartment" @change="onDepartmentChange">
+    <MySelect v-model="localDepartment" @change="onDepartmentChange">
       <option value="">전체</option>
       <option v-for="department in filteredDepartments" :key="department.id" :value="department.name">
         {{ department.name }}
       </option>
-    </select>
+    </MySelect>
   </div>
 </template>
