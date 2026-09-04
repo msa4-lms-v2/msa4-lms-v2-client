@@ -6,6 +6,7 @@ pipeline {
         IMAGE_NAME = 'msa4/team3/client'
         MANIFEST_REPO = 'https://github.com/msa4-lms-v2/msa4-lms-v2-k8s-manifests.git'
         MANIFEST_PATH = 'client'
+        VITE_API_BASE_URL = 'https://mirae-sv.meerkat.p-e.kr'
     }
 
     stages {
@@ -15,7 +16,7 @@ pipeline {
                     env.IMAGE_TAG = env.GIT_COMMIT.take(8)
                 }
                 withCredentials([string(credentialsId: 'toss-client-key', variable: 'VITE_TOSS_CLIENT_KEY')]) {
-                    sh "docker build --build-arg VITE_TOSS_CLIENT_KEY=\${VITE_TOSS_CLIENT_KEY} -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker build --build-arg VITE_TOSS_CLIENT_KEY=\${VITE_TOSS_CLIENT_KEY} --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
                 sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
             }

@@ -6,7 +6,9 @@ RUN npm ci
 
 COPY . .
 ARG VITE_TOSS_CLIENT_KEY
+ARG VITE_API_BASE_URL
 ENV VITE_TOSS_CLIENT_KEY=$VITE_TOSS_CLIENT_KEY
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
