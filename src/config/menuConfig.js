@@ -30,6 +30,7 @@ export const MENU_TITLES = {
     '/tuition/:tuitionBillId/installment': { default: '분할납부 신청' },
     '/payments/toss/success': { default: '결제 완료' },
     '/payments/toss/fail': { default: '결제 취소' },
+    '/students': { default: '학생 관리' },
 };
 
 // 동적 파라미터가 있어 MENU_TITLES의 경로 일치로 찾을 수 없는 라우트는 route name으로 별도 매핑한다.
