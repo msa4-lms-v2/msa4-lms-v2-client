@@ -32,8 +32,13 @@ const tuitionStore = useTuitionStore();
 const installmentStore = useInstallmentStore();
 const refundStore = useRefundStore();
 
-const handleApplyScholarship = (payload) => {
-  tuitionStore.applyScholarship({ tuitionBillId, ...payload });
+const handleApplyScholarship = async (payload) => {
+  try {
+    await tuitionStore.applyScholarship({ tuitionBillId, ...payload });
+    await notify('장학금을 적용했습니다.');
+  } catch (error) {
+    await notify(error.response?.data?.message || '장학금 적용 중 오류가 발생했습니다.');
+  }
 };
 
 // 분할납부 심사

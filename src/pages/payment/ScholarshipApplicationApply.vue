@@ -12,7 +12,7 @@
           <label>신청 대상 고지 선택</label>
           <MySelect v-model="selectedBillId" @change="onBillChange">
             <option v-for="bill in tuitionStore.myBills" :key="bill.id" :value="bill.id">
-              {{ bill.semesterId }} 학기 | 고지 금액: {{ formatCurrency(bill.billingAmount) }}
+              {{ semesterStore.getSemesterLabel(bill.semesterId) }} | 고지 금액: {{ formatCurrency(bill.billingAmount) }}
             </option>
           </MySelect>
         </div>
@@ -68,14 +68,17 @@
 import { ref, onMounted, computed } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useScholarshipApplicationStore } from '../../store/payment/useScholarshipApplicationStore';
+import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
+import { notify } from '../../composables/useDialog';
 import { formatCurrency } from '../../util/format';
 
 const tuitionStore = useTuitionStore();
 const appStore = useScholarshipApplicationStore();
+const semesterStore = useSemesterStore();
 
 const selectedBillId = ref(null);
 const form = ref({
@@ -91,7 +94,7 @@ const selectedBill = computed(() => {
 });
 
 onMounted(async () => {
-  await tuitionStore.fetchMyBills();
+  await Promise.all([tuitionStore.fetchMyBills(), semesterStore.fetchSemesters()]);
   if (tuitionStore.myBills && tuitionStore.myBills.length > 0) {
     selectedBillId.value = tuitionStore.myBills[0].id;
     await fetchPeriod();
@@ -113,7 +116,7 @@ const fetchPeriod = async () => {
 const onSubmit = async () => {
   submitConflict.value = false;
   if (!form.value.requestedAmount || !form.value.reason) {
-    alert('모든 항목을 입력해주세요.');
+    await notify('모든 항목을 입력해주세요.');
     return;
   }
   try {
@@ -128,7 +131,7 @@ const onSubmit = async () => {
     if (err.response && err.response.status === 409) {
       submitConflict.value = true;
     } else {
-      alert('신청 중 오류가 발생했습니다.');
+      await notify(err.response?.data?.message || '신청 중 오류가 발생했습니다.');
     }
   }
 };

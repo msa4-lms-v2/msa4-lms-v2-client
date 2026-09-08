@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { SCHOLARSHIP_TYPE_LABEL } from '../../util/payment/enumLabels';
 import MySelect from '../input/MySelect.vue';
+import MyInput from '../input/MyInput.vue';
 
 const props = defineProps({
   isSubmitting: { type: Boolean, default: false },
@@ -9,12 +10,12 @@ const props = defineProps({
 const emit = defineEmits(['submit']);
 
 const type = ref('MERIT');
-const amount = ref(null);
+const amount = ref('');
 const reason = ref('');
 
 const handleSubmit = () => {
-  emit('submit', { type: type.value, amount: amount.value, reason: reason.value });
-  amount.value = null;
+  emit('submit', { type: type.value, amount: Number(amount.value), reason: reason.value });
+  amount.value = '';
   reason.value = '';
 };
 </script>
@@ -34,7 +35,7 @@ const handleSubmit = () => {
 
     <div class="field">
       <label for="scholarship-amount">감면 금액</label>
-      <input id="scholarship-amount" v-model.number="amount" type="number" min="0.01" step="0.01" required />
+      <MyInput id="scholarship-amount" v-model="amount" numeric-only required placeholder="원 단위 정수로 입력하세요" />
     </div>
 
     <div class="field">

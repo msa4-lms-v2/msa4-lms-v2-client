@@ -58,9 +58,12 @@ const displayedPaymentAmount = computed(() => {
   return Number.isFinite(numericAmount) ? numericAmount : 0;
 });
 
+// 이 화면의 결제 금액은 "이미 낸 금액을 뺀 잔액"이 아니라 장학금 차감 후 전체 실납부액이다.
+// PARTIAL(가상계좌 부분입금 등으로 일부만 납부된 상태)에서 전체 금액을 다시 결제하면
+// 서버가 초과납부로 거부하므로, 그 상태에서는 결제 버튼 자체를 막고 안내만 보여준다.
 const canPay = computed(() => (
   displayedPaymentAmount.value > 0
-  && tuitionStore.currentStatus?.status !== 'PAID'
+  && !['PAID', 'PARTIAL'].includes(tuitionStore.currentStatus?.status)
 ));
 
 const formatRefundRate = (rate) => {
@@ -158,9 +161,17 @@ onMounted(() => {
           결제할 금액 {{ formatCurrency(displayedPaymentAmount) }}을 확인하고 결제 수단을 선택해 주세요.
         </p>
 
+        <p
+          v-if="tuitionStore.currentStatus?.status === 'PARTIAL'"
+          class="notice notice--warning"
+          role="status"
+        >
+          이미 일부 금액이 납부돼 있어 전체 금액 재결제는 제한됩니다. 잔여 납부는 관리자에게 문의해 주세요.
+        </p>
+
         <fieldset
           class="payment-methods"
-          :disabled="tuitionStore.isPaymentLoading"
+          :disabled="tuitionStore.isPaymentLoading || !canPay"
         >
           <legend>결제 수단</legend>
           <label
