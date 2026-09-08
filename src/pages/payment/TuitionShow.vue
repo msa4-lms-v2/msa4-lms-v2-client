@@ -3,11 +3,13 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
+import { useDocumentStore } from '../../store/payment/useDocumentStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
+import { notify } from '../../composables/useDialog';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
 import {
   PAYMENT_STATUS_LABEL,
@@ -20,9 +22,23 @@ const route = useRoute();
 const tuitionBillId = Number(route.params.id);
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
+const documentStore = useDocumentStore();
 const selectedPaymentMethod = ref('CARD');
 const paymentErrorMessage = ref('');
 const refundErrorMessage = ref('');
+
+const verifyUrl = computed(() => {
+  const token = documentStore.issuedDocument?.verificationToken;
+  return token ? `${window.location.origin}/certificates/verify?token=${encodeURIComponent(token)}` : '';
+});
+
+const handleIssueReceipt = async () => {
+  try {
+    await documentStore.issuePaymentReceipt(tuitionBillId);
+  } catch (error) {
+    await notify(error.response?.data?.message || '납부확인서를 발급하지 못했습니다.');
+  }
+};
 
 const currentBill = computed(() => tuitionStore.myBills.find((bill) => bill.id === tuitionBillId));
 const semesterLabel = computed(() => (
@@ -237,6 +253,34 @@ onMounted(() => {
           <dd class="highlight">
             {{ formatCurrency(tuitionStore.currentRefundEstimate.estimatedRefundAmount) }}
           </dd>
+        </dl>
+      </section>
+
+      <section
+        class="action-panel"
+        aria-labelledby="receipt-title"
+      >
+        <h3 id="receipt-title">
+          납부확인서
+        </h3>
+        <p class="description">
+          완료된 결제 건에 대해 납부확인서를 발급받을 수 있습니다.
+        </p>
+
+        <MyButton
+          color="white"
+          size="big"
+          :disabled="documentStore.isIssuing"
+          @click="handleIssueReceipt"
+        >
+          {{ documentStore.isIssuing ? '발급 중...' : '납부확인서 발급' }}
+        </MyButton>
+
+        <dl v-if="documentStore.issuedDocument" class="refund-details">
+          <dt>발급일시</dt>
+          <dd>{{ formatDate(documentStore.issuedDocument.issuedAt, 'YYYY-MM-DD HH:mm') }}</dd>
+          <dt>진위확인 링크</dt>
+          <dd><a :href="verifyUrl" target="_blank" rel="noopener">{{ verifyUrl }}</a></dd>
         </dl>
       </section>
     </div>
