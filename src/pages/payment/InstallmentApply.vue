@@ -109,6 +109,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyTable from '../../components/table/MyTable.vue';
+import { confirmDialog, notify } from '../../composables/useDialog';
 import { formatCurrency } from '../../util/format';
 
 const route = useRoute();
@@ -135,22 +136,21 @@ const onSubmit = async () => {
     });
     submitSuccess.value = true;
   } catch (err) {
-    alert('신청 중 오류가 발생했습니다.');
+    await notify(err.response?.data?.message || '신청 중 오류가 발생했습니다.');
   }
 };
 
 const onPayment = async (item) => {
-  if (!confirm(`${item.roundNo}회차 금액 ${formatCurrency(item.amount)}을 결제하시겠습니까?`)) {
-    return;
-  }
+  const confirmed = await confirmDialog(`${item.roundNo}회차 금액 ${formatCurrency(item.amount)}을 결제하시겠습니까?`);
+  if (!confirmed) return;
   try {
     await instStore.processInstallmentPayment({
       tuitionBillId,
       installmentPlanItemId: item.id
     });
-    alert('결제가 완료되었습니다.');
+    await notify('결제가 완료되었습니다.');
   } catch (err) {
-    alert('결제 중 오류가 발생했습니다.');
+    await notify(err.response?.data?.message || '결제 중 오류가 발생했습니다.');
   }
 };
 </script>

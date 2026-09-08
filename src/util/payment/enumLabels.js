@@ -47,6 +47,8 @@ export const REFUND_STATUS_LABEL = {
   SUCCEEDED: '완료',
   FAILED: '실패',
   RETRYING: '재시도중',
+  PENDING_ACADEMIC_VERIFICATION: '학적 확인 대기',
+  MANUAL_REVIEW_REQUIRED: '관리자 확인 필요',
 };
 
 export const REFUND_STATUS_VARIANT = {
@@ -54,6 +56,48 @@ export const REFUND_STATUS_VARIANT = {
   SUCCEEDED: 'success',
   FAILED: 'fail',
   RETRYING: 'warning',
+  PENDING_ACADEMIC_VERIFICATION: 'processing',
+  MANUAL_REVIEW_REQUIRED: 'fail',
+};
+
+export const REFUND_TYPE_LABEL = {
+  WITHDRAWAL: '자퇴 환불',
+  PG_CANCEL: 'PG 취소',
+  EXCESS_DEPOSIT: '초과입금 환불',
+};
+
+export const PAYMENT_ATTEMPT_STATUS_LABEL = {
+  REQUESTED: '진행중',
+  SUCCEEDED: '성공',
+  FAILED: '실패',
+  CANCELLED: '취소됨',
+};
+
+export const PAYMENT_ATTEMPT_STATUS_VARIANT = {
+  REQUESTED: 'processing',
+  SUCCEEDED: 'success',
+  FAILED: 'fail',
+  CANCELLED: 'warning',
+};
+
+export const DOCUMENT_TYPE_LABEL = {
+  ENROLLMENT: '재학증명서',
+  GRADUATION: '졸업증명서',
+  GRADE: '성적증명서',
+  EMPLOYMENT: '재직증명서',
+  PAYMENT_CERTIFICATE: '납부확인서',
+};
+
+export const DOCUMENT_VERIFICATION_RESULT_LABEL = {
+  VALID: '정상 발급',
+  REVOKED: '폐기됨',
+  EXPIRED: '만료됨',
+};
+
+export const DOCUMENT_VERIFICATION_RESULT_VARIANT = {
+  VALID: 'success',
+  REVOKED: 'fail',
+  EXPIRED: 'warning',
 };
 
 export const SCHOLARSHIP_APPLICATION_STATUS_LABEL = {

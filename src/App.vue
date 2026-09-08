@@ -10,14 +10,8 @@ import { useNotificationSocket } from "./composables/useNotificationSocket.js";
 
 const route = useRoute();
 const tabStore = useTabStore();
-const usesAppLayout = computed(
-  () =>
-    !["/login", "/initial-password", "/attendance/check-in"].includes(
-      route.path
-    )
-);
-
-useNotificationSocket();
+const usesAppLayout = computed(() => !['/login', '/initial-password', '/attendance/check-in', '/certificates/verify'].includes(route.path));
+  useNotificationSocket();
 </script>
 
 <template>
