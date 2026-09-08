@@ -21,6 +21,9 @@ export const MENU_TITLES = {
     '/leave-return/military': { default: '군휴학 신청' },
     '/department-transfer': { default: '전과 신청' },
     '/double-major': { default: '복수전공 신청' },
+    '/counseling': { default: '온라인 상담' },
+    '/counseling/history': { default: '상담 내역' },
+    '/professor/counseling': { default: '온라인 상담' },
     '/professor/leave-return': { default: '휴/복학 결재' },
     '/professor/attendance/approvals': { default: '출결 승인' },
     '/professor/attendance': { default: '출결 확인' },
@@ -36,6 +39,8 @@ export const MENU_TITLES = {
 export const MENU_TITLES_BY_NAME = {
     TuitionShow: '등록금 상세',
     AdminTuitionShow: '등록금 상세',
+    StudentCounselingResult: '상담 결과',
+    ProfessorCounselingAnswer: '온라인 상담 답변',
 };
 
 // 권한에 따른 메뉴 타이틀 반환 유틸리티

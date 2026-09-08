@@ -115,7 +115,7 @@
     --personal-font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
 
     font-family: var(--personal-font-family);
-    color-scheme: light dark;
+    color-scheme: light;
     
 
   
@@ -124,6 +124,7 @@
 body {
     margin: 0;
     background: var(--personal-color-bg-surface-frost);
+    color: var(--personal-color-primary-text-navy);
 }
 
 html,

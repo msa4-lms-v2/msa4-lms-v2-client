@@ -13,6 +13,37 @@ export const useAuthStore = defineStore('authStore', () => {
     const pendingLoginType = ref('student');
     const requiresInitialPasswordChange = computed(() => Boolean(passwordChangeToken.value));
 
+    const mergeAccountInfo = (data, previous = null) => {
+        const account = data.account || {};
+        const returnedUser = data.user || {};
+        return {
+            ...previous,
+            ...returnedUser,
+            userId: returnedUser.userId ?? returnedUser.id ?? account.id ?? data.userId,
+            loginId: returnedUser.loginId ?? account.loginId ?? data.loginId,
+            name: returnedUser.name ?? data.name ?? previous?.name,
+            role: returnedUser.role ?? account.role ?? data.role,
+            requiresPasswordChange: returnedUser.requiresPasswordChange ?? account.requiresPasswordChange,
+        };
+    };
+
+    const fetchDisplayName = async () => {
+        const profileUrls = {
+            STUDENT: '/api/academic/students/me',
+            PROFESSOR: '/api/academic/professors/me',
+        };
+        const url = profileUrls[userInfo.value?.role];
+        if (!url) return;
+
+        try {
+            const response = await myAxios.get(url);
+            const profile = response.data.data;
+            if (profile?.name) userInfo.value = { ...userInfo.value, name: profile.name };
+        } catch {
+            // 프로필 조회 실패가 로그인 자체를 막지는 않도록 계정 정보는 유지한다.
+        }
+    };
+
     // 3. Actions
     const clearAuthStore = () => {
         isLoggedIn.value = false;
@@ -39,17 +70,11 @@ export const useAuthStore = defineStore('authStore', () => {
             const res = await myAxios.post(url, loginForm);
             if (!res.data.code || res.data.code === '00') {
                 const data = res.data.data;
-                const account = data.account;
                 accessToken.value = data.accessToken || '';
                 passwordChangeToken.value = data.passwordChangeToken || '';
-                userInfo.value = data.user || {
-                    userId: account?.id ?? data.userId,
-                    loginId: account?.loginId ?? data.loginId,
-                    name: data.name,
-                    role: account?.role ?? data.role,
-                    requiresPasswordChange: account?.requiresPasswordChange,
-                };
+                userInfo.value = mergeAccountInfo(data);
                 isLoggedIn.value = Boolean(accessToken.value);
+                if (isLoggedIn.value) await fetchDisplayName();
                 pendingLoginId.value = passwordChangeToken.value ? loginForm.loginId : '';
                 pendingLoginType.value = passwordChangeToken.value ? loginType : 'student';
                 return {
@@ -81,18 +106,11 @@ export const useAuthStore = defineStore('authStore', () => {
 
             const res = await myAxios.post(url);
             const data = res.data.data;
-            const account = data.account;
             accessToken.value = data.accessToken;
             passwordChangeToken.value = '';
-            userInfo.value = data.user ||
-                userInfo.value || {
-                    userId: account?.id ?? data.userId,
-                    loginId: account?.login_id ?? data.loginId,
-                    name: data.name,
-                    role: account?.role ?? data.role,
-                    requiresPasswordChange: account?.requiresPasswordChange,
-            };
+            userInfo.value = mergeAccountInfo(data, userInfo.value);
             isLoggedIn.value = true;
+            await fetchDisplayName();
             return accessToken.value;
         } catch (error) {
             clearAuthStore();

@@ -35,11 +35,13 @@ const activeMenus = ref({
   studentAttendance: false,
   studentRegistration: false,
   studentScholarship: false,
+  studentCounseling: true,
   professorTeacher: false,
   professorStudent: false,
   professorCourse: false,
   professorGrade: false,
   professorAttendance: false,
+  professorCounseling: true,
 });
 
 const toggleMenu = (menuKey) => {
@@ -186,6 +188,17 @@ const toggleMenu = (menuKey) => {
             }}</router-link>
           </div>
         </div>
+
+        <div class="menu-group">
+          <button type="button" class="menu-header" @click="toggleMenu('studentCounseling')">
+            <span>상담 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.studentCounseling }">▼</span>
+          </button>
+          <div class="submenu-list" v-show="activeMenus.studentCounseling">
+            <router-link to="/counseling" class="submenu-item">온라인 상담</router-link>
+            <router-link to="/counseling/history" class="submenu-item">상담 내역</router-link>
+          </div>
+        </div>
       </template>
 
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
@@ -289,6 +302,16 @@ const toggleMenu = (menuKey) => {
               class="submenu-item"
               >{{ getMenuTitle("/professor/attendance") }}</router-link
             >
+          </div>
+        </div>
+
+        <div class="menu-group">
+          <button type="button" class="menu-header" @click="toggleMenu('professorCounseling')">
+            <span>상담 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorCounseling }">▼</span>
+          </button>
+          <div class="submenu-list" v-show="activeMenus.professorCounseling">
+            <router-link to="/professor/counseling" class="submenu-item">온라인 상담</router-link>
           </div>
         </div>
       </template>
