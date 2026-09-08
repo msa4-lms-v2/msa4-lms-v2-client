@@ -8,6 +8,7 @@ export const useInstallmentStore = defineStore('installmentStore', () => {
   const isLoadingPlan = ref(false);
   const isSubmittingPlan = ref(false);
   const isProcessingPayment = ref(false);
+  const isReviewingPlan = ref(false);
 
   // 2. Getters (computed)
 
@@ -72,13 +73,30 @@ export const useInstallmentStore = defineStore('installmentStore', () => {
     }
   };
 
+  // ADMIN이 REQUESTED 상태의 분할납부 신청을 승인·반려한다.
+  const reviewInstallmentPlan = async ({ planId, decision, rejectReason }) => {
+    isReviewingPlan.value = true;
+    try {
+      const res = await myAxios.patch(`/api/payment/installment-plans/${planId}/review`, {
+        decision,
+        rejectReason: rejectReason || undefined,
+      });
+      installmentPlan.value = res.data.data;
+      return installmentPlan.value;
+    } finally {
+      isReviewingPlan.value = false;
+    }
+  };
+
   return {
     installmentPlan,
     isLoadingPlan,
     isSubmittingPlan,
     isProcessingPayment,
+    isReviewingPlan,
     fetchInstallmentPlan,
     submitInstallmentPlan,
     processInstallmentPayment,
+    reviewInstallmentPlan,
   };
 });

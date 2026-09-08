@@ -123,6 +123,17 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT', 'ADMIN'] },
     },
     {
+        path: '/certificates/verify',
+        name: 'CertificateVerify',
+        component: () => import('../pages/payment/CertificateVerify.vue'),
+    },
+    {
+        path: '/admin/certificates/revoke',
+        name: 'AdminCertificateRevoke',
+        component: () => import('../pages/payment/AdminCertificateRevoke.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
         path: '/professor/attendance/qr',
         name: 'ProfessorQrAttendance',
         component: () => import('../pages/attendance/ProfessorQrAttendance.vue'),

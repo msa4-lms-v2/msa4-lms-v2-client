@@ -302,6 +302,7 @@ const toggleMenu = (menuKey) => {
         }}</router-link>
         <router-link to="/admin/tuition" class="nav-item">등록금 관리</router-link>
         <router-link to="/payment/health" class="nav-item">결제 상태</router-link>
+        <router-link to="/admin/certificates/revoke" class="nav-item">증명서 폐기</router-link>
         <router-link to="/admin/info-change-requests" class="nav-item">{{
           getMenuTitle("/admin/info-change-requests")
         }}</router-link>
