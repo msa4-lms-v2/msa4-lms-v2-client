@@ -10,15 +10,15 @@ const router = useRouter();
 
 const roleClass = computed(() => `role-${(authStore.userInfo?.role || 'student').toLowerCase()}`);
 
-const selectTab = (path) => {
-  if (tabStore.activeTab !== path) {
-    router.push(path);
+const selectTab = (tab) => {
+  if (tabStore.activeTab !== tab.key) {
+    router.push(tab.path);
   }
 };
 
-const closeTab = (path, event) => {
+const closeTab = (key, event) => {
   event.stopPropagation();
-  tabStore.removeTab(path);
+  tabStore.removeTab(key);
 };
 </script>
 
@@ -26,12 +26,12 @@ const closeTab = (path, event) => {
   <div class="tab-bar" v-if="tabStore.tabs.length > 0">
     <div
       v-for="tab in tabStore.tabs"
-      :key="tab.path"
-      :class="['tab-item', roleClass, { active: tab.path === tabStore.activeTab }]"
-      @click="selectTab(tab.path)"
+      :key="tab.key"
+      :class="['tab-item', roleClass, { active: tab.key === tabStore.activeTab }]"
+      @click="selectTab(tab)"
     >
       <span class="tab-title">{{ tab.title }}</span>
-      <button class="close-btn" @click="closeTab(tab.path, $event)">×</button>
+      <button class="close-btn" @click="closeTab(tab.key, $event)">×</button>
     </div>
   </div>
 </template>

@@ -11,34 +11,39 @@ export const useTabStore = defineStore('tabStore', () => {
         if (route.path === '/login') return; // 로그인 페이지는 탭에 추가하지 않음
 
         const title = getTitleByPath(route.path, route.name);
-        const existingTab = tabs.value.find((tab) => tab.path === route.path);
+        const key = route.meta?.tabKey || route.path;
+        const existingTab = tabs.value.find((tab) => tab.key === key);
 
         if (existingTab) {
-            activeTab.value = route.path;
+            existingTab.title = title;
+            existingTab.path = route.path;
+            existingTab.name = route.name;
+            activeTab.value = key;
         } else {
             // 최대 개수 제한(10개) 초과 시 가장 오래된 탭을 조용히 제거하고 새 탭을 연다.
             if (tabs.value.length >= 10) {
                 tabs.value.shift();
             }
             tabs.value.push({
+                key,
                 title,
                 path: route.path,
                 name: route.name, // keep-alive를 위한 컴포넌트 이름
             });
-            activeTab.value = route.path;
+            activeTab.value = key;
         }
     };
 
-    const removeTab = (path) => {
-        const index = tabs.value.findIndex((tab) => tab.path === path);
+    const removeTab = (key) => {
+        const index = tabs.value.findIndex((tab) => tab.key === key);
         if (index !== -1) {
             tabs.value.splice(index, 1);
 
             // 현재 활성화된 탭을 닫은 경우 다른 탭으로 이동
-            if (activeTab.value === path) {
+            if (activeTab.value === key) {
                 if (tabs.value.length > 0) {
                     const nextTab = tabs.value[tabs.value.length - 1];
-                    activeTab.value = nextTab.path;
+                    activeTab.value = nextTab.key;
                     router.push(nextTab.path);
                 } else {
                     // 남은 탭이 없으면 메인으로 이동

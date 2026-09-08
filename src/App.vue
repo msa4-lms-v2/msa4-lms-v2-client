@@ -1,15 +1,17 @@
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
-import Header from './components/layout/Header.vue';
-import SideBar from './components/layout/SideBar.vue';
-import TabBar from './components/layout/TabBar.vue';
-import AppDialog from './components/common/AppDialog.vue';
-import { useTabStore } from './store/tab/useTabStore';
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import Header from "./components/layout/Header.vue";
+import SideBar from "./components/layout/SideBar.vue";
+import TabBar from "./components/layout/TabBar.vue";
+import AppDialog from "./components/common/AppDialog.vue";
+import { useTabStore } from "./store/tab/useTabStore";
+import { useNotificationSocket } from "./composables/useNotificationSocket.js";
 
 const route = useRoute();
 const tabStore = useTabStore();
 const usesAppLayout = computed(() => !['/login', '/initial-password', '/attendance/check-in', '/certificates/verify'].includes(route.path));
+  useNotificationSocket();
 </script>
 
 <template>
@@ -73,3 +75,4 @@ const usesAppLayout = computed(() => !['/login', '/initial-password', '/attendan
   }
 }
 </style>
+
