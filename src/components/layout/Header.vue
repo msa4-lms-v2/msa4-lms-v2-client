@@ -3,11 +3,15 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 import MyButton from '../button/MyButton.vue';
+import NotificationBell from './NotificationBell.vue';
+
+defineOptions({ name: 'AppHeader' });
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const roleClass = computed(() => `role-${(authStore.userInfo?.role || 'student').toLowerCase()}`);
+const displayName = computed(() => authStore.userInfo?.name || authStore.userInfo?.loginId || '사용자');
 
 const goHome = () => {
   if (authStore.isLoggedIn) {
@@ -32,9 +36,10 @@ const logout = async () => {
 
     <div class="header-right">
       <template v-if="authStore.isLoggedIn">
+        <NotificationBell v-if="['STUDENT', 'PROFESSOR'].includes(authStore.userInfo?.role)" />
         <div class="user-info">
           <span class="user-name"
-            ><strong>{{ authStore.userInfo?.name }}</strong
+            ><strong>{{ displayName }}</strong
             >님 환영합니다</span
           >
           <span class="user-role">[{{ authStore.userInfo?.role }}]</span>

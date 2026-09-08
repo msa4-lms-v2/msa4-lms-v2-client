@@ -81,6 +81,28 @@ const routes = [
         },
     },
     {
+        path: '/counseling',
+        name: 'StudentCounselingApply',
+        component: () => import('../pages/counseling/StudentCounselingApply.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED', 'ON_LEAVE'],
+        },
+    },
+    {
+        path: '/counseling/history',
+        name: 'StudentCounselingHistory',
+        component: () => import('../pages/counseling/StudentCounselingHistory.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/counseling/:counselingId',
+        name: 'StudentCounselingResult',
+        component: () => import('../pages/counseling/StudentCounselingResult.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
         path: '/tuition',
         name: 'TuitionIndex',
         component: () => import('../pages/payment/TuitionIndex.vue'),
@@ -138,6 +160,18 @@ const routes = [
         name: 'ProfessorQrAttendance',
         component: () => import('../pages/attendance/ProfessorQrAttendance.vue'),
         meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/counseling',
+        name: 'ProfessorCounselingList',
+        component: () => import('../pages/counseling/ProfessorCounselingList.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'], tabKey: 'professor-counseling' },
+    },
+    {
+        path: '/professor/counseling/:counselingId',
+        name: 'ProfessorCounselingAnswer',
+        component: () => import('../pages/counseling/ProfessorCounselingAnswer.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'], tabKey: 'professor-counseling' },
     },
     {
         path: '/attendance/check-in',
