@@ -233,6 +233,18 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/leave-return" class="submenu-item">{{
               getMenuTitle("/professor/leave-return")
             }}</router-link>
+            <router-link
+              to="/professor/academic-change-requests/department-transfer"
+              class="submenu-item"
+            >
+              {{ getMenuTitle("/professor/academic-change-requests/department-transfer") }}
+            </router-link>
+            <router-link
+              to="/professor/academic-change-requests/double-major"
+              class="submenu-item"
+            >
+              {{ getMenuTitle("/professor/academic-change-requests/double-major") }}
+            </router-link>
           </div>
         </div>
 
@@ -329,6 +341,18 @@ const toggleMenu = (menuKey) => {
         <router-link to="/admin/info-change-requests" class="nav-item">{{
           getMenuTitle("/admin/info-change-requests")
         }}</router-link>
+        <router-link
+          to="/admin/academic-change-requests/department-transfer"
+          class="nav-item"
+        >
+          {{ getMenuTitle("/admin/academic-change-requests/department-transfer") }}
+        </router-link>
+        <router-link
+          to="/admin/academic-change-requests/double-major"
+          class="nav-item"
+        >
+          {{ getMenuTitle("/admin/academic-change-requests/double-major") }}
+        </router-link>
       </template>
     </nav>
   </aside>

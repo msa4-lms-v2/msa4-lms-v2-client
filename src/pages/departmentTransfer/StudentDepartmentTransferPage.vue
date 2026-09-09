@@ -31,7 +31,8 @@ const statusLabels = {
   PENDING: '심사중',
   ADVISOR_APPROVED: '지도교수 승인',
   ADVISOR_REJECTED: '지도교수 반려',
-  APPROVED: '승인',
+  APPROVED: '승인(기존)',
+  APPLIED: '학적 반영 완료',
   REJECTED: '반려',
   CANCELLED: '취소',
 };

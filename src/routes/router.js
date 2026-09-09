@@ -139,6 +139,18 @@ const routes = [
         meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
+        path: '/admin/academic-change-requests/department-transfer',
+        name: 'AdminDepartmentTransferManagement',
+        component: () => import('../pages/departmentTransfer/AdminDepartmentTransferManagement.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+        path: '/admin/academic-change-requests/double-major',
+        name: 'AdminDoubleMajorManagement',
+        component: () => import('../pages/doubleMajor/AdminDoubleMajorManagement.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
         path: '/payment/health',
         name: 'PaymentHealthIndex',
         component: () => import('../pages/payment/PaymentHealthIndex.vue'),
@@ -247,6 +259,18 @@ const routes = [
         path: '/professor/leave-return',
         name: 'ProfessorLeaveReturnApproval',
         component: () => import('../pages/leaveReturn/ProfessorLeaveReturnApproval.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/academic-change-requests/department-transfer',
+        name: 'ProfessorDepartmentTransferReview',
+        component: () => import('../pages/departmentTransfer/ProfessorDepartmentTransferReview.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/academic-change-requests/double-major',
+        name: 'ProfessorDoubleMajorReview',
+        component: () => import('../pages/doubleMajor/ProfessorDoubleMajorReview.vue'),
         meta: { requiresAuth: true, roles: ['PROFESSOR'] },
     },
     {
