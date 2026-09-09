@@ -1,0 +1,41 @@
+.people-page { color: #25283e; font-size: 13px; }
+.people-page .people-card { background: #fff; border: 1px solid #d9e0ed; border-radius: 9px; padding: 22px; }
+.people-page h3 { margin: 0; font-size: 15px; font-weight: 700; }
+.people-page label { display: block; font-size: 12px; font-weight: 600; }
+.people-page input, .people-page select { display: block; width: 100%; min-width: 0; height: 40px; border: 1px solid #d7dfec; border-radius: 6px; padding: 0 12px; margin-top: 8px; background: #fff; color: #25283e; box-sizing: border-box; font: inherit; font-weight: 400; }
+.people-page input:focus, .people-page select:focus { outline: 2px solid #a69af6; outline-offset: 1px; }
+.people-page button, .people-page .people-button { border: 1px solid #d7dfec; border-radius: 6px; background: #fff; color: #25283e; min-height: 40px; padding: 10px 24px; cursor: pointer; font: inherit; font-weight: 600; text-decoration: none; text-align: center; box-sizing: border-box; }
+.people-page .primary { background: #5d43e5; border-color: #5d43e5; color: white; }
+.people-page button:disabled { opacity: .5; cursor: not-allowed; }
+.people-filters { display: flex; gap: 20px; align-items: end; margin: 22px 0; flex-wrap: wrap; }
+.people-filters label { flex: 1; min-width: 140px; }
+.people-filters label.wide { flex: 1.6; }
+.people-results { min-height: 430px; }
+.people-results-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+.people-results-heading h3 span { font-size: 12px; color: #5d43e5; margin-left: 20px; }
+.people-table-scroll { overflow-x: auto; }
+.people-page table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.people-page th { background: #f7f8fa; color: #75819b; font-size: 12px; padding: 16px; }
+.people-page td { text-align: center; padding: 16px; border-bottom: 1px solid #edf0f6; }
+.people-page .small { min-height: 32px; padding: 6px 18px; font-size: 12px; }
+.people-pagination { display: flex; gap: 6px; justify-content: center; margin-top: 36px; }
+.people-pagination button { border: 0; color: #5d43e5; padding: 8px 12px; }
+.people-pagination .selected { background: #eeeaff; }
+.people-registration { display: grid; grid-template-columns: 1.47fr 1fr; gap: 22px; margin-top: 14px; }
+.people-registration h3 { padding-bottom: 14px; border-bottom: 1px solid #d9e0ed; }
+.people-help { font-size: 12px; color: #7b87a0; margin: 8px 0 28px; }
+.people-basic fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 16px; }
+.people-basic input:disabled { color: #4c556a; background: #fafbfc; }
+.people-two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.people-page em, .people-page .people-error { color: #d33a39; font-style: normal; }
+.people-aside { display: flex; flex-direction: column; gap: 22px; }
+.people-aside dl { display: grid; gap: 22px; padding: 0 4px 18px; }
+.people-aside dl div { display: flex; justify-content: space-between; gap: 20px; }
+.people-aside dt { color: #73809b; flex-shrink: 0; }
+.people-aside dd { margin: 0; text-align: right; font-weight: 600; overflow-wrap: anywhere; }
+.people-guide { min-height: 160px; }
+.people-guide p { color: #7b87a0; font-size: 12px; line-height: 1.8; }
+.people-actions { display: flex; justify-content: flex-end; gap: 18px; margin-top: auto; }
+.people-actions button { min-width: 130px; }
+@media (max-width: 1050px) { .people-registration { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .people-two-fields { grid-template-columns: 1fr; } .people-page .people-card { padding: 16px; } .people-results-heading { align-items: flex-start; flex-direction: column; } }
