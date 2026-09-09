@@ -10,6 +10,7 @@ import MyTable from '../../components/table/MyTable.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
+import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/academic/enumLabels';
 
 defineOptions({ name: 'AdminStudentIndex' });
 
@@ -21,9 +22,6 @@ const columns = [
   { key: 'status', label: '학적 상태' },
   { key: 'advisor', label: '지도교수' },
 ];
-
-const statusLabels = { ENROLLED: '재학', ON_LEAVE: '휴학', WITHDRAWN: '자퇴', GRADUATED: '졸업', DISMISSED: '제적' };
-const statusVariants = { ENROLLED: 'processing', GRADUATED: 'success', ON_LEAVE: 'warning', WITHDRAWN: 'fail', DISMISSED: 'fail' };
 
 const filters = reactive({
   keyword: '',
@@ -129,7 +127,7 @@ onMounted(async () => {
         <td>{{ student.gradeLevel }}학년</td>
         <td>{{ student.admissionYear }}</td>
         <td>
-          <MyStatusBadge :label="statusLabels[student.academicStatus] || student.academicStatus" :variant="statusVariants[student.academicStatus] || 'processing'" />
+          <MyStatusBadge :label="ACADEMIC_STATUS_LABEL[student.academicStatus] || student.academicStatus" :variant="ACADEMIC_STATUS_VARIANT[student.academicStatus] || 'processing'" />
         </td>
         <td>{{ student.advisorName || '-' }}</td>
       </tr>
