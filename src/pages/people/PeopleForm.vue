@@ -225,7 +225,7 @@ watch(() => form.departmentId, async departmentId => {
               :key="professor.professorId"
               :value="professor.professorId"
             >{{ professor.name }}{{ professor.professorNumber ? ` (${professor.professorNumber})` : '' }}</option></select></label>
-            <label v-else>소속 학과<input :value="departmentName"></label>
+            <label v-if="detail">소속 학과<input :value="departmentName"></label>
             <label v-if="admission">입학 연도 <em v-if="!detail">*</em><input
               v-if="detail"
               :value="form.admissionYear"
