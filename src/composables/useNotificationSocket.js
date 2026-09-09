@@ -1,5 +1,5 @@
 import { watch } from "vue";
-import { Client } from "@stomp/stompjs";
+import { Client, ReconnectionTimeMode } from "@stomp/stompjs";
 import { useAuthStore } from "../store/auth/useAuthStore";
 import { useNotificationStore } from '../store/notification/useNotificationStore';
 import { isJwtExpiringSoon } from '../util/jwt';
@@ -8,15 +8,25 @@ import myAxios from '../api/myAxios';
 export function useNotificationSocket() {
   const authStore = useAuthStore();
   const notifications = useNotificationStore();
-  watch(() => authStore.userInfo?.userId ?? authStore.userInfo?.id, () => notifications.clear(), { flush: 'sync' });
+  let consecutiveFailures = 0;
+  let retrySuspended = false;
+  watch(() => authStore.userInfo?.userId ?? authStore.userInfo?.id, () => {
+    consecutiveFailures = 0;
+    retrySuspended = false;
+    notifications.clear();
+  }, { flush: 'sync' });
 
   watch(
     () => [authStore.accessToken, authStore.userInfo?.role],
     ([token, role], previousToken, onCleanup) => {
       if (!token || !['STUDENT', 'PROFESSOR'].includes(role)) {
+        consecutiveFailures = 0;
+        retrySuspended = false;
         notifications.clear();
         return;
       }
+      // Token refresh must not restart a connection stopped after repeated failures.
+      if (retrySuspended) return;
 
       let disposed = false;
 
@@ -25,6 +35,8 @@ export function useNotificationSocket() {
         brokerURL: import.meta.env.VITE_NOTIFICATION_WS_URL
           || `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/notifications`,
         reconnectDelay: 5000,
+        reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,
+        maxReconnectDelay: 60000,
         connectionTimeout: 10000,
         heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
@@ -56,12 +68,23 @@ export function useNotificationSocket() {
           void client.deactivate();
         },
         onWebSocketClose: () => {
-          if (!disposed && notifications.connection !== 'error') notifications.connection = 'disconnected';
+          if (disposed || !client.active || notifications.connection === 'error') return;
+          consecutiveFailures += 1;
+          if (consecutiveFailures >= 6) {
+            retrySuspended = true;
+            notifications.connection = 'error';
+            notifications.error = '실시간 알림 연결이 반복해서 실패하여 자동 재연결을 중단했습니다. 잠시 후 페이지를 새로고침해 주세요.';
+            void client.deactivate();
+            return;
+          }
+          notifications.connection = 'disconnected';
         },
 
         onConnect: () => {
           if (disposed) return;
+          consecutiveFailures = 0;
           notifications.connection = 'connected';
+          notifications.error = null;
 
           client.subscribe("/user/queue/notifications", (frame) => {
             if (disposed) return;
@@ -77,7 +100,7 @@ export function useNotificationSocket() {
       });
 
       const refreshTimer = setInterval(async () => {
-        if (disposed) return;
+        if (disposed || retrySuspended) return;
         try {
           if (isJwtExpiringSoon(authStore.accessToken)) await authStore.reissue();
         } catch { void client.deactivate(); }
