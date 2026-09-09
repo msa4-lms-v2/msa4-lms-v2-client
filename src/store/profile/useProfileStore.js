@@ -18,9 +18,20 @@ export const useProfileStore = defineStore('profileStore', () => {
     }
   };
 
+  const fetchProfessorProfile = async () => {
+    isLoading.value = true;
+    try {
+      const res = await myAxios.get('/api/academic/professors/me');
+      profile.value = res.data.data;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     profile,
     isLoading,
     fetchStudentProfile,
+    fetchProfessorProfile,
   };
 });

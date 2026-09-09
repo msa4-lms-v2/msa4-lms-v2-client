@@ -26,9 +26,9 @@ const routes = [
     },
     {
         path: '/profile',
-        name: 'StudentProfile',
-        component: () => import('../pages/profile/StudentProfile.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        name: 'ProfilePage',
+        component: () => import('../pages/profile/ProfilePage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT', 'PROFESSOR'] },
     },
     {
         path: '/profile/info-change',
