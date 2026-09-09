@@ -1,5 +1,9 @@
 // 메뉴 경로별 공통 타이틀 관리
 export const MENU_TITLES = {
+    '/admin/admissions': { default: '입학 예정자 목록' },
+    '/admin/admissions/new': { default: '입학 예정자 등록' },
+    '/admin/professors': { default: '교수 목록' },
+    '/admin/professors/new': { default: '교수 등록' },
     '/main': { default: '메인 화면' },
     '/profile': { STUDENT: '학적 조회', PROFESSOR: '교적 조회', default: '내 정보' },
     '/profile/info-change': { default: '정보 변경 신청' },
@@ -44,6 +48,8 @@ export const MENU_TITLES = {
 
 // 동적 파라미터가 있어 MENU_TITLES의 경로 일치로 찾을 수 없는 라우트는 route name으로 별도 매핑한다.
 export const MENU_TITLES_BY_NAME = {
+    AdminAdmissionDetail: '입학 예정자 상세',
+    AdminProfessorDetail: '교수 상세',
     TuitionShow: '등록금 상세',
     AdminTuitionShow: '등록금 상세',
     InstallmentApply: '분할납부 신청',
