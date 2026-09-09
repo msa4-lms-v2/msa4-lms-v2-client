@@ -9,11 +9,14 @@ import PrevNextPagination from '../../components/pagination/PrevNextPagination.v
 import MyTable from '../../components/table/MyTable.vue';
 import myAxios from '../../api/myAxios';
 import { confirmDialog, notify } from '../../composables/useDialog';
+import {
+  LEAVE_ATTACHMENT_ACCEPT,
+  validateLeaveAttachment,
+} from '../../util/academic/leaveAttachmentPolicy';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentLeaveReturnPage' });
 
-const PDF_MAX_SIZE = 10 * 1024 * 1024;
 const ATTACHMENTS_MAX_COUNT = 5;
 const GENERAL_LEAVE = 'GENERAL_LEAVE';
 const GENERAL_RETURN = 'GENERAL_RETURN';
@@ -116,18 +119,9 @@ const resetAttachment = () => {
 
 const openFilePicker = () => fileInput.value?.click();
 
-const validatePdf = (file, documentName) => {
-  if (!file) return `${documentName} PDF를 첨부해 주세요.`;
-  if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
-    return `${documentName}는 PDF 형식만 선택할 수 있습니다.`;
-  }
-  if (file.size > PDF_MAX_SIZE) return `${documentName}는 10MB 이하만 선택할 수 있습니다.`;
-  return '';
-};
-
 const onFileChange = (event) => {
   const selected = Array.from(event.target.files || []);
-  const validationMessage = selected.map(validatePdf).find(Boolean) || '';
+  const validationMessage = selected.map((file) => validateLeaveAttachment(file)).find(Boolean) || '';
   if (validationMessage) {
     formError.value = validationMessage;
     event.target.value = '';
@@ -198,7 +192,7 @@ const validateForm = () => {
   if (!selectedPeriod.value || !targetSemester.value) return '현재 접수 가능한 신청 기간이 없습니다.';
   if (isLeave.value && !form.reason.trim()) return '휴학 신청 사유를 입력해 주세요.';
   if (form.reason.trim().length > 500) return '신청 사유는 500자 이하로 입력해 주세요.';
-  return attachments.value.map(validatePdf).find(Boolean) || '';
+  return attachments.value.map((file) => validateLeaveAttachment(file)).find(Boolean) || '';
 };
 
 const submitRequest = async () => {
@@ -260,7 +254,6 @@ onMounted(async () => {
   <MyPageContainer title="일반휴학/복학 신청">
     <div class="leave-return-page">
       <section class="request-section">
-        
         <form
           class="request-form"
           @submit.prevent="submitRequest"
@@ -312,14 +305,14 @@ onMounted(async () => {
           </div>
 
           <div class="form-field file-field">
-            <span>증빙 파일 (pdf 가능)</span>
+            <span>증빙 파일 (PDF, HWP/HWPX, 이미지 가능)</span>
             <div class="file-picker">
               <input
                 ref="fileInput"
                 class="visually-hidden"
                 type="file"
                 multiple
-                accept=".pdf,application/pdf"
+                :accept="LEAVE_ATTACHMENT_ACCEPT"
                 @change="onFileChange"
               >
               <MyButton

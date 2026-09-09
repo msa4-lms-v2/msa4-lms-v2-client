@@ -9,12 +9,14 @@ import PrevNextPagination from '../../components/pagination/PrevNextPagination.v
 import MyTable from '../../components/table/MyTable.vue';
 import myAxios from '../../api/myAxios';
 import { confirmDialog, notify } from '../../composables/useDialog';
+import {
+  LEAVE_ATTACHMENT_ACCEPT,
+  validateLeaveAttachment,
+} from '../../util/academic/leaveAttachmentPolicy';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentMilitaryLeavePage' });
 
-const PDF_MAX_SIZE = 10 * 1024 * 1024;
-const ATTACHMENTS_MAX_COUNT = 5;
 const MILITARY_LEAVE = 'MILITARY_LEAVE';
 
 const columns = [
@@ -93,36 +95,20 @@ const resetAttachment = () => {
 
 const openFilePicker = () => fileInput.value?.click();
 
-const validatePdf = (file) => {
-  if (!file) return '군휴학 신청 시 입영통지서 첨부는 필수입니다.';
-  if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
-    return '입영통지서는 PDF 형식만 선택할 수 있습니다.';
-  }
-  if (file.size > PDF_MAX_SIZE) return '입영통지서는 10MB 이하만 선택할 수 있습니다.';
-  return '';
-};
-
 const onFileChange = (event) => {
   const selected = Array.from(event.target.files || []);
-  const validationMessage = selected.map(validatePdf).find(Boolean) || '';
+  if (selected.length !== 1) {
+    formError.value = '군휴학 신청 시 입영통지서 파일 1개를 첨부해 주세요.';
+    event.target.value = '';
+    return;
+  }
+  const validationMessage = validateLeaveAttachment(selected[0], '입영통지서');
   if (validationMessage) {
     formError.value = validationMessage;
     event.target.value = '';
     return;
   }
-  const combined = [...attachments.value, ...selected].filter(
-    (file, index, files) => files.findIndex((candidate) => (
-      candidate.name === file.name
-      && candidate.size === file.size
-      && candidate.lastModified === file.lastModified
-    )) === index,
-  );
-  if (combined.length > ATTACHMENTS_MAX_COUNT) {
-    formError.value = '증빙 파일은 최대 5개까지 첨부할 수 있습니다.';
-    event.target.value = '';
-    return;
-  }
-  attachments.value = combined;
+  attachments.value = selected;
   event.target.value = '';
   formError.value = '';
 };
@@ -189,7 +175,11 @@ const submitRequest = async () => {
     return;
   }
 
-  formError.value = validatePdf(attachment.value);
+  if (attachments.value.length !== 1) {
+    formError.value = '군휴학 신청 시 입영통지서 파일 1개를 첨부해 주세요.';
+    return;
+  }
+  formError.value = validateLeaveAttachment(attachments.value[0], '입영통지서');
   if (formError.value) return;
 
   const confirmed = await confirmDialog('군휴학 신청서를 제출하시겠습니까?');
@@ -286,14 +276,13 @@ onMounted(async () => {
         </div>
 
         <div class="form-field file-field">
-          <span>입영통지서 첨부 (pdf 가능)</span>
+          <span>입영통지서 첨부 (PDF, HWP/HWPX, 이미지 가능)</span>
           <div class="file-picker">
             <input
               ref="fileInput"
               class="visually-hidden"
               type="file"
-              multiple
-              accept=".pdf,application/pdf"
+              :accept="LEAVE_ATTACHMENT_ACCEPT"
               @change="onFileChange"
             >
             <MyButton
@@ -305,38 +294,38 @@ onMounted(async () => {
               @click="openFilePicker"
             />
             <span
-                class="file-count"
-                :class="{ 'file-count--attached': attachments.length > 0 }"
-              >
-                {{ attachments.length ? `${attachments.length}개 파일 첨부됨` : '선택된 파일 없음' }}
-              </span>
+              class="file-count"
+              :class="{ 'file-count--attached': attachments.length > 0 }"
+            >
+              {{ attachments.length ? `${attachments.length}개 파일 첨부됨` : '선택된 파일 없음' }}
+            </span>
             <div
-                v-if="attachments.length"
-                class="file-chips"
+              v-if="attachments.length"
+              class="file-chips"
+            >
+              <span
+                v-for="(file, index) in attachments"
+                :key="`${file.name}-${file.size}-${file.lastModified}`"
+                class="file-chip"
               >
                 <span
-                  v-for="(file, index) in attachments"
-                  :key="`${file.name}-${file.size}-${file.lastModified}`"
-                  class="file-chip"
-                >
-                  <span
-                    class="file-icon"
-                    aria-hidden="true"
-                  >▣</span>
-                  <span
-                    class="file-name"
-                    :title="file.name"
-                  >{{ file.name }}</span>
-                  <MyButton
-                    btn-type="button"
-                    :content="'×'"
-                    :aria-label="`${file.name} 삭제`"
-                    @click="removeAttachment(index)"
-                  />
-                </span>
-              </div>
+                  class="file-icon"
+                  aria-hidden="true"
+                >▣</span>
+                <span
+                  class="file-name"
+                  :title="file.name"
+                >{{ file.name }}</span>
+                <MyButton
+                  btn-type="button"
+                  :content="'×'"
+                  :aria-label="`${file.name} 삭제`"
+                  @click="removeAttachment(index)"
+                />
+              </span>
+            </div>
           </div>
-          <span class="file-required">* 군휴학 신청 시 입영통지서 첨부는 필수입니다.</span>
+          <span class="file-required">* 군휴학 신청 시 지원 형식의 입영통지서 1개 첨부는 필수입니다.</span>
         </div>
 
         <p
