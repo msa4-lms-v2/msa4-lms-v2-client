@@ -14,6 +14,9 @@ const canChangeInfo = computed(() =>
 const canUseLeaveReturn = computed(() =>
   ["ENROLLED", "ON_LEAVE"].includes(academicStatus.value)
 );
+const canApplyForWithdrawal = computed(() =>
+  ["ENROLLED", "ON_LEAVE"].includes(academicStatus.value)
+);
 const canApplyForMilitaryLeave = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDepartmentTransfer = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDoubleMajor = computed(() => academicStatus.value === "ENROLLED");
@@ -85,6 +88,13 @@ const toggleMenu = (menuKey) => {
             <router-link v-if="canChangeInfo" to="/profile/info-change" class="submenu-item">{{
               getMenuTitle("/profile/info-change")
             }}</router-link>
+            <router-link
+              v-if="canApplyForWithdrawal"
+              to="/withdrawal"
+              class="submenu-item"
+            >
+              {{ getMenuTitle("/withdrawal") }}
+            </router-link>
             <router-link v-if="canUseLeaveReturn" to="/leave-return/general" class="submenu-item">{{
               getMenuTitle("/leave-return/general")
             }}</router-link>
