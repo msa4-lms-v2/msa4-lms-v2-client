@@ -41,6 +41,16 @@ const routes = [
         },
     },
     {
+        path: '/withdrawal',
+        name: 'StudentWithdrawal',
+        component: () => import('../pages/withdrawal/StudentWithdrawalPage.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED', 'ON_LEAVE'],
+        },
+    },
+    {
         path: '/leave-return/general',
         name: 'StudentLeaveReturn',
         component: () => import('../pages/leaveReturn/StudentLeaveReturnPage.vue'),
