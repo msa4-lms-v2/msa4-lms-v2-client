@@ -7,6 +7,7 @@ export const MENU_TITLES = {
     '/main': { default: '메인 화면' },
     '/profile': { STUDENT: '학적 조회', PROFESSOR: '교적 조회', default: '내 정보' },
     '/profile/info-change': { default: '정보 변경 신청' },
+    '/professor/profile/info-change': { default: '교수 정보 변경 신청' },
     '/withdrawal': { default: '자퇴 신청' },
     '/admin/info-change-requests': { default: '학적 정보 변경 승인' },
     '/admin/academic-change-requests/department-transfer': { default: '전과 신청 관리' },
