@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import { useProfileStore } from "../../store/profile/useProfileStore";
 import { getMenuTitle } from "../../config/menuConfig";
@@ -17,16 +17,25 @@ const canUseLeaveReturn = computed(() =>
 const canApplyForMilitaryLeave = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDepartmentTransfer = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDoubleMajor = computed(() => academicStatus.value === "ENROLLED");
+const canRegisterCourse = computed(() => academicStatus.value === "ENROLLED");
+const canApplyForExcuse = computed(() => academicStatus.value === "ENROLLED");
 
-onMounted(async () => {
-  if (authStore.userInfo?.role !== "STUDENT") return;
+// 새로고침 직후에는 세션 복구(reissue)가 비동기로 끝나기 전에 이 컴포넌트가 먼저 마운트되어
+// authStore.userInfo가 아직 null일 수 있다. onMounted 1회성 체크로는 role이 나중에 STUDENT로
+// 채워져도 다시 조회하지 않으므로, role 값 자체를 watch해 나중에 채워지는 경우도 잡는다.
+watch(
+  () => authStore.userInfo?.role,
+  async (role) => {
+    if (role !== "STUDENT") return;
 
-  try {
-    await profileStore.fetchStudentProfile();
-  } catch {
-    // 프로필 조회 실패 시 제한 메뉴를 노출하지 않는다.
-  }
-});
+    try {
+      await profileStore.fetchStudentProfile();
+    } catch {
+      // 프로필 조회 실패 시 제한 메뉴를 노출하지 않는다.
+    }
+  },
+  { immediate: true }
+);
 
 const activeMenus = ref({
   studentAcademic: false,
@@ -105,7 +114,7 @@ const toggleMenu = (menuKey) => {
             <router-link to="/enrollments" class="submenu-item">{{
               getMenuTitle("/enrollments")
             }}</router-link>
-            <router-link to="/registration" class="submenu-item">{{
+            <router-link v-if="canRegisterCourse" to="/registration" class="submenu-item">{{
               getMenuTitle("/registration")
             }}</router-link>
           </div>
@@ -142,7 +151,7 @@ const toggleMenu = (menuKey) => {
             <router-link to="/attendance" class="submenu-item">{{
               getMenuTitle("/attendance")
             }}</router-link>
-            <router-link to="/excuses" class="submenu-item">{{
+            <router-link v-if="canApplyForExcuse" to="/excuses" class="submenu-item">{{
               getMenuTitle("/excuses")
             }}</router-link>
           </div>
@@ -233,6 +242,18 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/leave-return" class="submenu-item">{{
               getMenuTitle("/professor/leave-return")
             }}</router-link>
+            <router-link
+              to="/professor/academic-change-requests/department-transfer"
+              class="submenu-item"
+            >
+              {{ getMenuTitle("/professor/academic-change-requests/department-transfer") }}
+            </router-link>
+            <router-link
+              to="/professor/academic-change-requests/double-major"
+              class="submenu-item"
+            >
+              {{ getMenuTitle("/professor/academic-change-requests/double-major") }}
+            </router-link>
           </div>
         </div>
 
@@ -329,6 +350,18 @@ const toggleMenu = (menuKey) => {
         <router-link to="/admin/info-change-requests" class="nav-item">{{
           getMenuTitle("/admin/info-change-requests")
         }}</router-link>
+        <router-link
+          to="/admin/academic-change-requests/department-transfer"
+          class="nav-item"
+        >
+          {{ getMenuTitle("/admin/academic-change-requests/department-transfer") }}
+        </router-link>
+        <router-link
+          to="/admin/academic-change-requests/double-major"
+          class="nav-item"
+        >
+          {{ getMenuTitle("/admin/academic-change-requests/double-major") }}
+        </router-link>
       </template>
     </nav>
   </aside>

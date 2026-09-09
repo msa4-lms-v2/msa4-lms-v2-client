@@ -8,6 +8,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import myAxios from '../../api/myAxios';
+import { useProfileStore } from '../../store/profile/useProfileStore';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
@@ -17,6 +18,8 @@ const PDF_MAX_SIZE = 10 * 1024 * 1024;
 const ATTACHMENTS_MAX_COUNT = 5;
 const GENERAL_LEAVE = 'GENERAL_LEAVE';
 const GENERAL_RETURN = 'GENERAL_RETURN';
+
+const profileStore = useProfileStore();
 
 const columns = [
   { key: 'type', label: '유형' },
@@ -64,6 +67,13 @@ const isSubmitting = ref(false);
 const formError = ref('');
 
 const isLeave = computed(() => form.requestType === GENERAL_LEAVE);
+
+// 학적 상태별 접근 제한 기준(휴학 신청은 ENROLLED만, 복학 신청은 ON_LEAVE만 가능)에 맞춰
+// 신청 유형 선택지 자체를 좁힌다. 라우트 가드는 ENROLLED/ON_LEAVE 둘 다 이 페이지 접근을
+// 허용하지만, 실제로 제출 가능한 유형은 현재 학적 상태에 따라 하나뿐이다.
+const academicStatus = computed(() => profileStore.profile?.academicStatus);
+const canRequestLeave = computed(() => academicStatus.value === 'ENROLLED');
+const canRequestReturn = computed(() => academicStatus.value === 'ON_LEAVE');
 
 const applicablePeriodTypes = computed(() => (
   isLeave.value ? [GENERAL_LEAVE] : [GENERAL_RETURN, 'MILITARY_RETURN']
@@ -251,8 +261,13 @@ watch(() => form.requestType, () => {
   formError.value = '';
 });
 
+watch(academicStatus, (status) => {
+  if (status === 'ON_LEAVE') form.requestType = GENERAL_RETURN;
+  else if (status === 'ENROLLED') form.requestType = GENERAL_LEAVE;
+});
+
 onMounted(async () => {
-  await Promise.all([loadPeriods(), loadRequests()]);
+  await Promise.all([profileStore.fetchStudentProfile(), loadPeriods(), loadRequests()]);
 });
 </script>
 
@@ -276,8 +291,8 @@ onMounted(async () => {
                 v-model="form.requestType"
                 class="form-select"
               >
-                <option :value="GENERAL_LEAVE">휴학</option>
-                <option :value="GENERAL_RETURN">복학</option>
+                <option v-if="canRequestLeave" :value="GENERAL_LEAVE">휴학</option>
+                <option v-if="canRequestReturn" :value="GENERAL_RETURN">복학</option>
               </MySelect>
             </label>
 

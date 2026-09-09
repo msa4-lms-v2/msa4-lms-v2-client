@@ -26,9 +26,9 @@ const routes = [
     },
     {
         path: '/profile',
-        name: 'StudentProfile',
-        component: () => import('../pages/profile/StudentProfile.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        name: 'ProfilePage',
+        component: () => import('../pages/profile/ProfilePage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT', 'PROFESSOR'] },
     },
     {
         path: '/profile/info-change',
@@ -139,6 +139,18 @@ const routes = [
         meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
+        path: '/admin/academic-change-requests/department-transfer',
+        name: 'AdminDepartmentTransferManagement',
+        component: () => import('../pages/departmentTransfer/AdminDepartmentTransferManagement.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+        path: '/admin/academic-change-requests/double-major',
+        name: 'AdminDoubleMajorManagement',
+        component: () => import('../pages/doubleMajor/AdminDoubleMajorManagement.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
         path: '/payment/health',
         name: 'PaymentHealthIndex',
         component: () => import('../pages/payment/PaymentHealthIndex.vue'),
@@ -223,7 +235,11 @@ const routes = [
         path: '/registration',
         name: 'StudentRegistrationIndex',
         component: () => import('../pages/enrollment/StudentRegistrationIndex.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/grade',
@@ -241,12 +257,28 @@ const routes = [
         path: '/excuses',
         name: 'StudentExcuseIndex',
         component: () => import('../pages/attendance/StudentExcuseIndex.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/professor/leave-return',
         name: 'ProfessorLeaveReturnApproval',
         component: () => import('../pages/leaveReturn/ProfessorLeaveReturnApproval.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/academic-change-requests/department-transfer',
+        name: 'ProfessorDepartmentTransferReview',
+        component: () => import('../pages/departmentTransfer/ProfessorDepartmentTransferReview.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/academic-change-requests/double-major',
+        name: 'ProfessorDoubleMajorReview',
+        component: () => import('../pages/doubleMajor/ProfessorDoubleMajorReview.vue'),
         meta: { requiresAuth: true, roles: ['PROFESSOR'] },
     },
     {
