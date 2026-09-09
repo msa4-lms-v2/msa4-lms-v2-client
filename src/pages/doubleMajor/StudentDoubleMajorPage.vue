@@ -12,8 +12,8 @@ import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentDoubleMajorPage' });
 
-const PDF_MAX_SIZE = 10 * 1024 * 1024;
-const ATTACHMENTS_MAX_COUNT = 5;
+const FILE_MAX_SIZE = 10 * 1024 * 1024;
+const ATTACHMENTS_REQUIRED_COUNT = 2;
 
 const columns = [
   { key: 'semester', label: '신청 학기' },
@@ -25,14 +25,20 @@ const columns = [
 
 const statusLabels = {
   PENDING: '접수 완료',
-  APPROVED: '승인',
+  ADVISOR_APPROVED: '지도교수 승인',
+  ADVISOR_REJECTED: '지도교수 반려',
+  APPROVED: '승인(기존)',
+  APPLIED: '학적 반영 완료',
   REJECTED: '반려',
   CANCELLED: '취소',
 };
 
 const statusVariants = {
   PENDING: 'processing',
+  ADVISOR_APPROVED: 'processing',
+  ADVISOR_REJECTED: 'fail',
   APPROVED: 'success',
+  APPLIED: 'success',
   REJECTED: 'fail',
   CANCELLED: 'warning',
 };
@@ -44,8 +50,6 @@ const periods = ref([]);
 const requests = ref([]);
 const selectedCollegeId = ref('');
 const selectedDepartmentId = ref('');
-const selfIntroduction = ref(null);
-const studyPlan = ref(null);
 const hasReadGuidelines = ref(false);
 const formError = ref('');
 const isLoadingForm = ref(false);
@@ -67,8 +71,10 @@ const filteredDepartments = computed(() => departments.value
   .filter((department) => String(department.college?.id || '') === String(selectedCollegeId.value))
   .sort((left, right) => left.name.localeCompare(right.name, 'ko')));
 
-const selectedFiles = computed(() => [selfIntroduction.value, studyPlan.value].filter(Boolean));
 const selectedPeriod = computed(() => periods.value.find((period) => period.open) || null);
+const requestPayload = computed(() => ({
+  targetDepartmentId: Number(selectedDepartmentId.value),
+}));
 
 watch(selectedCollegeId, () => {
   if (!filteredDepartments.value.some(
@@ -86,12 +92,10 @@ const formatSemester = (year, term) => {
 const formatStatus = (status) => statusLabels[status] || status || '-';
 const statusVariant = (status) => statusVariants[status] || 'processing';
 
-const validatePdf = (file, documentName) => {
-  if (!file) return `${documentName} PDF를 첨부해 주세요.`;
-  if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
-    return `${documentName}는 PDF 형식만 선택할 수 있습니다.`;
-  }
-  if (file.size > PDF_MAX_SIZE) return `${documentName}는 10MB 이하만 선택할 수 있습니다.`;
+const validateHwp = (file) => {
+  if (!file) return '첨부파일을 선택해 주세요.';
+  if (!/\.(hwp|hwpx)$/i.test(file.name)) return 'HWP 또는 HWPX 파일만 선택할 수 있습니다.';
+  if (file.size > FILE_MAX_SIZE) return '첨부파일은 파일당 10MB 이하만 선택할 수 있습니다.';
   return '';
 };
 
@@ -104,7 +108,7 @@ const openFilePicker = () => fileInput.value?.click();
 
 const onFileChange = (event) => {
   const selected = Array.from(event.target.files || []);
-  const validationMessage = selected.map(validatePdf).find(Boolean) || '';
+  const validationMessage = selected.map(validateHwp).find(Boolean) || '';
   if (validationMessage) {
     formError.value = validationMessage;
     event.target.value = '';
@@ -117,8 +121,8 @@ const onFileChange = (event) => {
       && candidate.lastModified === file.lastModified
     )) === index,
   );
-  if (combined.length > ATTACHMENTS_MAX_COUNT) {
-    formError.value = '증빙 파일은 최대 5개까지 첨부할 수 있습니다.';
+  if (combined.length > ATTACHMENTS_REQUIRED_COUNT) {
+    formError.value = '복수전공 첨부파일은 정확히 2개만 선택할 수 있습니다.';
     event.target.value = '';
     return;
   }
@@ -181,13 +185,30 @@ const showGuidelines = async () => {
   const periodMessage = period
     ? `${formatSemester(period.academicYear, period.term)} 모집\n접수 기간: ${formatDate(period.startAt, 'YYYY-MM-DD HH:mm')} ~ ${formatDate(period.endAt, 'YYYY-MM-DD HH:mm')}`
     : '현재 접수 가능한 복수전공 모집 기간이 없습니다.';
-  await notify(`${periodMessage}\n필수 서류: 자기소개서, 학업계획서 PDF 각 1부`);
+  await notify(`${periodMessage}\n신청 자격: 정규학기 2개 이상 이수 및 33학점 이상 취득\n첨부 조건: 작성한 HWP 또는 HWPX 파일 2개(각 10MB 이하)`);
   hasReadGuidelines.value = true;
 };
 
 const createIdempotencyKey = () => {
   const suffix = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return `double-major-${suffix}`;
+};
+
+const downloadTemplate = async (template, filename) => {
+  try {
+    const response = await myAxios.get(
+      `/api/academic/double-major-requests/templates/${template}`,
+      { responseType: 'blob' },
+    );
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    await notify(error.response?.data?.message || '양식을 다운로드하지 못했습니다.');
+  }
 };
 
 const submitRequest = async () => {
@@ -206,15 +227,18 @@ const submitRequest = async () => {
     return;
   }
 
-  formError.value = validatePdf(selfIntroduction.value, '자기소개서')
-    || validatePdf(studyPlan.value, '학업계획서');
+  if (attachments.value.length !== ATTACHMENTS_REQUIRED_COUNT) {
+    formError.value = '작성한 HWP 또는 HWPX 파일을 정확히 2개 첨부해 주세요.';
+    return;
+  }
+  formError.value = attachments.value.map(validateHwp).find(Boolean) || '';
   if (formError.value) return;
 
   const confirmed = await confirmDialog('복수전공 신청서를 제출하시겠습니까?');
   if (!confirmed) return;
 
   const formData = new FormData();
-  formData.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
+  formData.append('request', new Blob([JSON.stringify(requestPayload.value)], { type: 'application/json' }));
   attachments.value.forEach((file) => formData.append('files', file));
 
   isSubmitting.value = true;
@@ -244,13 +268,33 @@ onMounted(async () => {
 <template>
   <MyPageContainer title="복수전공 신청">
     <div class="double-major-page">
-      <MyButton
-        btn-type="button"
-        color="deep-blue"
-        size="middle"
-        content="모집 요강"
-        @click="showGuidelines"
-      />
+      <div class="page-actions">
+        <MyButton
+          btn-type="button"
+          color="deep-blue"
+          size="middle"
+          content="모집 요강"
+          @click="showGuidelines"
+        />
+        <div class="template-actions">
+          <MyButton
+            btn-type="button"
+            class="template-download-action"
+            color="deep-blue"
+            size="middle"
+            content="학업계획서 다운로드"
+            @click="downloadTemplate('study-plan', '학업계획서 양식.hwp')"
+          />
+          <MyButton
+            btn-type="button"
+            class="template-download-action"
+            color="deep-blue"
+            size="middle"
+            content="자기소개서 다운로드"
+            @click="downloadTemplate('self-introduction', '자기소개서 양식.hwp')"
+          />
+        </div>
+      </div>
 
       <section class="application-section">
         <form
@@ -303,7 +347,7 @@ onMounted(async () => {
 
           <div class="form-field file-field">
             <div class="file-label-row">
-              <span>증빙파일 (pdf 가능)</span>
+              <span>첨부파일 (hwp, hwpx 가능)</span>
               <span class="required-guide">* 필수 제출 서류 : 자기소개서 / 학업계획서</span>
             </div>
             <div class="file-picker">
@@ -311,7 +355,7 @@ onMounted(async () => {
                 ref="fileInput"
                 class="visually-hidden"
                 type="file"
-                accept=".pdf,application/pdf"
+                accept=".hwp,.hwpx,application/x-hwp,application/vnd.hancom.hwp,application/vnd.hancom.hwpx"
                 multiple
                 @change="onFileChange"
               >
@@ -423,6 +467,23 @@ onMounted(async () => {
 <style scoped>
 .double-major-page {
   max-width: 1120px;
+}
+
+.page-actions,
+.template-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-actions {
+  justify-content: space-between;
+}
+
+.template-download-action {
+  width: auto;
+  min-width: 132px;
+  padding: 0 14px;
 }
 
 .application-section {
@@ -608,6 +669,16 @@ onMounted(async () => {
 }
 
 @media (max-width: 800px) {
+  .page-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .template-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
   .form-grid,
   .file-chips {
     grid-template-columns: 1fr;
