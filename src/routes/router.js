@@ -10,6 +10,12 @@ const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
     };
 };
 const routes = [
+    { path: '/admin/admissions', name: 'AdminAdmissionIndex', component: () => import('../pages/people/PeopleIndex.vue'), props: { kind: 'admission' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/admissions/new', name: 'AdminAdmissionCreate', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'admission' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/admissions/:id', name: 'AdminAdmissionDetail', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'admission' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/professors', name: 'AdminProfessorIndex', component: () => import('../pages/people/PeopleIndex.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/professors/new', name: 'AdminProfessorCreate', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/professors/:id', name: 'AdminProfessorDetail', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {

@@ -1,9 +1,11 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import { useProfileStore } from "../../store/profile/useProfileStore";
 import { getMenuTitle } from "../../config/menuConfig";
 
+import { useRoute } from 'vue-router';
+const route = useRoute();
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
 
@@ -29,6 +31,8 @@ onMounted(async () => {
 });
 
 const activeMenus = ref({
+  adminAdmission: false,
+  adminProfessor: false,
   studentAcademic: false,
   studentCourse: false,
   studentGrade: false,
@@ -43,6 +47,11 @@ const activeMenus = ref({
   professorAttendance: false,
   professorCounseling: true,
 });
+
+watch(() => route.path, path => {
+  if (path.startsWith('/admin/admissions')) activeMenus.value.adminAdmission = true;
+  if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
+}, { immediate: true });
 
 const toggleMenu = (menuKey) => {
   activeMenus.value[menuKey] = !activeMenus.value[menuKey];
@@ -329,6 +338,24 @@ const toggleMenu = (menuKey) => {
       </template>
 
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminAdmission" @click="toggleMenu('adminAdmission')">
+            <span>입학 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminAdmission }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminAdmission" class="submenu-list">
+            <router-link to="/admin/admissions" class="submenu-item" exact-active-class="router-link-active">입학 예정자 목록</router-link>
+            <router-link to="/admin/admissions/new" class="submenu-item">입학 예정자 등록</router-link>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminProfessor" @click="toggleMenu('adminProfessor')">
+            <span>교수 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminProfessor }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminProfessor" class="submenu-list">
+            <router-link to="/admin/professors" class="submenu-item" exact-active-class="router-link-active">교수 목록</router-link>
+            <router-link to="/admin/professors/new" class="submenu-item">교수 등록</router-link>
+          </div>
+        </div>
         <router-link to="/students" class="nav-item">{{
           getMenuTitle("/students")
         }}</router-link>
