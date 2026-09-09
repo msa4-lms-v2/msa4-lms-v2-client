@@ -17,6 +17,8 @@ const canUseLeaveReturn = computed(() =>
 const canApplyForMilitaryLeave = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDepartmentTransfer = computed(() => academicStatus.value === "ENROLLED");
 const canApplyForDoubleMajor = computed(() => academicStatus.value === "ENROLLED");
+const canRegisterCourse = computed(() => academicStatus.value === "ENROLLED");
+const canApplyForExcuse = computed(() => academicStatus.value === "ENROLLED");
 
 // 새로고침 직후에는 세션 복구(reissue)가 비동기로 끝나기 전에 이 컴포넌트가 먼저 마운트되어
 // authStore.userInfo가 아직 null일 수 있다. onMounted 1회성 체크로는 role이 나중에 STUDENT로
@@ -112,7 +114,7 @@ const toggleMenu = (menuKey) => {
             <router-link to="/enrollments" class="submenu-item">{{
               getMenuTitle("/enrollments")
             }}</router-link>
-            <router-link to="/registration" class="submenu-item">{{
+            <router-link v-if="canRegisterCourse" to="/registration" class="submenu-item">{{
               getMenuTitle("/registration")
             }}</router-link>
           </div>
@@ -149,7 +151,7 @@ const toggleMenu = (menuKey) => {
             <router-link to="/attendance" class="submenu-item">{{
               getMenuTitle("/attendance")
             }}</router-link>
-            <router-link to="/excuses" class="submenu-item">{{
+            <router-link v-if="canApplyForExcuse" to="/excuses" class="submenu-item">{{
               getMenuTitle("/excuses")
             }}</router-link>
           </div>
