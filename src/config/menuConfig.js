@@ -9,6 +9,7 @@ export const MENU_TITLES = {
     '/tuition': { default: '등록금 납부' },
     '/tuition/history': { default: '등록금 납부 내역' },
     '/admin/tuition': { default: '등록금 관리' },
+    '/admin/certificates/revoke': { default: '증명서 폐기' },
     '/payment/health': { default: '결제 상태' },
     '/enrollments': { default: '시간표 조회' },
     '/registration': { default: '수강 신청' },
@@ -44,6 +45,7 @@ export const MENU_TITLES = {
 export const MENU_TITLES_BY_NAME = {
     TuitionShow: '등록금 상세',
     AdminTuitionShow: '등록금 상세',
+    InstallmentApply: '분할납부 신청',
     StudentCounselingResult: '상담 결과',
     ProfessorCounselingAnswer: '온라인 상담 답변',
 };
