@@ -8,10 +8,19 @@ import PrevNextPagination from '../../components/pagination/PrevNextPagination.v
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { useInfoChangeStore } from '../../store/infochange/useInfoChangeStore';
+import { useProfessorInfoChangeStore } from '../../store/infochange/useProfessorInfoChangeStore';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'InfoChangeRequest' });
+
+const props = defineProps({
+  profileType: {
+    type: String,
+    default: 'STUDENT',
+    validator: (value) => ['STUDENT', 'PROFESSOR'].includes(value),
+  },
+});
 
 const PROFILE_IMAGE_MAX_SIZE = 5 * 1024 * 1024;
 const ATTACHMENT_MAX_SIZE = 10 * 1024 * 1024;
@@ -56,7 +65,12 @@ const statusVariants = {
   CANCELLED: 'warning',
 };
 
-const infoChangeStore = useInfoChangeStore();
+const isProfessor = computed(() => props.profileType === 'PROFESSOR');
+const pageTitle = computed(() => (isProfessor.value ? '교수 정보 변경 신청' : '학적 정보 변경 신청'));
+const profileDescription = computed(() => (isProfessor.value ? '교수 정보' : '학적 정보'));
+const infoChangeStore = isProfessor.value
+  ? useProfessorInfoChangeStore()
+  : useInfoChangeStore();
 const profileStore = useProfileStore();
 const profileImageInput = ref(null);
 const attachmentInput = ref(null);
@@ -178,9 +192,14 @@ const loadProfile = async () => {
   isProfileLoading.value = true;
   profileLoadError.value = '';
   try {
-    await profileStore.fetchStudentProfile();
+    if (isProfessor.value) {
+      await profileStore.fetchProfessorProfile();
+    } else {
+      await profileStore.fetchStudentProfile();
+    }
   } catch (error) {
-    profileLoadError.value = error.response?.data?.message || '현재 학적 정보를 불러오지 못했습니다.';
+    profileLoadError.value = error.response?.data?.message
+      || `현재 ${profileDescription.value}를 불러오지 못했습니다.`;
   } finally {
     isProfileLoading.value = false;
   }
@@ -203,7 +222,7 @@ const submitRequest = async () => {
   try {
     await infoChangeStore.submitRequest(payload);
     resetForm();
-    await notify('학적 정보 변경 신청이 접수되었습니다.');
+    await notify(`${profileDescription.value} 변경 신청이 접수되었습니다.`);
     await loadRequests();
   } catch (error) {
     await notify(error.response?.data?.message || '신청 처리 중 오류가 발생했습니다.');
@@ -228,13 +247,13 @@ onUnmounted(revokePreview);
 </script>
 
 <template>
-  <MyPageContainer title="학적 정보 변경 신청">
+  <MyPageContainer :title="pageTitle">
     <div class="info-change-page">
       <div
         v-if="isProfileLoading"
         class="profile-state"
       >
-        현재 학적 정보를 불러오는 중입니다...
+        현재 {{ profileDescription }}를 불러오는 중입니다...
       </div>
       <div
         v-else-if="profileLoadError"

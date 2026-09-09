@@ -47,6 +47,12 @@ const routes = [
         },
     },
     {
+        path: '/professor/profile/info-change',
+        name: 'ProfessorInfoChangeRequest',
+        component: () => import('../pages/profile/ProfessorInfoChangeRequest.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
         path: '/withdrawal',
         name: 'StudentWithdrawal',
         component: () => import('../pages/withdrawal/StudentWithdrawalPage.vue'),
