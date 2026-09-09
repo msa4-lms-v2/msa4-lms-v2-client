@@ -7,6 +7,7 @@ import PasswordChange from './PasswordChange.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/academic/enumLabels';
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -18,18 +19,9 @@ onMounted(async () => {
 
 const user = computed(() => profileStore.profile || {});
 
-const formatStatus = (status) => {
-  if (status === 'ENROLLED') return '재학';
-  if (status === 'GRADUATED') return '졸업';
-  if (status === 'ON_LEAVE') return '휴학';
-  if (status === 'WITHDRAWN') return '자퇴';
-  if (status === 'DISMISSED') return '제적';
-  return status || '-';
-};
-
 const student = computed(() => ({
   name: user.value.name || '-',
-  status: formatStatus(user.value.academicStatus),
+  status: ACADEMIC_STATUS_LABEL[user.value.academicStatus] || user.value.academicStatus || '-',
   college: user.value.collegeName || '-',
   department: user.value.departmentName || '-',
   major: user.value.majorName || '-',
@@ -43,13 +35,7 @@ const student = computed(() => ({
   totalCredits: user.value.totalCredits ?? 0,
 }));
 
-const statusVariant = computed(() => ({
-  ENROLLED: 'processing',
-  GRADUATED: 'success',
-  ON_LEAVE: 'warning',
-  WITHDRAWN: 'fail',
-  DISMISSED: 'fail',
-}[user.value.academicStatus] || 'processing'));
+const statusVariant = computed(() => ACADEMIC_STATUS_VARIANT[user.value.academicStatus] || 'processing');
 
 const basicRows = computed(() => [
   { label: '이름', value: student.value.name },

@@ -26,8 +26,11 @@ export const finalizeGrades = (classId, idempotencyKey) =>
   });
 
 // 학생 본인의 과목별 수강·공개 성적 근거 조회 (졸업학점 진단용 API를 재사용)
-// studentId는 Academic의 Student 엔티티 ID이며, 현재 학생 본인이 이 값을 직접 조회할 수 있는
-// API가 없어 자기 자신을 대상으로는 호출할 수 없다. 관리자·교수 화면에서 studentId를 이미 아는
-// 경우에만 사용한다.
+// studentId는 Academic의 Student 엔티티 ID이며, 관리자·교수 화면에서 studentId를 이미 아는
+// 경우에만 사용한다. 학생 본인 화면은 getMyGrades를 쓴다.
 export const getGraduationCreditRecords = (studentId, params = {}) =>
   myAxios.get(CREDIT_RECORDS_URL(studentId), { params });
+
+// 학생 본인 성적 조회(로그인 사용자 기준, studentId 불필요)
+export const getMyGrades = (params = {}) =>
+  myAxios.get(`${GRADES_URL}/me`, { params });
