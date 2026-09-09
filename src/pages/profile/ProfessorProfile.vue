@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 import PasswordChange from './PasswordChange.vue';
+import MyButton from '../../components/button/MyButton.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 
@@ -10,6 +12,7 @@ defineOptions({ name: 'ProfessorProfile' });
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
+const router = useRouter();
 
 onMounted(async () => {
   await profileStore.fetchProfessorProfile();
@@ -80,6 +83,13 @@ const employmentRows = computed(() => [
       </div>
 
       <div class="profile-actions">
+        <MyButton
+          btn-type="button"
+          color="white"
+          size="middle"
+          content="정보 변경 신청"
+          @click="router.push('/professor/profile/info-change')"
+        />
         <PasswordChange />
       </div>
     </article>
