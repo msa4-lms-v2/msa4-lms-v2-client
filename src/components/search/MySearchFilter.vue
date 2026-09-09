@@ -23,7 +23,7 @@ defineEmits(['search']);
         v-if="showSubmit"
         btnType="button"
         color="deep-blue"
-        size="small"
+        size="middle"
         :content="submitText"
         @click="$emit('search')"
       />
