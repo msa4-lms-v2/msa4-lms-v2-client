@@ -1,86 +1,79 @@
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 import PasswordChange from './PasswordChange.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
-import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/academic/enumLabels';
+
+defineOptions({ name: 'ProfessorProfile' });
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
-const router = useRouter();
 
 onMounted(async () => {
-  await profileStore.fetchStudentProfile();
+  await profileStore.fetchProfessorProfile();
 });
 
 const user = computed(() => profileStore.profile || {});
 
-const student = computed(() => ({
+const statusLabels = { ACTIVE: '재직', INACTIVE: '비활성' };
+const statusVariants = { ACTIVE: 'processing', INACTIVE: 'fail' };
+
+const professor = computed(() => ({
   name: user.value.name || '-',
-  status: ACADEMIC_STATUS_LABEL[user.value.academicStatus] || user.value.academicStatus || '-',
+  status: statusLabels[user.value.status] || user.value.status || '-',
   college: user.value.collegeName || '-',
   department: user.value.departmentName || '-',
-  major: user.value.majorName || '-',
-  grade: user.value.gradeLevel ? `${user.value.gradeLevel}학년` : '-',
-  studentNo: authStore.userInfo?.loginId || '-',
+  employeeNo: authStore.userInfo?.loginId || '-',
   email: user.value.email || '-',
   phone: user.value.phoneNumber || '-',
   address: user.value.address || '-',
-  advisor: user.value.advisorName || '-',
-  entranceYear: user.value.admissionYear || '-',
-  totalCredits: user.value.totalCredits ?? 0,
+  hireYear: user.value.hireYear || '-',
 }));
 
-const statusVariant = computed(() => ACADEMIC_STATUS_VARIANT[user.value.academicStatus] || 'processing');
+const statusVariant = computed(() => statusVariants[user.value.status] || 'processing');
 
 const basicRows = computed(() => [
-  { label: '이름', value: student.value.name },
-  { label: '학번', value: student.value.studentNo },
-  { label: '소속 단과대학', value: student.value.college },
-  { label: '학과', value: student.value.department },
-  { label: '전공', value: student.value.major },
-  { label: '학년', value: student.value.grade },
-  { label: '이메일', value: student.value.email },
-  { label: '연락처', value: student.value.phone },
-  { label: '주소', value: student.value.address },
+  { label: '이름', value: professor.value.name },
+  { label: '교번', value: professor.value.employeeNo },
+  { label: '소속 단과대학', value: professor.value.college },
+  { label: '학과', value: professor.value.department },
+  { label: '이메일', value: professor.value.email },
+  { label: '연락처', value: professor.value.phone },
+  { label: '주소', value: professor.value.address },
 ]);
 
-const academicRows = computed(() => [
-  { label: '학적 상태', value: student.value.status },
-  { label: '입학년도', value: student.value.entranceYear },
-  { label: '지도교수', value: student.value.advisor },
-  { label: '총 취득 학점', value: `${student.value.totalCredits}학점` },
+const employmentRows = computed(() => [
+  { label: '재직 상태', value: professor.value.status },
+  { label: '임용 연도', value: professor.value.hireYear },
 ]);
 </script>
 
 <template>
-  <MyPageContainer title="내 정보">
+  <MyPageContainer title="교적 조회">
     <article class="profile-hero">
-      <div class="student-intro">
+      <div class="professor-intro">
         <div class="profile-image" aria-hidden="true"></div>
 
-        <div class="student-main">
+        <div class="professor-main">
           <div class="name-row">
-            <h2>{{ student.name }}</h2>
+            <h2>{{ professor.name }}</h2>
             <MyStatusBadge
-              :label="student.status"
+              :label="professor.status"
               :variant="statusVariant"
             />
           </div>
 
-          <ul class="quick-list" aria-label="학생 기본 요약">
+          <ul class="quick-list" aria-label="교수 기본 요약">
             <li>
-              <span>{{ student.department }} {{ student.grade }}</span>
+              <span>{{ professor.department }}</span>
             </li>
             <li>
-              <span>학번 {{ student.studentNo }}</span>
+              <span>교번 {{ professor.employeeNo }}</span>
             </li>
             <li>
-              <span>{{ student.email }}</span>
+              <span>{{ professor.email }}</span>
             </li>
           </ul>
         </div>
@@ -88,12 +81,6 @@ const academicRows = computed(() => [
 
       <div class="profile-actions">
         <PasswordChange />
-        <MyButton
-          color="deep-blue"
-          size="big"
-          content="정보 변경 신청"
-          @click="router.push('/profile/info-change')"
-        />
       </div>
     </article>
 
@@ -113,11 +100,11 @@ const academicRows = computed(() => [
 
       <article class="info-card">
         <div class="common-section-header">
-          <h3>학적 정보</h3>
+          <h3>임용 정보</h3>
         </div>
 
         <dl class="info-list">
-          <div v-for="row in academicRows" :key="row.label" class="info-row">
+          <div v-for="row in employmentRows" :key="row.label" class="info-row">
             <dt>{{ row.label }}</dt>
             <dd>{{ row.value }}</dd>
           </div>
@@ -151,7 +138,7 @@ const academicRows = computed(() => [
   flex: 0 0 auto;
 }
 
-.student-intro {
+.professor-intro {
   display: flex;
   align-items: center;
   gap: 32px;
@@ -166,7 +153,7 @@ const academicRows = computed(() => [
   flex: 0 0 96px;
 }
 
-.student-main {
+.professor-main {
   min-width: 0;
 }
 

@@ -26,9 +26,9 @@ const routes = [
     },
     {
         path: '/profile',
-        name: 'StudentProfile',
-        component: () => import('../pages/profile/StudentProfile.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        name: 'ProfilePage',
+        component: () => import('../pages/profile/ProfilePage.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT', 'PROFESSOR'] },
     },
     {
         path: '/profile/info-change',
@@ -235,7 +235,11 @@ const routes = [
         path: '/registration',
         name: 'StudentRegistrationIndex',
         component: () => import('../pages/enrollment/StudentRegistrationIndex.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/grade',
@@ -253,7 +257,11 @@ const routes = [
         path: '/excuses',
         name: 'StudentExcuseIndex',
         component: () => import('../pages/attendance/StudentExcuseIndex.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT'] },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
     },
     {
         path: '/professor/leave-return',
