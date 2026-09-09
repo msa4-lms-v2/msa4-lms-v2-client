@@ -66,10 +66,6 @@ const usesAppLayout = computed(() => !['/login', '/initial-password', '/attendan
 }
 
 @media (max-width: 900px) {
-  .app-body {
-    display: block;
-  }
-
   .page-content {
     padding: 12px;
   }
