@@ -7,7 +7,6 @@ export const useInstallmentStore = defineStore('installmentStore', () => {
   const installmentPlan = ref(null);
   const isLoadingPlan = ref(false);
   const isSubmittingPlan = ref(false);
-  const isProcessingPayment = ref(false);
   const isReviewingPlan = ref(false);
 
   // 2. Getters (computed)
@@ -45,34 +44,6 @@ export const useInstallmentStore = defineStore('installmentStore', () => {
     }
   };
 
-  const processInstallmentPayment = async ({ tuitionBillId, installmentPlanItemId }) => {
-    isProcessingPayment.value = true;
-    try {
-      // 1. Initiate payment
-      const initRes = await myAxios.post('/api/payment/payments', {
-        tuitionBillId,
-        method: 'CARD',
-        installmentPlanItemId,
-      });
-      
-      const { orderId, amount } = initRes.data.data;
-      const paymentKey = 'pk_' + orderId;
-      const idempotencyKey = crypto.randomUUID();
-
-      // 2. Confirm payment
-      await myAxios.post(
-        '/api/payment/payments/confirm',
-        { orderId, paymentKey, amount },
-        { headers: { 'Idempotency-Key': idempotencyKey } }
-      );
-
-      // Refresh the plan
-      await fetchInstallmentPlan(tuitionBillId);
-    } finally {
-      isProcessingPayment.value = false;
-    }
-  };
-
   // ADMIN이 REQUESTED 상태의 분할납부 신청을 승인·반려한다.
   const reviewInstallmentPlan = async ({ planId, decision, rejectReason }) => {
     isReviewingPlan.value = true;
@@ -92,11 +63,9 @@ export const useInstallmentStore = defineStore('installmentStore', () => {
     installmentPlan,
     isLoadingPlan,
     isSubmittingPlan,
-    isProcessingPayment,
     isReviewingPlan,
     fetchInstallmentPlan,
     submitInstallmentPlan,
-    processInstallmentPayment,
     reviewInstallmentPlan,
   };
 });
