@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import myAxios from '../../api/myAxios';
 import { useTabStore } from '../tab/useTabStore';
+import { clearAcademicChangeGuidelineViews } from '../../util/academic/academicChangeGuidelineView';
 
 export const useAuthStore = defineStore('authStore', () => {
     // 1. State
@@ -52,6 +53,7 @@ export const useAuthStore = defineStore('authStore', () => {
         userInfo.value = null;
         pendingLoginId.value = '';
         pendingLoginType.value = 'student';
+        clearAcademicChangeGuidelineViews();
 
         // 로그아웃 시 남아있는 탭 비우기
         const tabStore = useTabStore();
@@ -70,6 +72,7 @@ export const useAuthStore = defineStore('authStore', () => {
             const res = await myAxios.post(url, loginForm);
             if (!res.data.code || res.data.code === '00') {
                 const data = res.data.data;
+                clearAcademicChangeGuidelineViews();
                 accessToken.value = data.accessToken || '';
                 passwordChangeToken.value = data.passwordChangeToken || '';
                 userInfo.value = mergeAccountInfo(data);
