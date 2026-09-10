@@ -7,6 +7,7 @@ pipeline {
         MANIFEST_REPO = 'https://github.com/msa4-lms-v2/msa4-lms-v2-k8s-manifests.git'
         MANIFEST_PATH = 'client'
         VITE_API_BASE_URL = 'https://mirae-sv.meerkat.p-e.kr'
+        VITE_NOTIFICATION_WS_URL = 'wss://mirae-sv.meerkat.p-e.kr/ws/notifications'
     }
 
     stages {
