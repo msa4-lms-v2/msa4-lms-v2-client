@@ -28,8 +28,8 @@ const columns = [
   { key: 'id', label: '신청번호' },
   { key: 'studentNumber', label: '학번' },
   { key: 'name', label: '이름' },
-  { key: 'source', label: '주전공' },
-  { key: 'target', label: '희망 복수전공' },
+  { key: 'source', label: '소속 학과' },
+  { key: 'target', label: '희망 학과' },
   { key: 'semester', label: '모집 학기' },
   { key: 'status', label: '검토 상태' },
   { key: 'management', label: '관리' },
@@ -244,8 +244,8 @@ onMounted(() => load());
             class="detail-list"
           >
             <div><dt>신청자</dt><dd>{{ selectedRequest.studentName }} ({{ selectedRequest.studentNumber || '-' }})</dd></div>
-            <div><dt>주전공</dt><dd>{{ selectedRequest.sourceDepartmentName }}</dd></div>
-            <div><dt>희망 복수전공</dt><dd>{{ selectedRequest.targetDepartmentName }}</dd></div>
+            <div><dt>소속 학과</dt><dd>{{ selectedRequest.sourceDepartmentName }}</dd></div>
+            <div><dt>희망 학과</dt><dd>{{ selectedRequest.targetDepartmentName }}</dd></div>
             <div><dt>모집 학기</dt><dd>{{ formatAcademicChangeSemester(selectedRequest, TYPE) }}</dd></div>
             <div><dt>신청일</dt><dd>{{ formatDate(selectedRequest.createdAt) }}</dd></div>
             <div><dt>현재 상태</dt><dd>{{ formatAcademicChangeStatus(selectedRequest.status) }}</dd></div>

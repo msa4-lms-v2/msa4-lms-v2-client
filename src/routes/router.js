@@ -64,8 +64,20 @@ const routes = [
     },
     {
         path: '/leave-return/general',
-        name: 'StudentLeaveReturn',
+        name: 'StudentGeneralLeave',
         component: () => import('../pages/leaveReturn/StudentLeaveReturnPage.vue'),
+        props: { mode: 'leave' },
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED', 'ON_LEAVE'],
+        },
+    },
+    {
+        path: '/leave-return/return',
+        name: 'StudentReturn',
+        component: () => import('../pages/leaveReturn/StudentLeaveReturnPage.vue'),
+        props: { mode: 'return' },
         meta: {
             requiresAuth: true,
             roles: ['STUDENT'],

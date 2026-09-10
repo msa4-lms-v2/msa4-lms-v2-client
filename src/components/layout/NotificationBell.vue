@@ -27,7 +27,7 @@ async function openNotification(item) {
       : 'StudentCounselingResult';
     await router.push({ name: routeName, params: { counselingId: item.resourceId } });
   } else if (item.resourceType === 'LEAVE_REQUEST' && authStore.userInfo?.role === 'STUDENT') {
-    await router.push({ name: 'StudentLeaveReturn' });
+    await router.push({ name: 'StudentReturn' });
   }
 }
 </script>
