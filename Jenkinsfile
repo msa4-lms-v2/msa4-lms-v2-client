@@ -17,7 +17,7 @@ pipeline {
                     env.IMAGE_TAG = env.GIT_COMMIT.take(8)
                 }
                 withCredentials([string(credentialsId: 'toss-client-key', variable: 'VITE_TOSS_CLIENT_KEY')]) {
-                    sh "docker build --build-arg VITE_TOSS_CLIENT_KEY=\${VITE_TOSS_CLIENT_KEY} --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker build --build-arg VITE_TOSS_CLIENT_KEY=\${VITE_TOSS_CLIENT_KEY} --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} --build-arg VITE_NOTIFICATION_WS_URL=${VITE_NOTIFICATION_WS_URL} -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
                 sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
             }
