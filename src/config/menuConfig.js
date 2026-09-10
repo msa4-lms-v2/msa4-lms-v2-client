@@ -4,6 +4,8 @@ export const MENU_TITLES = {
     '/admin/admissions/new': { default: '입학 예정자 등록' },
     '/admin/professors': { default: '교수 목록' },
     '/admin/professors/new': { default: '교수 등록' },
+    '/admin/academic-schedules': { default: '학사일정 목록' },
+    '/admin/academic-schedules/new': { default: '학사일정 작성' },
     '/main': { default: '메인 화면' },
     '/profile': { STUDENT: '학적 조회', PROFESSOR: '교적 조회', default: '내 정보' },
     '/profile/info-change': { default: '정보 변경 신청' },
@@ -52,6 +54,7 @@ export const MENU_TITLES = {
 export const MENU_TITLES_BY_NAME = {
     AdminAdmissionDetail: '입학 예정자 상세',
     AdminProfessorDetail: '교수 상세',
+    AcademicScheduleDetail: '학사일정 상세 · 수정',
     TuitionShow: '등록금 상세',
     AdminTuitionShow: '등록금 상세',
     InstallmentApply: '분할납부 신청',
