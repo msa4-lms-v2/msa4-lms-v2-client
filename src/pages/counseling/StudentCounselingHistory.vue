@@ -6,6 +6,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { useCounselingStore } from '../../store/counseling/useCounselingStore';
@@ -81,12 +82,20 @@ const statusLabel = (status) => status === 'ANSWERED' ? '답변완료' : '대기
 
 <template>
   <MyPageContainer title="상담 내역">
-    <section class="filter-card">
-      <label><span>연도</span><MySelect v-model="selectedYear" :options="years" /></label>
-      <label><span>학기</span><MySelect v-model="selectedTerm" :options="terms" /></label>
-      <label><span>처리 상태</span><MySelect v-model="selectedStatus" :options="statuses" /></label>
-      <MyButton color="deep-blue" size="middle" content="조회" @click="load" />
-    </section>
+    <MySearchFilter submit-text="조회" submit-at-end @search="load">
+      <div class="search-group">
+        <label for="counseling-filter-year">연도</label>
+        <MySelect id="counseling-filter-year" v-model="selectedYear" :options="years" />
+      </div>
+      <div class="search-group">
+        <label for="counseling-filter-term">학기</label>
+        <MySelect id="counseling-filter-term" v-model="selectedTerm" :options="terms" />
+      </div>
+      <div class="search-group">
+        <label for="counseling-filter-status">처리 상태</label>
+        <MySelect id="counseling-filter-status" v-model="selectedStatus" :options="statuses" />
+      </div>
+    </MySearchFilter>
 
     <section class="history-section">
       <h3>나의 상담 신청</h3>
@@ -119,9 +128,6 @@ const statusLabel = (status) => status === 'ANSWERED' ? '답변완료' : '대기
 </template>
 
 <style scoped>
-.filter-card { display: grid; grid-template-columns: 200px 200px 220px 1fr; gap: 22px; align-items: end; padding: 24px 20px; background: white; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; }
-.filter-card label { display: flex; flex-direction: column; gap: 8px; font-size: .9rem; font-weight: 700; color: var(--personal-color-text-secondary-steel); }
-.filter-card button { justify-self: end; }
 .history-section { margin-top: 36px; }
 .history-section h3 { font-size: 1.15rem; margin: 0 0 14px; }
 .title-cell { max-width: 320px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -134,8 +140,6 @@ const statusLabel = (status) => status === 'ANSWERED' ? '답변완료' : '대기
 .detail-content p, .detail-content strong { margin: 0; white-space: pre-wrap; }
 .loading { text-align: center; padding: 50px; }
 @media (max-width: 850px) {
-  .filter-card { grid-template-columns: 1fr; }
-  .filter-card button { justify-self: start; }
   .detail-summary { flex-direction: column; }
 }
 </style>

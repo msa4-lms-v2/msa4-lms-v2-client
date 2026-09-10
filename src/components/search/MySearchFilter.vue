@@ -10,6 +10,10 @@ defineProps({
     type: String,
     default: '조회',
   },
+  submitAtEnd: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 defineEmits(['search']);
@@ -21,6 +25,7 @@ defineEmits(['search']);
       <slot></slot>
       <MyButton
         v-if="showSubmit"
+        :class="{ 'submit-at-end': submitAtEnd }"
         btnType="button"
         color="deep-blue"
         size="middle"
@@ -45,6 +50,10 @@ defineEmits(['search']);
   gap: 16px;
   align-items: flex-end;
   flex-wrap: wrap;
+}
+
+.submit-at-end {
+  margin-left: auto;
 }
 
 /* Scoped 캡슐화를 유지하면서 슬롯으로 들어오는 자식 요소에 스타일을 적용하기 위해 :deep() 사용 */

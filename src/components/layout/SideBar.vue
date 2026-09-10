@@ -51,13 +51,13 @@ const activeMenus = ref({
   studentAttendance: false,
   studentRegistration: false,
   studentScholarship: false,
-  studentCounseling: true,
+  studentCounseling: false,
   professorTeacher: false,
   professorStudent: false,
   professorCourse: false,
   professorGrade: false,
   professorAttendance: false,
-  professorCounseling: true,
+  professorCounseling: false,
 });
 
 watch(() => route.path, path => {
