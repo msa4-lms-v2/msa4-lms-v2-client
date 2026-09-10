@@ -1,4 +1,6 @@
 <script setup>
+import MyCard from '../common/MyCard.vue';
+
 defineProps({
   schedules: {
     type: Array,
@@ -12,7 +14,10 @@ defineProps({
     <div class="common-section-header">
       <h3>학사일정</h3>
     </div>
-    <div class="schedule-list">
+    <MyCard class="schedule-list">
+      <p v-if="schedules.length === 0" class="empty-message">
+        일정이 없습니다.
+      </p>
       <div class="schedule-container">
         <div v-for="schedule in schedules" :key="schedule.id" class="schedule-item">
           <div class="schedule-title">
@@ -25,7 +30,7 @@ defineProps({
           </div>
         </div>
       </div>
-    </div>
+    </MyCard>
   </div>
 </template>
 
@@ -37,10 +42,7 @@ defineProps({
 }
 
 .schedule-list {
-  background: var(--personal-color-white);
-  border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 4px 14px var(--personal-shadow-soft);
   flex: 1;
 }
 
@@ -52,10 +54,7 @@ defineProps({
 
 .schedule-item {
   background: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 10px;
-  padding: 14px;
-  transition: all 0.2s ease;
+  padding: 4px 0;
 }
 
 .schedule-title {
@@ -67,5 +66,12 @@ defineProps({
 .schedule-date {
   font-size: 14px;
   color: var(--personal-color-primary-text-navy);
+}
+
+.empty-message {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--personal-color-text-muted-slate);
+  text-align: center;
 }
 </style>

@@ -3,9 +3,18 @@ import { computed, onMounted, ref } from 'vue';
 import DashboardCalendar from '../../components/dashboard/DashboardCalendar.vue';
 import ScheduleList from '../../components/dashboard/ScheduleList.vue';
 import NoticeList from '../../components/dashboard/NoticeList.vue';
+import MyCard from '../../components/common/MyCard.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { useDashboardStore } from '../../store/dashboard/useDashboardStore.js';
+import { useAuthStore } from '../../store/auth/useAuthStore.js';
 
 const dashboardStore = useDashboardStore();
+const authStore = useAuthStore();
+const dashboardTitle = computed(() => ({
+  STUDENT: '학생 대시보드',
+  PROFESSOR: '교수 대시보드',
+  ADMIN: '관리자 대시보드',
+}[authStore.userInfo?.role] || '대시보드'));
 const visibleRange = ref({
   start: null,
   end: null,
@@ -40,30 +49,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="dashboard">
+  <MyPageContainer :title="dashboardTitle">
+    <div class="dashboard">
     <div class="left">
-      <div v-if="dashboardStore.isSchedulesLoading" class="status-msg">일정을 불러오는 중입니다...</div>
-      <div v-else-if="dashboardStore.isSchedulesError" class="status-msg error">
+      <MyCard v-if="dashboardStore.isSchedulesLoading" class="status-msg">일정을 불러오는 중입니다...</MyCard>
+      <MyCard v-else-if="dashboardStore.isSchedulesError" class="status-msg error">
         일정을 불러오지 못했습니다. <button type="button" @click="dashboardStore.loadSchedules()">재시도</button>
-      </div>
+      </MyCard>
       <template v-else>
         <DashboardCalendar :schedules="dashboardStore.schedules" @update:visible-range="updateVisibleRange" />
         <ScheduleList :schedules="visibleMonthSchedules" />
-        <div v-if="dashboardStore.schedules.length === 0" class="empty-msg">일정이 없습니다.</div>
       </template>
     </div>
 
     <div class="right">
-      <div v-if="dashboardStore.isNoticesLoading" class="status-msg">공지사항을 불러오는 중입니다...</div>
-      <div v-else-if="dashboardStore.isNoticesError" class="status-msg error">
+      <MyCard v-if="dashboardStore.isNoticesLoading" class="status-msg">공지사항을 불러오는 중입니다...</MyCard>
+      <MyCard v-else-if="dashboardStore.isNoticesError" class="status-msg error">
         공지사항을 불러오지 못했습니다. <button type="button" @click="dashboardStore.loadNotices()">재시도</button>
-      </div>
+      </MyCard>
       <template v-else>
         <NoticeList :notices="dashboardStore.notices" />
-        <div v-if="dashboardStore.notices.length === 0" class="empty-msg">공지사항이 없습니다.</div>
       </template>
     </div>
-  </div>
+    </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
@@ -72,7 +81,6 @@ onMounted(async () => {
   grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
   align-items: stretch;
   gap: 20px;
-  background: #f5f7fb;
   min-height: calc(100vh - 104px);
   overflow: hidden;
 }
@@ -105,13 +113,10 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-.status-msg, .empty-msg {
+.status-msg {
   padding: 20px;
-  background: var(--personal-color-white);
-  border-radius: 8px;
   text-align: center;
   color: var(--personal-color-text-muted-slate);
-  box-shadow: 0 4px 14px var(--personal-shadow-soft);
 }
 
 .status-msg.error {

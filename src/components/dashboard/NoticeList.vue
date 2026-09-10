@@ -1,4 +1,6 @@
 <script setup>
+import MyCard from '../common/MyCard.vue';
+
 defineProps({
   notices: {
     type: Array,
@@ -12,13 +14,16 @@ defineProps({
     <div class="common-section-header">
       <h3>공지사항</h3>
     </div>
-    <div class="notice-list">
+    <MyCard class="notice-list">
+      <p v-if="notices.length === 0" class="empty-message">
+        공지사항이 없습니다.
+      </p>
       <div v-for="notice in notices" :key="notice.id" class="notice-item">
         <div class="notice-title">
           {{ notice.title }}
         </div>
       </div>
-    </div>
+    </MyCard>
   </div>
 </template>
 
@@ -31,10 +36,7 @@ defineProps({
 }
 
 .notice-list {
-  background: var(--personal-color-white);
-  border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 4px 14px var(--personal-shadow-soft);
   flex: 1;
   overflow-y: auto;
 }
@@ -50,5 +52,12 @@ defineProps({
 
 .notice-title {
   font-weight: 600;
+}
+
+.empty-message {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--personal-color-text-muted-slate);
+  text-align: center;
 }
 </style>
