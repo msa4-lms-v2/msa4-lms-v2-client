@@ -9,6 +9,10 @@ const authStore = useAuthStore();
 const router = useRouter();
 const open = ref(false);
 
+function categoryLabel(category) {
+  return category === 'ACADEMIC' ? '학사' : '상담';
+}
+
 function toggle() {
   open.value = !open.value;
   if (open.value) void notifications.syncFromServer();
@@ -16,13 +20,15 @@ function toggle() {
 
 async function openNotification(item) {
   if (!item.read) await notifications.markRead(item.notificationId);
-  if (!item.counselingId) return;
-
   open.value = false;
-  const routeName = authStore.userInfo?.role === 'PROFESSOR'
-    ? 'ProfessorCounselingAnswer'
-    : 'StudentCounselingResult';
-  await router.push({ name: routeName, params: { counselingId: item.counselingId } });
+  if (item.resourceType === 'COUNSELING') {
+    const routeName = authStore.userInfo?.role === 'PROFESSOR'
+      ? 'ProfessorCounselingAnswer'
+      : 'StudentCounselingResult';
+    await router.push({ name: routeName, params: { counselingId: item.resourceId } });
+  } else if (item.resourceType === 'LEAVE_REQUEST' && authStore.userInfo?.role === 'STUDENT') {
+    await router.push({ name: 'StudentLeaveReturn' });
+  }
 }
 </script>
 <template>
@@ -47,10 +53,10 @@ async function openNotification(item) {
       v-if="open"
       id="notification-panel"
       class="notification-panel"
-      aria-label="상담 알림"
+      aria-label="알림"
     >
       <div class="panel-heading">
-        <strong>상담 알림</strong><button
+        <strong>알림</strong><button
           type="button"
           @click="open = false"
         >
@@ -86,8 +92,8 @@ async function openNotification(item) {
             class="notification-item"
             @click="openNotification(item)"
           >
-            <strong>{{ item.message }}</strong>
-            <span>{{ item.title }} · {{ item.professorName }} 교수</span>
+            <strong>[{{ categoryLabel(item.category) }}] {{ item.title }}</strong>
+            <span>{{ item.message }}</span>
             <small>{{ item.createdAt?.replace('T', ' ') }}</small>
           </button>
         </li>

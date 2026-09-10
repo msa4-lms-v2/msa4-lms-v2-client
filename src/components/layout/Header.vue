@@ -36,7 +36,7 @@ const logout = async () => {
 
     <div class="header-right">
       <template v-if="authStore.isLoggedIn">
-        <NotificationBell v-if="['STUDENT', 'PROFESSOR'].includes(authStore.userInfo?.role)" />
+        <NotificationBell v-if="['STUDENT', 'PROFESSOR', 'ADMIN'].includes(authStore.userInfo?.role)" />
         <div class="user-info">
           <span class="user-name"
             ><strong>{{ displayName }}</strong

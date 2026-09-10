@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import myAxios from '../../api/myAxios';
 
-const endpoint = '/api/academic/counseling/notifications';
+const endpoint = '/api/academic/notifications';
 export const useNotificationStore = defineStore('notification', () => {
   const items = ref([]);
   const unreadCount = ref(0);

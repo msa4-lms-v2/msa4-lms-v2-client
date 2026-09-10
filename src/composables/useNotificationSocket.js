@@ -19,7 +19,7 @@ export function useNotificationSocket() {
   watch(
     () => [authStore.accessToken, authStore.userInfo?.role],
     ([token, role], previousToken, onCleanup) => {
-      if (!token || !['STUDENT', 'PROFESSOR'].includes(role)) {
+      if (!token || !['STUDENT', 'PROFESSOR', 'ADMIN'].includes(role)) {
         consecutiveFailures = 0;
         retrySuspended = false;
         notifications.clear();
