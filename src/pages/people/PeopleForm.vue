@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import { createPerson, getAdmissionAccount, getAccount, getPerson, getDepartments, getProfessorsByDepartment, peopleStatuses } from '../../api/peopleManagementApi';
+import { createPerson, getAdmissionAccount, getAccount, getPerson, getDepartments, getProfessorsByDepartment, peopleStatuses, retryAdmissionProvisioning, cancelAdmissionProvisioning } from '../../api/peopleManagementApi';
 import './peopleManagement.css';
 
 const props = defineProps({ kind: { type: String, required: true } });
@@ -30,9 +30,55 @@ const registration = ref(null);
 const issuedNumber = ref('');
 const checking = ref(false);
 const needsReview = ref(false);
+const provisioningAction = ref('');
+const provisioningNotice = ref('');
+const confirmCancellation = ref(false);
+const canManageProvisioning = computed(() => admission.value && detail && status.value === 'PROVISIONING');
+let detailTimer;
+let detailRefreshVersion = 0;
 let disposed = false;
 let checkTimer;
-onUnmounted(() => { disposed = true; clearTimeout(checkTimer); });
+onUnmounted(() => { disposed = true; clearTimeout(checkTimer); clearTimeout(detailTimer); });
+function scheduleDetailRefresh() {
+  clearTimeout(detailTimer);
+  if (!disposed && canManageProvisioning.value) detailTimer = setTimeout(refreshProvisioning, 5000);
+}
+async function refreshProvisioning() {
+  if (disposed || provisioningAction.value || !canManageProvisioning.value) return;
+  const refreshVersion = ++detailRefreshVersion;
+  try {
+    const response = await getPerson(props.kind, route.params.id);
+    if (disposed || refreshVersion !== detailRefreshVersion) return;
+    status.value = response.data.data.status;
+    issuedNumber.value = response.data.data.studentNumber || '';
+    if (!canManageProvisioning.value) {
+      confirmCancellation.value = false;
+      provisioningNotice.value = status.value === 'PROVISIONED' ? '학생 계정 생성이 완료되었습니다.' : '';
+    }
+  } catch { /* Keep the last known state; action endpoints revalidate it. */ }
+  finally { scheduleDetailRefresh(); }
+}
+async function manageProvisioning(cancel) {
+  if (provisioningAction.value || !canManageProvisioning.value) return;
+  provisioningAction.value = cancel ? 'cancel' : 'retry';
+  detailRefreshVersion++;
+  error.value = '';
+  provisioningNotice.value = '';
+  try {
+    const response = await (cancel ? cancelAdmissionProvisioning : retryAdmissionProvisioning)(route.params.id);
+    status.value = response.data.data.status;
+    issuedNumber.value = response.data.data.studentNumber || '';
+    confirmCancellation.value = false;
+    provisioningNotice.value = cancel ? '등록을 취소했습니다.' : '계정 생성을 다시 요청했습니다. 처리 결과를 확인하고 있습니다.';
+  } catch (e) {
+    error.value = e.response?.data?.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+    provisioningAction.value = '';
+    await refreshProvisioning();
+  } finally {
+    provisioningAction.value = '';
+    scheduleDetailRefresh();
+  }
+}
 async function checkRegistration(attempt = 0) {
   if (disposed || !registration.value) return;
   checking.value = true;
@@ -90,6 +136,7 @@ async function initialize() {
       issuedNumber.value = data.studentNumber || data.professorNumber || '';
     } else { departments.value = await getDepartments(); }
     ready.value = true;
+    scheduleDetailRefresh();
   } catch (e) { error.value = e.response?.data?.message || '정보를 불러오지 못했습니다. 다시 시도해 주세요.'; }
   finally { loading.value = false; }
 }
@@ -244,6 +291,59 @@ watch(() => form.departmentId, async departmentId => {
           </fieldset>
         </section>
         <div class="people-aside">
+          <section
+            v-if="canManageProvisioning || provisioningNotice"
+            class="people-card"
+            aria-label="계정 생성 관리"
+          >
+            <h3>계정 생성 상태</h3>
+            <p
+              v-if="provisioningNotice"
+              role="status"
+            >
+              {{ provisioningNotice }}
+            </p>
+            <template v-if="canManageProvisioning">
+              <p>계정 생성 중입니다. 처리가 중단되었다면 재시도하거나 등록을 취소할 수 있습니다.</p>
+              <div class="people-actions">
+                <button
+                  type="button"
+                  :disabled="Boolean(provisioningAction)"
+                  @click="manageProvisioning(false)"
+                >
+                  {{ provisioningAction === 'retry' ? '재시도 요청 중…' : '계정 생성 재시도' }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="Boolean(provisioningAction)"
+                  @click="confirmCancellation = true"
+                >
+                  등록 취소
+                </button>
+              </div>
+              <div
+                v-if="confirmCancellation"
+                role="group"
+                aria-label="등록 취소 확인"
+              >
+                <p>입학 예정자 등록을 취소하고 계정 생성을 중단할까요?</p>
+                <button
+                  type="button"
+                  :disabled="Boolean(provisioningAction)"
+                  @click="manageProvisioning(true)"
+                >
+                  {{ provisioningAction === 'cancel' ? '취소 중…' : '등록 취소 확인' }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="Boolean(provisioningAction)"
+                  @click="confirmCancellation = false"
+                >
+                  돌아가기
+                </button>
+              </div>
+            </template>
+          </section>
           <section class="people-card">
             <h3>등록 정보 확인</h3><p class="people-help">
               입력한 정보를 다시 한번 확인해 주세요.
