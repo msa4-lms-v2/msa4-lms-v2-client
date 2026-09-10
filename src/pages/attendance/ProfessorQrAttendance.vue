@@ -58,7 +58,7 @@ const lectureOptions = computed(() =>
   lectures.value.map((lecture) => ({
     value: String(lecture.classId),
     label: lectureLabel(lecture),
-  })),
+  }))
 );
 const hasOpenSession = computed(() => currentSession.value?.status === "OPEN");
 
@@ -251,10 +251,7 @@ onBeforeUnmount(stopLiveUpdates);
 </script>
 
 <template>
-  <MyPageContainer
-    title="QR 출석 관리"
-    subtitle="담당 강의의 출석 세션을 열고 실시간 참여 현황을 확인합니다."
-  >
+  <MyPageContainer title="QR 출석 관리">
     <section class="attendance-page" :aria-busy="isLoading">
       <div class="lecture-panel panel">
         <label for="lecture-select">강의 선택</label>
@@ -438,7 +435,6 @@ onBeforeUnmount(stopLiveUpdates);
   background: var(--personal-color-white);
   border: 1px solid var(--personal-color-border-mist);
   border-radius: var(--personal-radius);
-  box-shadow: 0 8px 24px var(--personal-shadow-soft);
 }
 .lecture-panel {
   padding: 20px 24px;
@@ -594,10 +590,18 @@ h2 {
 .lecture-cell {
   white-space: nowrap;
 }
-:deep(.lecture-column) { width: 28%; }
-:deep(.date-column) { width: 32%; }
-:deep(.attendance-column) { width: 25%; }
-:deep(.status-column) { width: 15%; }
+:deep(.lecture-column) {
+  width: 28%;
+}
+:deep(.date-column) {
+  width: 32%;
+}
+:deep(.attendance-column) {
+  width: 25%;
+}
+:deep(.status-column) {
+  width: 15%;
+}
 .expanded-qr {
   padding: 0 12px 4px;
 }
