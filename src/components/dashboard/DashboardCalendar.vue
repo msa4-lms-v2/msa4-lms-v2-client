@@ -1,8 +1,9 @@
 <script setup>
-import FullCalendar from '@fullcalendar/vue3';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import dayjs from 'dayjs';
-import { computed, ref } from 'vue';
+import FullCalendar from "@fullcalendar/vue3";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import dayjs from "dayjs";
+import { computed, ref } from "vue";
+import MyCard from "../common/MyCard.vue";
 
 const props = defineProps({
   schedules: {
@@ -11,13 +12,13 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:visibleRange']);
+const emit = defineEmits(["update:visibleRange"]);
 const calendarRef = ref(null);
-const calendarTitle = ref('');
+const calendarTitle = ref("");
 
 const addOneDay = (date) => {
   const parsed = dayjs(date);
-  return parsed.isValid() ? parsed.add(1, 'day').format('YYYY-MM-DD') : null;
+  return parsed.isValid() ? parsed.add(1, "day").format("YYYY-MM-DD") : null;
 };
 
 const events = computed(() =>
@@ -26,12 +27,12 @@ const events = computed(() =>
     start: schedule.startDate,
     end: addOneDay(schedule.endDate || schedule.startDate),
     backgroundColor:
-      schedule.targetRole === 'STUDENT'
-        ? 'var(--personal-color-green)'
-        : schedule.targetRole === 'PROFESSOR'
-        ? 'var(--personal-color-secondary-blue)'
-        : 'var(--personal-color-red)',
-    borderColor: 'transparent',
+      schedule.targetRole === "STUDENT"
+        ? "var(--personal-color-green)"
+        : schedule.targetRole === "PROFESSOR"
+        ? "var(--personal-color-secondary-blue)"
+        : "var(--personal-color-red)",
+    borderColor: "transparent",
   }))
 );
 
@@ -44,15 +45,15 @@ const moveCalendar = (action) => {
 
 const calendarOptions = {
   plugins: [dayGridPlugin],
-  initialView: 'dayGridMonth',
-  height: '100%',
+  initialView: "dayGridMonth",
+  height: "100%",
   expandRows: true,
   dayMaxEventRows: 2,
   headerToolbar: false,
   datesSet: ({ view }) => {
     calendarTitle.value = view.title;
 
-    emit('update:visibleRange', {
+    emit("update:visibleRange", {
       start: view.currentStart,
       end: view.currentEnd,
     });
@@ -61,13 +62,25 @@ const calendarOptions = {
 </script>
 
 <template>
-  <div class="calendar-card">
+  <MyCard class="calendar-card">
     <div class="calendar-header">
-      <button class="calendar-nav-button" type="button" @click="moveCalendar('prev')">‹</button>
+      <button
+        class="calendar-nav-button"
+        type="button"
+        @click="moveCalendar('prev')"
+      >
+        ‹
+      </button>
 
       <h3 class="calendar-title">{{ calendarTitle }}</h3>
 
-      <button class="calendar-nav-button" type="button" @click="moveCalendar('next')">›</button>
+      <button
+        class="calendar-nav-button"
+        type="button"
+        @click="moveCalendar('next')"
+      >
+        ›
+      </button>
     </div>
 
     <div class="calendar-body">
@@ -79,17 +92,15 @@ const calendarOptions = {
         }"
       />
     </div>
-  </div>
+  </MyCard>
 </template>
 
 <style scoped>
 .calendar-card {
   display: flex;
   flex-direction: column;
-  background: var(--personal-color-white);
-  border-radius: 8px;
   padding: 18px;
-  box-shadow: 0 4px 14px var(--personal-shadow-soft);
+
   height: 100%;
   min-height: 0;
   overflow: hidden;
