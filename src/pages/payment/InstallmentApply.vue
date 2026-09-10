@@ -63,7 +63,6 @@
               { key: 'amount', label: '금액' },
               { key: 'dueDate', label: '납부기한' },
               { key: 'status', label: '상태' },
-              { key: 'action', label: '결제' }
             ]"
           >
             <tr v-for="item in sortedItems" :key="item.id">
@@ -76,18 +75,12 @@
                   :variant="INSTALLMENT_ITEM_STATUS_VARIANT[item.status]"
                 />
               </td>
-              <td>
-                <MyButton
-                  v-if="item.status === 'SCHEDULED' && instStore.installmentPlan.status === 'ACTIVE'"
-                  color="deep-blue"
-                  size="small"
-                  content="결제하기"
-                  @click="onPayment(item)"
-                  :disabled="instStore.isProcessingPayment"
-                />
-              </td>
             </tr>
           </MyTable>
+
+          <p v-if="instStore.installmentPlan.status === 'ACTIVE'" class="notice">
+            회차별 결제는 <RouterLink :to="`/tuition/${tuitionBillId}`">등록금 납부</RouterLink> 화면에서 진행합니다.
+          </p>
         </div>
       </div>
     </article>
@@ -109,7 +102,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import { confirmDialog, notify } from '../../composables/useDialog';
+import { notify } from '../../composables/useDialog';
 import { formatCurrency } from '../../util/format';
 
 const route = useRoute();
@@ -140,19 +133,6 @@ const onSubmit = async () => {
   }
 };
 
-const onPayment = async (item) => {
-  const confirmed = await confirmDialog(`${item.roundNo}회차 금액 ${formatCurrency(item.amount)}을 결제하시겠습니까?`);
-  if (!confirmed) return;
-  try {
-    await instStore.processInstallmentPayment({
-      tuitionBillId,
-      installmentPlanItemId: item.id
-    });
-    await notify('결제가 완료되었습니다.');
-  } catch (err) {
-    await notify(err.response?.data?.message || '결제 중 오류가 발생했습니다.');
-  }
-};
 </script>
 
 <style scoped>
