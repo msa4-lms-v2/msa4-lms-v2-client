@@ -21,6 +21,7 @@ defineOptions({ name: 'StudentLeaveReturnPage' });
 const ATTACHMENTS_MAX_COUNT = 5;
 const GENERAL_LEAVE = 'GENERAL_LEAVE';
 const GENERAL_RETURN = 'GENERAL_RETURN';
+const MILITARY_RETURN = 'MILITARY_RETURN';
 
 const profileStore = useProfileStore();
 
@@ -75,11 +76,11 @@ const isLeave = computed(() => form.requestType === GENERAL_LEAVE);
 // 신청 유형 선택지 자체를 좁힌다. 라우트 가드는 ENROLLED/ON_LEAVE 둘 다 이 페이지 접근을
 // 허용하지만, 실제로 제출 가능한 유형은 현재 학적 상태에 따라 하나뿐이다.
 const academicStatus = computed(() => profileStore.profile?.academicStatus);
-const canRequestLeave = computed(() => academicStatus.value === 'ENROLLED');
+const canRequestLeave = computed(() => ['ENROLLED', 'ON_LEAVE'].includes(academicStatus.value));
 const canRequestReturn = computed(() => academicStatus.value === 'ON_LEAVE');
 
 const applicablePeriodTypes = computed(() => (
-  isLeave.value ? [GENERAL_LEAVE] : [GENERAL_RETURN, 'MILITARY_RETURN']
+  isLeave.value ? [GENERAL_LEAVE] : [form.requestType]
 ));
 
 const selectedPeriod = computed(() => periods.value.find(
@@ -284,8 +285,18 @@ onMounted(async () => {
                 v-model="form.requestType"
                 class="form-select"
               >
-                <option v-if="canRequestLeave" :value="GENERAL_LEAVE">휴학</option>
-                <option v-if="canRequestReturn" :value="GENERAL_RETURN">복학</option>
+                <option
+                  v-if="canRequestLeave"
+                  :value="GENERAL_LEAVE"
+                >휴학</option>
+                <option
+                  v-if="canRequestReturn"
+                  :value="GENERAL_RETURN"
+                >일반복학</option>
+                <option
+                  v-if="canRequestReturn"
+                  :value="MILITARY_RETURN"
+                >군복학</option>
               </MySelect>
             </label>
 
