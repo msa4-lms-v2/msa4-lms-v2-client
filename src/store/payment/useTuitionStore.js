@@ -12,17 +12,15 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
   const currentStatus = ref(null);
   const currentAllocation = ref(null);
   const currentPayment = ref(null);
-  const currentRefundEstimate = ref(null);
+  const billItems = ref([]);
   const isLoadingAdminBills = ref(false);
   const isLoadingMyBills = ref(false);
   const isLoadingStatus = ref(false);
   const isLoadingAllocation = ref(false);
+  const isLoadingBillItems = ref(false);
   const isSubmittingScholarship = ref(false);
   const isPaymentLoading = ref(false);
   const isPaymentError = ref(false);
-  const isRefundEstimateLoading = ref(false);
-  const isRefundEstimateError = ref(false);
-  const hasNoWithdrawalRequest = ref(false);
 
   // 2. Getters (computed)
 
@@ -90,6 +88,16 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     }
   };
 
+  const fetchBillItems = async (tuitionBillId) => {
+    isLoadingBillItems.value = true;
+    try {
+      const res = await myAxios.get(`/api/payment/tuition-bills/${tuitionBillId}/items`);
+      billItems.value = res.data.data;
+    } finally {
+      isLoadingBillItems.value = false;
+    }
+  };
+
   const applyScholarship = async ({ tuitionBillId, type, amount, reason }) => {
     isSubmittingScholarship.value = true;
     try {
@@ -108,24 +116,27 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
 
   // 결제 수단 선택 -> 체크아웃 세션 생성까지는 우리 서버가 하고, 그 뒤 실제 승인은 토스 결제창(SDK)으로 넘긴다.
   // 토스가 successUrl/failUrl로 브라우저를 이동시키므로 이 함수는 정상 반환 없이 페이지를 떠난다(리다이렉트).
-  const initiateTossPayment = async ({ tuitionBillId, method, amount }) => {
+  const initiateTossPayment = async ({ tuitionBillId, method, amount, installmentPlanItemId }) => {
     isPaymentLoading.value = true;
     isPaymentError.value = false;
     currentPayment.value = null;
 
     try {
-      const validationRes = await myAxios.post('/api/payment/payment-amount-validation', {
-        tuitionBillId,
-        amount,
-      });
-      const validation = validationRes.data.data;
-      if (!validation.valid || Number(validation.expectedAmount) !== Number(amount)) {
-        throw new Error('결제 금액이 서버 계산값과 일치하지 않습니다.');
+      if (!installmentPlanItemId) {
+        const validationRes = await myAxios.post('/api/payment/payment-amount-validation', {
+          tuitionBillId,
+          amount,
+        });
+        const validation = validationRes.data.data;
+        if (!validation.valid || Number(validation.expectedAmount) !== Number(amount)) {
+          throw new Error('결제 금액이 서버 계산값과 일치하지 않습니다.');
+        }
       }
 
       const checkoutRes = await myAxios.post('/api/payment/payments', {
         tuitionBillId,
         method,
+        installmentPlanItemId: installmentPlanItemId || undefined,
       });
       const checkoutSession = checkoutRes.data.data;
 
@@ -170,45 +181,6 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     }
   };
 
-  // /api/payment/refunds/withdrawal-estimate는 tuitionBillId와 함께 withdrawalId도 요구한다(IDOR 방지 -
-  // 본인의 어떤 자퇴 신청인지 명시). Payment는 자퇴 신청 목록을 갖고 있지 않으므로, 먼저 Academic에서
-  // 본인 자퇴 신청 목록을 조회해 withdrawalId를 구한 뒤에만 Payment의 예상 환불액 조회를 호출한다.
-  const fetchWithdrawalEstimate = async (tuitionBillId) => {
-    isRefundEstimateLoading.value = true;
-    isRefundEstimateError.value = false;
-    hasNoWithdrawalRequest.value = false;
-    currentRefundEstimate.value = null;
-
-    try {
-      const withdrawalsRes = await myAxios.get('/api/academic/withdrawals', {
-        params: { page: 1, size: 1 },
-      });
-      const withdrawals = withdrawalsRes.data.data.items;
-      if (!withdrawals || withdrawals.length === 0) {
-        hasNoWithdrawalRequest.value = true;
-        return null;
-      }
-
-      const withdrawalId = withdrawals[0].id;
-      const res = await myAxios.get('/api/payment/refunds/withdrawal-estimate', {
-        params: { tuitionBillId, withdrawalId },
-      });
-      currentRefundEstimate.value = res.data.data;
-      return currentRefundEstimate.value;
-    } catch (error) {
-      if (error.response?.status === 404) {
-        hasNoWithdrawalRequest.value = true;
-        return null;
-      }
-      isRefundEstimateError.value = true;
-      throw error;
-    } finally {
-      isRefundEstimateLoading.value = false;
-    }
-  };
-
-  // 환불률 확정(PATCH /api/payment/refunds/withdrawal-rate)은 자퇴 승인 화면 완성 후 연동 예정.
-
   return {
     adminBills,
     adminBillsPage,
@@ -218,25 +190,23 @@ export const useTuitionStore = defineStore('tuitionStore', () => {
     currentStatus,
     currentAllocation,
     currentPayment,
-    currentRefundEstimate,
+    billItems,
     isLoadingAdminBills,
     isLoadingMyBills,
     isLoadingStatus,
     isLoadingAllocation,
+    isLoadingBillItems,
     isSubmittingScholarship,
     isPaymentLoading,
     isPaymentError,
-    isRefundEstimateLoading,
-    isRefundEstimateError,
-    hasNoWithdrawalRequest,
     fetchAdminBills,
     fetchMyBills,
     fetchPaymentHistory,
     fetchStatus,
     fetchAllocation,
+    fetchBillItems,
     applyScholarship,
     initiateTossPayment,
     confirmTossPayment,
-    fetchWithdrawalEstimate,
   };
 });

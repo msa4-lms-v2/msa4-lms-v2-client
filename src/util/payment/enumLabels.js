@@ -25,8 +25,8 @@ export const HEALTH_STATUS_VARIANT = {
 
 export const PAYMENT_STATUS_LABEL = {
   REQUESTED: '처리중',
-  SUCCEEDED: '결제 완료',
-  FAILED: '결제 실패',
+  SUCCEEDED: '완료',
+  FAILED: '미완료',
   CANCELLED: '취소됨',
 };
 

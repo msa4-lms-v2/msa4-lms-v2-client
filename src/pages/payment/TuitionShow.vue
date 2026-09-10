@@ -1,57 +1,73 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
+import { useInstallmentStore } from '../../store/payment/useInstallmentStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
-import { useDocumentStore } from '../../store/payment/useDocumentStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyTable from '../../components/table/MyTable.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { notify } from '../../composables/useDialog';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
-import {
-  PAYMENT_STATUS_LABEL,
-  PAYMENT_STATUS_VARIANT,
-  TUITION_BILL_STATUS_LABEL,
-  TUITION_BILL_STATUS_VARIANT,
-} from '../../util/payment/enumLabels';
+import { INSTALLMENT_ITEM_STATUS_LABEL, INSTALLMENT_ITEM_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
 const route = useRoute();
 const tuitionBillId = Number(route.params.id);
 const tuitionStore = useTuitionStore();
+const installmentStore = useInstallmentStore();
 const semesterStore = useSemesterStore();
-const documentStore = useDocumentStore();
-const selectedPaymentMethod = ref('CARD');
+
+const paymentType = ref('LUMP_SUM');
+const selectedInstallmentItemId = ref('');
+const selectedMethod = ref('CARD');
 const paymentErrorMessage = ref('');
-const refundErrorMessage = ref('');
 
-const verifyUrl = computed(() => {
-  const token = documentStore.issuedDocument?.verificationToken;
-  return token ? `${window.location.origin}/certificates/verify?token=${encodeURIComponent(token)}` : '';
-});
+const paymentTypeOptions = [
+  { value: 'LUMP_SUM', label: '일시납' },
+  { value: 'INSTALLMENT', label: '분할납부' },
+];
 
-const handleIssueReceipt = async () => {
-  try {
-    await documentStore.issuePaymentReceipt(tuitionBillId);
-  } catch (error) {
-    await notify(error.response?.data?.message || '납부확인서를 발급하지 못했습니다.');
-  }
-};
-
-const currentBill = computed(() => tuitionStore.myBills.find((bill) => bill.id === tuitionBillId));
-const semesterLabel = computed(() => (
-  currentBill.value ? semesterStore.getSemesterLabel(currentBill.value.semesterId) : '-'
-));
-
-const paymentMethods = [
+const methodOptions = [
   { value: 'CARD', label: '카드' },
   { value: 'VIRTUAL_ACCOUNT', label: '가상계좌' },
   { value: 'TRANSFER', label: '계좌이체' },
 ];
 
+const currentBill = computed(() => tuitionStore.myBills.find((bill) => bill.id === tuitionBillId));
+const semester = computed(() => semesterStore.semesters.find((item) => item.id === currentBill.value?.semesterId));
+const semesterLabel = computed(() => (
+  semester.value ? `${semester.value.academicYear}년 ${semester.value.term === 'FIRST' ? '1' : '2'}학기` : '-'
+));
+
+const hasActivePlan = computed(() => (
+  ['ACTIVE', 'COMPLETED'].includes(installmentStore.installmentPlan?.status)
+));
+
+const sortedPlanItems = computed(() => {
+  if (!installmentStore.installmentPlan?.items) return [];
+  return [...installmentStore.installmentPlan.items].sort((a, b) => a.roundNo - b.roundNo);
+});
+
+const scheduledPlanItems = computed(() => sortedPlanItems.value.filter((item) => item.status === 'SCHEDULED'));
+
+const selectedInstallmentItem = computed(() => (
+  scheduledPlanItems.value.find((item) => item.id === selectedInstallmentItemId.value)
+));
+
+// 자동으로 활성 분할납부 계획이 확인되면 다음 납부 회차를 미리 선택해 준다.
+watch(() => scheduledPlanItems.value, (items) => {
+  if (items.length > 0 && !selectedInstallmentItemId.value) {
+    selectedInstallmentItemId.value = items[0].id;
+  }
+}, { immediate: true });
+
 const displayedPaymentAmount = computed(() => {
+  if (paymentType.value === 'INSTALLMENT') {
+    return selectedInstallmentItem.value ? Number(selectedInstallmentItem.value.amount) : 0;
+  }
   const amount = tuitionStore.currentAllocation?.actualPaymentAmount
     ?? tuitionStore.currentStatus?.billingAmount;
   const numericAmount = Number(amount);
@@ -61,15 +77,12 @@ const displayedPaymentAmount = computed(() => {
 // 이 화면의 결제 금액은 "이미 낸 금액을 뺀 잔액"이 아니라 장학금 차감 후 전체 실납부액이다.
 // PARTIAL(가상계좌 부분입금 등으로 일부만 납부된 상태)에서 전체 금액을 다시 결제하면
 // 서버가 초과납부로 거부하므로, 그 상태에서는 결제 버튼 자체를 막고 안내만 보여준다.
-const canPay = computed(() => (
-  displayedPaymentAmount.value > 0
-  && !['PAID', 'PARTIAL'].includes(tuitionStore.currentStatus?.status)
-));
-
-const formatRefundRate = (rate) => {
-  const numericRate = Number(rate);
-  return Number.isFinite(numericRate) ? `${numericRate * 100}%` : '-';
-};
+const canPay = computed(() => {
+  if (paymentType.value === 'INSTALLMENT') {
+    return hasActivePlan.value && !!selectedInstallmentItem.value;
+  }
+  return displayedPaymentAmount.value > 0 && !['PAID', 'PARTIAL'].includes(tuitionStore.currentStatus?.status);
+});
 
 const handlePayment = async () => {
   paymentErrorMessage.value = '';
@@ -78,39 +91,46 @@ const handlePayment = async () => {
     // 성공 시 토스 결제창이 successUrl로 브라우저를 이동시키므로 여기서 더 할 일이 없다.
     await tuitionStore.initiateTossPayment({
       tuitionBillId,
-      method: selectedPaymentMethod.value,
+      method: selectedMethod.value,
       amount: displayedPaymentAmount.value,
+      installmentPlanItemId: paymentType.value === 'INSTALLMENT' ? selectedInstallmentItem.value?.id : undefined,
     });
   } catch {
     paymentErrorMessage.value = '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.';
   }
 };
 
-const handleRefundEstimate = async () => {
-  refundErrorMessage.value = '';
-  try {
-    await tuitionStore.fetchWithdrawalEstimate(tuitionBillId);
-  } catch {
-    refundErrorMessage.value = '환불 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
-  }
+const handleCancel = () => {
+  paymentType.value = 'LUMP_SUM';
+  selectedMethod.value = 'CARD';
+  paymentErrorMessage.value = '';
 };
 
-onMounted(() => {
+onMounted(async () => {
   tuitionStore.fetchMyBills();
   tuitionStore.fetchStatus(tuitionBillId);
   tuitionStore.fetchAllocation(tuitionBillId);
+  tuitionStore.fetchBillItems(tuitionBillId);
   semesterStore.fetchSemesters();
+
+  try {
+    await installmentStore.fetchInstallmentPlan(tuitionBillId);
+    if (hasActivePlan.value) {
+      paymentType.value = 'INSTALLMENT';
+    }
+  } catch {
+    // 분할납부 계획이 없거나 조회에 실패해도 일시납 결제는 그대로 가능해야 하므로 무시한다.
+  }
 });
 </script>
 
 <template>
-  <MyPageContainer title="등록금 고지서">
+  <MyPageContainer title="등록금 납부">
     <div class="panels">
       <section
         v-if="tuitionStore.currentAllocation"
         class="summary-bar"
       >
-        <SummaryStatCard label="학기" :value="semesterLabel" />
         <SummaryStatCard label="총 등록금" :value="formatCurrency(tuitionStore.currentAllocation.billingAmount)" />
         <SummaryStatCard
           label="장학금"
@@ -126,173 +146,122 @@ onMounted(() => {
         불러오는 중...
       </p>
 
-      <section v-if="tuitionStore.currentStatus" class="notice-section">
-        <h3>납부 고지 내역</h3>
-        <MyTable
-          :columns="[
-            { key: 'division', label: '구분' },
-            { key: 'amount', label: '금액' },
-            { key: 'dueDate', label: '납부기한' },
-            { key: 'status', label: '상태' },
-          ]"
-        >
-          <tr>
-            <td>{{ semesterLabel }} 등록금</td>
-            <td>{{ formatCurrency(tuitionStore.currentStatus.billingAmount) }}</td>
-            <td>{{ formatDate(tuitionStore.currentStatus.dueDate) }}</td>
-            <td>
-              <MyStatusBadge
-                :label="TUITION_BILL_STATUS_LABEL[tuitionStore.currentStatus.status]"
-                :variant="TUITION_BILL_STATUS_VARIANT[tuitionStore.currentStatus.status]"
-              />
-            </td>
-          </tr>
-        </MyTable>
-      </section>
-
-      <section
-        class="action-panel"
-        aria-labelledby="payment-title"
-      >
-        <h3 id="payment-title">
-          등록금 결제
-        </h3>
-        <p class="description">
-          결제할 금액 {{ formatCurrency(displayedPaymentAmount) }}을 확인하고 결제 수단을 선택해 주세요.
-        </p>
-
-        <p
-          v-if="tuitionStore.currentStatus?.status === 'PARTIAL'"
-          class="notice notice--warning"
-          role="status"
-        >
-          이미 일부 금액이 납부돼 있어 전체 금액 재결제는 제한됩니다. 잔여 납부는 관리자에게 문의해 주세요.
-        </p>
-
-        <fieldset
-          class="payment-methods"
-          :disabled="tuitionStore.isPaymentLoading || !canPay"
-        >
-          <legend>결제 수단</legend>
-          <label
-            v-for="method in paymentMethods"
-            :key="method.value"
-            class="payment-method"
-          >
-            <input
-              v-model="selectedPaymentMethod"
-              type="radio"
-              name="paymentMethod"
-              :value="method.value"
+      <section class="bill-section">
+        <h3>등록금 고지 목록</h3>
+        <div class="bill-grid">
+          <div class="bill-detail">
+            <h4>등록금 상세 내역</h4>
+            <MyTable
+              :loading="tuitionStore.isLoadingBillItems"
+              :empty="!tuitionStore.isLoadingBillItems && tuitionStore.billItems.length === 0"
+              empty-message="등록된 항목이 없습니다."
+              :columns="[
+                { key: 'itemName', label: '수급자금명' },
+                { key: 'amount', label: '수납금액' },
+                { key: 'paid', label: '납입여부' },
+              ]"
             >
-            <span>{{ method.label }}</span>
-          </label>
-        </fieldset>
+              <tr v-for="item in tuitionStore.billItems" :key="item.id">
+                <td>{{ item.itemName }}</td>
+                <td>{{ formatCurrency(item.amount) }}</td>
+                <td>
+                  <input type="checkbox" :checked="item.paid" disabled>
+                </td>
+              </tr>
+            </MyTable>
+          </div>
 
-        <p
-          v-if="tuitionStore.isPaymentError && paymentErrorMessage"
-          class="notice notice--error"
-          role="alert"
-        >
-          {{ paymentErrorMessage }}
-        </p>
-        <div
-          v-if="tuitionStore.currentPayment"
-          class="result-row"
-          role="status"
-        >
-          <span>결제 결과</span>
-          <MyStatusBadge
-            :label="PAYMENT_STATUS_LABEL[tuitionStore.currentPayment.status]"
-            :variant="PAYMENT_STATUS_VARIANT[tuitionStore.currentPayment.status]"
-          />
+          <form class="payment-form" @submit.prevent="handlePayment">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="payment-type">납부방식</label>
+                <MySelect id="payment-type" v-model="paymentType" :disabled="tuitionStore.isPaymentLoading">
+                  <option
+                    v-for="option in paymentTypeOptions"
+                    :key="option.value"
+                    :value="option.value"
+                    :disabled="option.value === 'INSTALLMENT' && !hasActivePlan"
+                  >
+                    {{ option.label }}
+                  </option>
+                </MySelect>
+              </div>
+
+              <div v-if="paymentType === 'INSTALLMENT'" class="form-group">
+                <label for="installment-round">회차 선택</label>
+                <MySelect id="installment-round" v-model="selectedInstallmentItemId" :disabled="tuitionStore.isPaymentLoading">
+                  <option v-for="item in scheduledPlanItems" :key="item.id" :value="item.id">
+                    {{ item.roundNo }}회차
+                  </option>
+                </MySelect>
+              </div>
+            </div>
+
+            <p
+              v-if="paymentType === 'INSTALLMENT' && !hasActivePlan"
+              class="notice"
+              role="status"
+            >
+              승인된 분할납부 계획이 없습니다. 분할납부 신청 화면에서 먼저 신청해 주세요.
+            </p>
+
+            <div class="form-group">
+              <label for="payment-method">수납방식</label>
+              <MySelect id="payment-method" v-model="selectedMethod" :options="methodOptions" :disabled="tuitionStore.isPaymentLoading || !canPay" />
+            </div>
+
+            <p
+              v-if="tuitionStore.currentStatus?.status === 'PARTIAL'"
+              class="notice notice--warning"
+              role="status"
+            >
+              이미 일부 금액이 납부돼 있어 전체 금액 재결제는 제한됩니다. 잔여 납부는 관리자에게 문의해 주세요.
+            </p>
+            <p
+              v-if="tuitionStore.isPaymentError && paymentErrorMessage"
+              class="notice notice--error"
+              role="alert"
+            >
+              {{ paymentErrorMessage }}
+            </p>
+
+            <div class="form-actions">
+              <MyButton
+                btn-type="submit"
+                color="deep-blue"
+                size="middle"
+                :disabled="!canPay || tuitionStore.isPaymentLoading"
+              >
+                {{ tuitionStore.isPaymentLoading ? '처리 중...' : '납부' }}
+              </MyButton>
+              <MyButton
+                btn-type="button"
+                color="white"
+                size="middle"
+                content="취소"
+                :disabled="tuitionStore.isPaymentLoading"
+                @click="handleCancel"
+              />
+            </div>
+          </form>
         </div>
-
-        <MyButton
-          color="deep-blue"
-          size="big"
-          :disabled="!canPay || tuitionStore.isPaymentLoading"
-          @click="handlePayment"
-        >
-          {{ tuitionStore.isPaymentLoading ? '결제 처리 중...' : '결제하기' }}
-        </MyButton>
       </section>
 
-      <section
-        class="action-panel"
-        aria-labelledby="refund-title"
-      >
-        <h3 id="refund-title">
-          자퇴 환불 상태
-        </h3>
-        <p class="description">
-          자퇴 신청에 따른 예상 환불 금액을 확인할 수 있습니다.
-        </p>
-
-        <MyButton
-          color="white"
-          size="big"
-          :disabled="tuitionStore.isRefundEstimateLoading"
-          @click="handleRefundEstimate"
-        >
-          {{ tuitionStore.isRefundEstimateLoading ? '확인 중...' : '환불 정보 확인' }}
-        </MyButton>
-
-        <p
-          v-if="tuitionStore.hasNoWithdrawalRequest"
-          class="notice"
-          role="status"
-        >
-          자퇴 신청 내역이 없습니다.
-        </p>
-        <p
-          v-else-if="tuitionStore.isRefundEstimateError && refundErrorMessage"
-          class="notice notice--error"
-          role="alert"
-        >
-          {{ refundErrorMessage }}
-        </p>
-        <dl
-          v-else-if="tuitionStore.currentRefundEstimate"
-          class="refund-details"
-        >
-          <dt>환불 기준 금액</dt>
-          <dd>{{ formatCurrency(tuitionStore.currentRefundEstimate.refundableBase) }}</dd>
-          <dt>예상 환불률</dt>
-          <dd>{{ formatRefundRate(tuitionStore.currentRefundEstimate.refundRate) }}</dd>
-          <dt>예상 환불액</dt>
-          <dd class="highlight">
-            {{ formatCurrency(tuitionStore.currentRefundEstimate.estimatedRefundAmount) }}
-          </dd>
-        </dl>
-      </section>
-
-      <section
-        class="action-panel"
-        aria-labelledby="receipt-title"
-      >
-        <h3 id="receipt-title">
-          납부확인서
-        </h3>
-        <p class="description">
-          완료된 결제 건에 대해 납부확인서를 발급받을 수 있습니다.
-        </p>
-
-        <MyButton
-          color="white"
-          size="big"
-          :disabled="documentStore.isIssuing"
-          @click="handleIssueReceipt"
-        >
-          {{ documentStore.isIssuing ? '발급 중...' : '납부확인서 발급' }}
-        </MyButton>
-
-        <dl v-if="documentStore.issuedDocument" class="refund-details">
-          <dt>발급일시</dt>
-          <dd>{{ formatDate(documentStore.issuedDocument.issuedAt, 'YYYY-MM-DD HH:mm') }}</dd>
-          <dt>진위확인 링크</dt>
-          <dd><a :href="verifyUrl" target="_blank" rel="noopener">{{ verifyUrl }}</a></dd>
-        </dl>
+      <section v-if="sortedPlanItems.length > 0" class="rounds-section">
+        <h3>{{ semesterLabel }} · 납부 회차 안내</h3>
+        <div class="rounds-grid">
+          <div v-for="item in sortedPlanItems" :key="item.id" class="round-card">
+            <div class="round-header">
+              <span class="round-no">{{ item.roundNo }}회</span>
+              <MyStatusBadge
+                :label="INSTALLMENT_ITEM_STATUS_LABEL[item.status]"
+                :variant="INSTALLMENT_ITEM_STATUS_VARIANT[item.status]"
+              />
+            </div>
+            <span class="round-amount">{{ formatCurrency(item.amount) }}</span>
+            <span class="round-due">{{ formatDate(item.dueDate, 'MM.DD') }}</span>
+          </div>
+        </div>
       </section>
     </div>
   </MyPageContainer>
@@ -307,27 +276,53 @@ onMounted(() => {
 
 .summary-bar {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
-.notice-section {
+@media (max-width: 640px) {
+  .summary-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bill-section,
+.rounds-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bill-section h3,
+.rounds-section h3 {
+  margin: 0;
+}
+
+.bill-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .bill-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bill-detail {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.notice-section h3 {
+.bill-detail h4 {
   margin: 0;
+  font-size: 0.95rem;
 }
 
-@media (max-width: 640px) {
-  .summary-bar {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.action-panel {
+.payment-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -336,39 +331,28 @@ onMounted(() => {
   border-radius: var(--personal-radius-card);
 }
 
-.action-panel h3,
-.action-panel p {
-  margin: 0;
-}
-
-.description {
-  color: var(--personal-color-student-primary-cyan);
-}
-
-.payment-methods {
+.form-row {
   display: grid;
-  gap: 10px;
-  padding: 0;
-  border: 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
-.payment-methods legend {
-  margin-bottom: 8px;
-  font-weight: 700;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.payment-method {
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--personal-color-text-secondary-steel);
+}
+
+.form-actions {
   display: flex;
   gap: 8px;
-  align-items: center;
-  padding: 12px;
-  background: var(--personal-color-bg-surface-frost);
-  border-radius: var(--personal-radius);
-  cursor: pointer;
-}
-
-.payment-method input {
-  accent-color: var(--personal-color-secondary-blue);
+  justify-content: flex-end;
 }
 
 .notice {
@@ -386,28 +370,38 @@ onMounted(() => {
   background: var(--personal-color-status-fail-bg-blush);
 }
 
-.result-row {
+.rounds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.round-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--personal-color-white);
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: var(--personal-radius);
+}
+
+.round-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.refund-details {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px 16px;
-  margin: 0;
-}
-
-.refund-details dt {
-  color: var(--personal-color-student-primary-cyan);
-}
-
-.refund-details dd {
-  margin: 0;
-}
-
-.highlight {
+.round-no {
   font-weight: 700;
+}
+
+.round-amount {
+  font-weight: 600;
+}
+
+.round-due {
+  color: var(--personal-color-text-muted-slate);
+  font-size: 0.85rem;
 }
 </style>

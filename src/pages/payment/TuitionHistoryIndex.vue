@@ -2,17 +2,20 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
+import { useDocumentStore } from '../../store/payment/useDocumentStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import { notify } from '../../composables/useDialog';
 import { formatCurrency, formatDate } from '../../util/format';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_VARIANT, PAYMENT_TYPE_LABEL } from '../../util/payment/enumLabels';
 
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
+const documentStore = useDocumentStore();
 
 const filters = reactive({
   academicYear: '',
@@ -45,8 +48,38 @@ const filteredHistory = computed(() => tuitionStore.paymentHistory.filter((row) 
   return true;
 }));
 
+// 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
+const resolveTargetBill = () => {
+  const matches = tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId));
+  return matches[0] || null;
+};
+
+const handlePrintNotice = async () => {
+  const bill = resolveTargetBill();
+  if (!bill) {
+    await notify('출력할 등록금 고지를 찾을 수 없습니다. 연도·학기를 확인해 주세요.');
+    return;
+  }
+  window.print();
+};
+
+const handleIssueReceipt = async () => {
+  const bill = resolveTargetBill();
+  if (!bill) {
+    await notify('납부확인서를 발급할 등록금 고지를 찾을 수 없습니다. 연도·학기를 확인해 주세요.');
+    return;
+  }
+  try {
+    await documentStore.issuePaymentReceipt(bill.id);
+    await notify('납부확인서가 발급되었습니다.');
+  } catch (error) {
+    await notify(error.response?.data?.message || '납부확인서를 발급하지 못했습니다.');
+  }
+};
+
 onMounted(() => {
   tuitionStore.fetchPaymentHistory();
+  tuitionStore.fetchMyBills();
   semesterStore.fetchSemesters();
 });
 </script>
@@ -88,8 +121,13 @@ onMounted(() => {
           </option>
         </MySelect>
       </div>
+      <div class="search-group extra-actions">
+        <MyButton btn-type="button" color="white" size="middle" content="고지서 출력" @click="handlePrintNotice" />
+        <MyButton btn-type="button" color="white" size="middle" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
+      </div>
     </MySearchFilter>
 
+    <h3>나의 납부 내역</h3>
     <MyTable
       :loading="tuitionStore.isLoadingPaymentHistory"
       :empty="!tuitionStore.isLoadingPaymentHistory && filteredHistory.length === 0"
@@ -100,7 +138,6 @@ onMounted(() => {
         { key: 'date', label: '납부일' },
         { key: 'amount', label: '납부금액' },
         { key: 'status', label: '상태' },
-        { key: 'detail', label: '상세' },
       ]"
     >
       <tr v-for="row in filteredHistory" :key="`${row.tuitionBillId}-${row.paymentDate}-${row.amount}`">
@@ -114,12 +151,18 @@ onMounted(() => {
             :variant="PAYMENT_STATUS_VARIANT[row.status]"
           />
         </td>
-        <td>
-          <RouterLink :to="`/tuition/${row.tuitionBillId}`">
-            <MyButton color="white" size="small" content="상세보기" />
-          </RouterLink>
-        </td>
       </tr>
     </MyTable>
   </MyPageContainer>
 </template>
+
+<style scoped>
+.extra-actions {
+  flex-direction: row !important;
+  gap: 8px;
+}
+
+h3 {
+  margin: 0 0 12px;
+}
+</style>
