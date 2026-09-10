@@ -18,6 +18,14 @@ import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentLeaveReturnPage' });
 
+const props = defineProps({
+  mode: {
+    type: String,
+    required: true,
+    validator: (value) => ['leave', 'return'].includes(value),
+  },
+});
+
 const ATTACHMENTS_MAX_COUNT = 5;
 const GENERAL_LEAVE = 'GENERAL_LEAVE';
 const GENERAL_RETURN = 'GENERAL_RETURN';
@@ -56,7 +64,7 @@ const statusVariants = {
 };
 
 const form = reactive({
-  requestType: GENERAL_LEAVE,
+  requestType: props.mode === 'leave' ? GENERAL_LEAVE : GENERAL_RETURN,
   reason: '',
 });
 
@@ -70,14 +78,11 @@ const isLoadingRequests = ref(false);
 const isSubmitting = ref(false);
 const formError = ref('');
 
-const isLeave = computed(() => form.requestType === GENERAL_LEAVE);
-
-// 학적 상태별 접근 제한 기준(휴학 신청은 ENROLLED만, 복학 신청은 ON_LEAVE만 가능)에 맞춰
-// 신청 유형 선택지 자체를 좁힌다. 라우트 가드는 ENROLLED/ON_LEAVE 둘 다 이 페이지 접근을
-// 허용하지만, 실제로 제출 가능한 유형은 현재 학적 상태에 따라 하나뿐이다.
+const isLeave = computed(() => props.mode === 'leave');
+const pageTitle = computed(() => (isLeave.value ? '일반휴학 신청' : '복학 신청'));
+const historyTitle = computed(() => (isLeave.value ? '나의 일반휴학 신청 내역' : '나의 복학 신청 내역'));
 const academicStatus = computed(() => profileStore.profile?.academicStatus);
-const canRequestLeave = computed(() => ['ENROLLED', 'ON_LEAVE'].includes(academicStatus.value));
-const canRequestReturn = computed(() => academicStatus.value === 'ON_LEAVE');
+const canSubmitCurrentRequest = computed(() => isLeave.value || academicStatus.value === 'ON_LEAVE');
 
 const applicablePeriodTypes = computed(() => (
   isLeave.value ? [GENERAL_LEAVE] : [form.requestType]
@@ -120,7 +125,9 @@ const returnSemesterLabel = computed(() => (
 ));
 
 const visibleRequests = computed(() => requests.value.filter(
-  (request) => request.requestType !== 'MILITARY_LEAVE',
+  (request) => (isLeave.value
+    ? request.requestType === GENERAL_LEAVE
+    : [GENERAL_RETURN, MILITARY_RETURN].includes(request.requestType)),
 ));
 
 const resetAttachment = () => {
@@ -208,6 +215,10 @@ const validateForm = () => {
 
 const submitRequest = async () => {
   if (isSubmitting.value) return;
+  if (!canSubmitCurrentRequest.value) {
+    formError.value = '복학 신청은 휴학생만 제출할 수 있습니다.';
+    return;
+  }
 
   formError.value = validateForm();
   if (formError.value) return;
@@ -256,9 +267,11 @@ watch(() => form.requestType, () => {
   formError.value = '';
 });
 
-watch(academicStatus, (status) => {
-  if (status === 'ON_LEAVE') form.requestType = GENERAL_RETURN;
-  else if (status === 'ENROLLED') form.requestType = GENERAL_LEAVE;
+watch(() => props.mode, (mode) => {
+  form.requestType = mode === 'leave' ? GENERAL_LEAVE : GENERAL_RETURN;
+  form.reason = '';
+  resetAttachment();
+  formError.value = '';
 });
 
 onMounted(async () => {
@@ -267,7 +280,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="일반휴학/복학 신청">
+  <MyPageContainer :title="pageTitle">
     <div class="leave-return-page">
       <section class="request-section">
         <form
@@ -276,6 +289,7 @@ onMounted(async () => {
         >
           <div class="form-grid">
             <label
+              v-if="!isLeave"
               class="form-field"
               for="leave-request-type"
             >
@@ -285,18 +299,8 @@ onMounted(async () => {
                 v-model="form.requestType"
                 class="form-select"
               >
-                <option
-                  v-if="canRequestLeave"
-                  :value="GENERAL_LEAVE"
-                >휴학</option>
-                <option
-                  v-if="canRequestReturn"
-                  :value="GENERAL_RETURN"
-                >일반복학</option>
-                <option
-                  v-if="canRequestReturn"
-                  :value="MILITARY_RETURN"
-                >군복학</option>
+                <option :value="GENERAL_RETURN">일반복학</option>
+                <option :value="MILITARY_RETURN">군복학</option>
               </MySelect>
             </label>
 
@@ -304,7 +308,7 @@ onMounted(async () => {
               class="form-field"
               for="leave-start-period"
             >
-              <span>시작 기간</span>
+              <span>{{ isLeave ? '휴학 적용 학기' : '복학 적용 학기' }}</span>
               <MyInput
                 id="leave-start-period"
                 class="period-input"
@@ -387,7 +391,7 @@ onMounted(async () => {
             class="form-field reason-field"
             for="leave-reason"
           >
-            <span>사유</span>
+            <span>{{ isLeave ? '사유' : '사유 (선택)' }}</span>
             <textarea
               id="leave-reason"
               v-model="form.reason"
@@ -396,6 +400,14 @@ onMounted(async () => {
               placeholder="상세 사유를 입력해 주세요."
             />
           </label>
+
+          <p
+            v-if="!canSubmitCurrentRequest"
+            class="return-access-guide"
+            role="status"
+          >
+            복학 신청은 휴학생만 제출할 수 있습니다. 재학생은 신청 절차와 내역만 확인할 수 있습니다.
+          </p>
 
           <p
             v-if="formError"
@@ -411,7 +423,7 @@ onMounted(async () => {
               color="deep-blue"
               size="big"
               :content="isSubmitting ? '제출 중...' : '신청서 제출'"
-              :disabled="isSubmitting || isLoadingPeriods || !selectedPeriod"
+              :disabled="isSubmitting || isLoadingPeriods || !selectedPeriod || !canSubmitCurrentRequest"
             />
           </div>
         </form>
@@ -419,7 +431,7 @@ onMounted(async () => {
 
       <section class="history-section">
         <h3 class="section-title">
-          나의 신청 내역
+          {{ historyTitle }}
         </h3>
 
         <div class="table-scroll">
@@ -428,7 +440,7 @@ onMounted(async () => {
             :columns="columns"
             :loading="isLoadingRequests"
             :empty="!isLoadingRequests && visibleRequests.length === 0"
-            empty-message="일반휴학·복학 신청 내역이 없습니다."
+            :empty-message="isLeave ? '일반휴학 신청 내역이 없습니다.' : '복학 신청 내역이 없습니다.'"
           >
             <tr
               v-for="request in visibleRequests"
@@ -496,7 +508,7 @@ onMounted(async () => {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 28px;
 }
 
@@ -622,6 +634,12 @@ onMounted(async () => {
   color: var(--personal-color-red);
   font-size: 0.8rem;
   font-weight: 500;
+}
+
+.return-access-guide {
+  margin: 10px 0 0;
+  color: var(--personal-color-text-tertiary-slate);
+  font-size: 0.78rem;
 }
 
 .form-actions {

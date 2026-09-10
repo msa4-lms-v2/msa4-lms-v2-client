@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
+import AcademicChangeGuidelineModal from '../../components/common/AcademicChangeGuidelineModal.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
@@ -11,12 +12,47 @@ import PrevNextPagination from '../../components/pagination/PrevNextPagination.v
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { useProfileStore } from '../../store/profile/useProfileStore';
+import {
+  hasViewedAcademicChangeGuideline,
+  markAcademicChangeGuidelineViewed,
+} from '../../util/academic/academicChangeGuidelineView';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentDepartmentTransferPage' });
 
 const FILE_MAX_SIZE = 10 * 1024 * 1024;
 const ATTACHMENTS_REQUIRED_COUNT = 2;
+const GUIDELINE_SECTIONS = [
+  {
+    heading: '전과(부)',
+    paragraphs: ['전과(부)(이하 전과라 한다)란 학사과정 학생이 소속 학과(부)를 변경하여 다른 학과에 소속하는 것을 말합니다.'],
+  },
+  {
+    heading: '허용범위',
+    paragraphs: [
+      '전과(부)를 허용하는 범위는 다음과 같습니다.\n- 사범대학의 학과\n- 사범대학 이외의 학과는 사범대학 이외의 각 학과\n단, 의과대학, 수의과대학 및 간호대학으로의 전입은 불가합니다.',
+      '- 전통 및 현대 문화 관련 학과로의 전입은 학과장의 승인을 받아 대학장이 따로 정할 수 있습니다.\n- 의학대학 전입 인원은 편입학 인원을 포함하여 해당대학 입학정원을 초과할 수 없습니다.',
+      '- 전과를 허가하고 입학한 학생, 편입학한 학생 및 치의학대학 학사전문석사통합과정 학생은 전과를 할 수 없습니다.',
+    ],
+  },
+  {
+    heading: '지원시기 및 지원자격',
+    paragraphs: [
+      '시기\n- 전과의 지원 시기는 매 학년도 말로 합니다.',
+      '자격\n- 전과 지원자는 2개 정규학기 이상 이수하고 33학점 이상을 취득하고, 4개 정규학기 이상 이수한 학생으로 합니다. 다만, 미취득으로 인한 소속 재학생의 전과는 지원자격을 갖추어야 합니다.\n- 의과대학 및 수의과대학 전입은 예과과정 등록학기 및 이수학점을 충족한 경우에 한합니다.',
+    ],
+  },
+  {
+    heading: '인원산정',
+    paragraphs: ['전과 및 전입 인원은 각각 모집단위별 입학정원의 100분의 20 이내에서 총장의 승인을 받아 대학장이 따로 정하며, 구체적인 계획과 기준은 매 학년도 말 이전에 공지합니다.'],
+  },
+  {
+    heading: '절차',
+    paragraphs: [
+      '- 온라인 전과 신청 → 소속학과 및 단과대학 승인 → 지원서와 제출서류 확인 → 전출 승인 후 전입 학과 선발 → 전과\n- 희망하는 소속 학과(부)장의 승인을 받아 지원서에 성적증명서 등 관계 서류를 첨부하여 소속 대학장에게 제출하여야 합니다.\n- 전과 지원 기간 내에 온라인 전과 신청을 완료하여야 하며, 전출 승인을 확정한 학생에 한해서 전입 선발이 가능합니다.',
+    ],
+  },
+];
 
 const columns = [
   { key: 'semester', label: '신청 학기' },
@@ -47,6 +83,7 @@ const selectedCollegeId = ref('');
 const selectedDepartmentId = ref('');
 const selectedSemesterId = ref('');
 const hasReadGuidelines = ref(false);
+const isGuidelineModalOpen = ref(false);
 const formError = ref('');
 const isLoadingForm = ref(false);
 const isLoadingRequests = ref(false);
@@ -198,14 +235,21 @@ const loadRequests = async (page = 1) => {
   }
 };
 
-const showGuidelines = async () => {
-  const periodMessage = openPeriods.value.length
-    ? openPeriods.value.map((period) => (
-      `${formatSemester(period.academicYear, period.term)}: ${formatDate(period.startAt, 'YYYY-MM-DD HH:mm')} ~ ${formatDate(period.endAt, 'YYYY-MM-DD HH:mm')}`
-    )).join('\n')
-    : '현재 접수 가능한 전과 모집 기간이 없습니다.';
-  await notify(`${periodMessage}\n첨부 조건: 작성한 HWP 또는 HWPX 파일 2개(각 10MB 이하)`);
+const showGuidelines = () => {
   hasReadGuidelines.value = true;
+  isGuidelineModalOpen.value = true;
+};
+
+const closeGuidelines = () => { isGuidelineModalOpen.value = false; };
+
+const openInitialGuidelines = () => {
+  if (hasViewedAcademicChangeGuideline('department-transfer')) {
+    hasReadGuidelines.value = true;
+    return;
+  }
+
+  showGuidelines();
+  markAcademicChangeGuidelineViewed('department-transfer');
 };
 
 const createIdempotencyKey = (prefix) => {
@@ -322,6 +366,7 @@ const cancelRequest = async () => {
 };
 
 onMounted(async () => {
+  openInitialGuidelines();
   await profileStore.fetchStudentProfile();
   await Promise.all([loadFormData(), loadRequests()]);
 });
@@ -633,6 +678,13 @@ onMounted(async () => {
         />
       </template>
     </MyModal>
+
+    <AcademicChangeGuidelineModal
+      :is-open="isGuidelineModalOpen"
+      title="전과 모집 요강"
+      :sections="GUIDELINE_SECTIONS"
+      @close="closeGuidelines"
+    />
   </MyPageContainer>
 </template>
 

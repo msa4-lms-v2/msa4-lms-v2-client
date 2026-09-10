@@ -2,23 +2,72 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
+import AcademicChangeGuidelineModal from '../../components/common/AcademicChangeGuidelineModal.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
+import {
+  hasViewedAcademicChangeGuideline,
+  markAcademicChangeGuidelineViewed,
+} from '../../util/academic/academicChangeGuidelineView';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentDoubleMajorPage' });
 
 const FILE_MAX_SIZE = 10 * 1024 * 1024;
 const ATTACHMENTS_REQUIRED_COUNT = 2;
+const GUIDELINE_SECTIONS = [
+  {
+    heading: '복수전공',
+    paragraphs: ['학생이 소속된 학과(부)를 포함하여 2개 이상의 학과 교육과정을 이수하는 과정을 말합니다.'],
+  },
+  {
+    heading: '신청자격',
+    paragraphs: [
+      '복수전공의 신청은 2개 정규학기 이상 이수하고 33학점 이상 취득한 이후에 신청할 수 있습니다.',
+      '복수전공을 이수하고자 하는 자는 신청 기간에 미래대학교 학사관리시스템을 통해 신청하여야 합니다.',
+    ],
+  },
+  {
+    heading: '신청절차',
+    paragraphs: [
+      '대학 내 복수전공인 경우에는 소속 학과 담당교수의 승인을 받아 학장에게 제출합니다.',
+      '대학 간 복수전공인 경우에는 소속 학과(부)장의 승인을 받아 학장에게 제출하고, 이수하고자 하는 대학에 제출합니다.',
+      '복수전공 이수 신청을 받은 학장은 정해진 기일 내에 복수전공 이수자를 선발하여 총장에게 보고하여야 합니다.',
+    ],
+  },
+  {
+    heading: '취소절차',
+    paragraphs: [
+      '대학 내 복수전공인 경우에는 소속 학과(부)장의 승인을 받아 학장에게 제출합니다.',
+      '대학 간 복수전공인 경우에는 소속 학과(부)장의 승인을 받아 학장에게 제출하고, 이수중인 대학에 제출합니다.',
+      '복수전공 이수 신청을 받은 학장은 정해진 기일 내에 복수전공 취소자를 총장에게 보고하여야 합니다.',
+    ],
+  },
+  {
+    heading: '선발인원 및 과정이수 학점',
+    paragraphs: [
+      '복수전공 이수자의 선발인원은 각 학과(부)별 전년도 입학정원의 2배 이내를 원칙으로 합니다. 다만, 학과(부) 교육여건을 감안하여 학장은 총장의 승인을 얻어 전년도 입학정원의 관계없이 선발인원을 달리 정할 수 있습니다.',
+      '복수전공 이수자는 해당 학과 학점 33학점 이상을 이수하여야 하고, 성적 평점평균이 2.0 이상이어야 합니다.',
+      '복수전공 이수자가 희망 학과의 교육과정을 이수하기 전에 이수한 관련 교과목은 해당 학과 학점으로 인정합니다.',
+    ],
+  },
+  {
+    heading: '졸업증서 등의 기재',
+    paragraphs: [
+      '복수전공을 이수하였을 때에는 졸업증서 및 학적부에 그 사실을 기재하며, 이수한 학과마다 별도의 졸업증서를 수여하지 않습니다.',
+      '예체능 계열은 인턴과정 수료자격과 노련 교육과정 이수 여부에 따라 별도 기준을 적용할 수 있습니다.',
+    ],
+  },
+];
 
 const columns = [
   { key: 'semester', label: '신청 학기' },
-  { key: 'sourceDepartment', label: '주전공' },
-  { key: 'targetDepartment', label: '희망 복수전공' },
+  { key: 'sourceDepartment', label: '소속 학과' },
+  { key: 'targetDepartment', label: '희망 학과' },
   { key: 'status', label: '진행 상태' },
   { key: 'createdAt', label: '신청일' },
 ];
@@ -51,6 +100,7 @@ const requests = ref([]);
 const selectedCollegeId = ref('');
 const selectedDepartmentId = ref('');
 const hasReadGuidelines = ref(false);
+const isGuidelineModalOpen = ref(false);
 const formError = ref('');
 const isLoadingForm = ref(false);
 const isLoadingRequests = ref(false);
@@ -180,13 +230,21 @@ const loadRequests = async (page = 1) => {
   }
 };
 
-const showGuidelines = async () => {
-  const period = selectedPeriod.value;
-  const periodMessage = period
-    ? `${formatSemester(period.academicYear, period.term)} 모집\n접수 기간: ${formatDate(period.startAt, 'YYYY-MM-DD HH:mm')} ~ ${formatDate(period.endAt, 'YYYY-MM-DD HH:mm')}`
-    : '현재 접수 가능한 복수전공 모집 기간이 없습니다.';
-  await notify(`${periodMessage}\n신청 자격: 정규학기 2개 이상 이수 및 33학점 이상 취득\n첨부 조건: 작성한 HWP 또는 HWPX 파일 2개(각 10MB 이하)`);
+const showGuidelines = () => {
   hasReadGuidelines.value = true;
+  isGuidelineModalOpen.value = true;
+};
+
+const closeGuidelines = () => { isGuidelineModalOpen.value = false; };
+
+const openInitialGuidelines = () => {
+  if (hasViewedAcademicChangeGuideline('double-major')) {
+    hasReadGuidelines.value = true;
+    return;
+  }
+
+  showGuidelines();
+  markAcademicChangeGuidelineViewed('double-major');
 };
 
 const createIdempotencyKey = () => {
@@ -223,7 +281,7 @@ const submitRequest = async () => {
     return;
   }
   if (!selectedDepartmentId.value) {
-    formError.value = '희망 복수전공을 선택해 주세요.';
+    formError.value = '희망 학과를 선택해 주세요.';
     return;
   }
 
@@ -261,6 +319,7 @@ const submitRequest = async () => {
 };
 
 onMounted(async () => {
+  openInitialGuidelines();
   await Promise.all([loadFormData(), loadRequests()]);
 });
 </script>
@@ -327,7 +386,7 @@ onMounted(async () => {
               class="form-field"
               for="double-major-department"
             >
-              <span>희망 복수전공</span>
+              <span>희망 학과</span>
               <MySelect
                 id="double-major-department"
                 v-model="selectedDepartmentId"
@@ -461,6 +520,13 @@ onMounted(async () => {
         />
       </section>
     </div>
+
+    <AcademicChangeGuidelineModal
+      :is-open="isGuidelineModalOpen"
+      title="복수전공 모집 요강"
+      :sections="GUIDELINE_SECTIONS"
+      @close="closeGuidelines"
+    />
   </MyPageContainer>
 </template>
 

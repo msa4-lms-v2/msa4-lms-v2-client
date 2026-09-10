@@ -110,6 +110,9 @@ const toggleMenu = (menuKey) => {
             <router-link v-if="canApplyForMilitaryLeave" to="/leave-return/military" class="submenu-item">{{
               getMenuTitle("/leave-return/military")
             }}</router-link>
+            <router-link v-if="canUseLeaveReturn" to="/leave-return/return" class="submenu-item">{{
+              getMenuTitle("/leave-return/return")
+            }}</router-link>
             <router-link v-if="canApplyForDepartmentTransfer" to="/department-transfer" class="submenu-item">{{
               getMenuTitle("/department-transfer")
             }}</router-link>
