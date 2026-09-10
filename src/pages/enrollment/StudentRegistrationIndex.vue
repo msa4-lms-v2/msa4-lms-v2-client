@@ -61,6 +61,11 @@ const createIdempotencyKey = () => {
   return `enrollment-create-${suffix}`;
 };
 
+const enrollmentErrorMessage = (error) =>
+  error.response?.data?.data?.reasons?.[0]?.message
+  || error.response?.data?.message
+  || '수강신청에 실패했습니다.';
+
 const loadCart = async () => {
   isLoadingCart.value = true;
   try {
@@ -130,7 +135,7 @@ const enrollFromCart = async (item) => {
     await notify('수강신청이 완료되었습니다.');
     await Promise.all([loadCart(), loadEnrollments()]);
   } catch (error) {
-    await notify(error.response?.data?.message || '수강신청에 실패했습니다.');
+    await notify(enrollmentErrorMessage(error));
   } finally {
     enrollingLectureId.value = null;
   }
