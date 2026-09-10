@@ -16,6 +16,9 @@ const routes = [
     { path: '/admin/professors', name: 'AdminProfessorIndex', component: () => import('../pages/people/PeopleIndex.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/professors/new', name: 'AdminProfessorCreate', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/professors/:id', name: 'AdminProfessorDetail', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/academic-schedules', name: 'AcademicScheduleIndex', component: () => import('../pages/academicSchedule/AcademicScheduleIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/academic-schedules/new', name: 'AcademicScheduleCreate', component: () => import('../pages/academicSchedule/AcademicScheduleForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/academic-schedules/:scheduleId', name: 'AcademicScheduleDetail', component: () => import('../pages/academicSchedule/AcademicScheduleForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {
