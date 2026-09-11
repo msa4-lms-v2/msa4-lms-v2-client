@@ -2,7 +2,6 @@
 import { onMounted, reactive, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -12,7 +11,6 @@ import { useLeaveRequestStore } from '../../store/leaveReturn/useLeaveRequestSto
 import {
   ACADEMIC_STATUS_LABEL,
   LEAVE_REQUEST_STATUS_LABEL,
-  LEAVE_REQUEST_STATUS_VARIANT,
 } from '../../util/academic/enumLabels';
 import { formatDate } from '../../util/format';
 
@@ -202,11 +200,8 @@ onMounted(() => load());
           <td>{{ item.departmentName }}</td>
           <td>{{ item.targetYear }}학년도 {{ item.targetSemester }}학기</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>
-            <MyStatusBadge
-              :label="LEAVE_REQUEST_STATUS_LABEL[item.status] || item.status"
-              :variant="LEAVE_REQUEST_STATUS_VARIANT[item.status] || 'warning'"
-            />
+          <td :class="{ rejected: item.status === 'REJECTED' }">
+            {{ LEAVE_REQUEST_STATUS_LABEL[item.status] || item.status }}
           </td>
           <td>
             <MyButton color="admin-indigo" size="small" content="확인" @click="openDetail(item)" />
@@ -231,12 +226,9 @@ onMounted(() => load());
             <strong>{{ requestTypeLabel[leaveRequestStore.currentRequest.requestType] }}</strong>
           </div>
 
-          <div>
+          <div :class="{ rejected: leaveRequestStore.currentRequest.status === 'REJECTED' }">
             <span>처리 상태</span>
-            <MyStatusBadge
-              :label="LEAVE_REQUEST_STATUS_LABEL[leaveRequestStore.currentRequest.status]"
-              :variant="LEAVE_REQUEST_STATUS_VARIANT[leaveRequestStore.currentRequest.status]"
-            />
+            <strong>{{ LEAVE_REQUEST_STATUS_LABEL[leaveRequestStore.currentRequest.status] }}</strong>
           </div>
         </div>
 
@@ -433,6 +425,11 @@ onMounted(() => load());
 .info-list dd {
   color: var(--personal-color-primary-text-navy);
   font-size: 0.86rem;
+}
+
+.rejected strong,
+td.rejected {
+  color: var(--personal-color-danger-coral);
 }
 
 .detail-section {

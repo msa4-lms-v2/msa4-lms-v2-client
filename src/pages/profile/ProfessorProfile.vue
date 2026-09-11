@@ -31,7 +31,6 @@ const professor = computed(() => ({
   employeeNo: authStore.userInfo?.loginId || '-',
   email: user.value.email || '-',
   phone: user.value.phoneNumber || '-',
-  address: user.value.address || '-',
   hireYear: user.value.hireYear || '-',
 }));
 
@@ -40,16 +39,17 @@ const statusVariant = computed(() => statusVariants[user.value.status] || 'proce
 const basicRows = computed(() => [
   { label: '이름', value: professor.value.name },
   { label: '교번', value: professor.value.employeeNo },
-  { label: '소속 단과대학', value: professor.value.college },
   { label: '학과', value: professor.value.department },
   { label: '이메일', value: professor.value.email },
   { label: '연락처', value: professor.value.phone },
-  { label: '주소', value: professor.value.address },
 ]);
 
 const employmentRows = computed(() => [
   { label: '재직 상태', value: professor.value.status },
+  { label: '직위', value: '교수' },
   { label: '임용 연도', value: professor.value.hireYear },
+  { label: '소속 단과대학', value: professor.value.college },
+  { label: '소속 학과', value: professor.value.department },
 ]);
 </script>
 
@@ -110,7 +110,7 @@ const employmentRows = computed(() => [
 
       <article class="info-card">
         <div class="common-section-header">
-          <h3>임용 정보</h3>
+          <h3>교직 정보</h3>
         </div>
 
         <dl class="info-list">
