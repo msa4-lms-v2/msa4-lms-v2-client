@@ -6,6 +6,7 @@ export const MENU_TITLES = {
     '/admin/professors/new': { default: '교수 등록' },
     '/admin/academic-schedules': { default: '학사일정 목록' },
     '/admin/graduation-requirements': { default: '졸업요건 관리' },
+    '/admin/grades/retake-reflection': { default: '재수강 성적 반영' },
     '/admin/dismissals': { default: '제적 처리' },
     '/admin/academic-schedules/new': { default: '학사일정 작성' },
     '/admin/notices': { default: '공지사항 목록' },

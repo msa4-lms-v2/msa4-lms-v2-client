@@ -47,6 +47,10 @@ export const getGraduationCreditRecords = (studentId, params = {}) =>
 export const getMyGrades = (params = {}) =>
   myAxios.get(`${GRADES_URL}/me`, { params });
 
+// 관리자 재수강 성적 반영
+export const reflectRetakeGrade = (enrollmentId, reason) =>
+  myAxios.patch(`${GRADES_URL}/${enrollmentId}/retake-reflection`, { reason });
+
 // 학생 본인 강의평가 제출
 export const submitLectureEvaluation = (payload) =>
   myAxios.post(EVALUATIONS_URL, payload);
