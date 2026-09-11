@@ -55,6 +55,7 @@ export const MENU_TITLES = {
     '/counseling/history': { default: '상담 내역' },
     '/professor/counseling': { default: '온라인 상담' },
     '/professor/leave-return': { default: '휴·복학 신청 확인' },
+    '/professor/withdrawals': { default: '자퇴 신청 검토' },
     '/professor/academic-change-requests/department-transfer': { default: '전과 신청 검토' },
     '/professor/academic-change-requests/double-major': { default: '복수전공 신청 검토' },
     '/professor/attendance/approvals': { default: '출결 승인' },

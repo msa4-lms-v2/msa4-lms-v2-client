@@ -19,3 +19,9 @@ export const reviewWithdrawalByAdmin = (withdrawalId, payload, idempotencyKey) =
 // 자퇴 증빙 다운로드
 export const downloadWithdrawalAttachment = (withdrawalId) =>
   myAxios.get(`${WITHDRAWALS_URL}/${withdrawalId}/attachment`, { responseType: 'blob' });
+
+// 지도교수 자퇴 신청 검토 (PENDING 상태만 처리 가능)
+export const reviewWithdrawalByAdvisor = (withdrawalId, payload, idempotencyKey) =>
+  myAxios.patch(`${WITHDRAWALS_URL}/${withdrawalId}/advisor-review`, payload, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
