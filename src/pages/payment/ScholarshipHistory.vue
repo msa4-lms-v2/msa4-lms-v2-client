@@ -13,6 +13,11 @@
         </MySelect>
       </div>
 
+      <section v-if="filteredScholarships.length > 0" class="summary-bar">
+        <SummaryStatCard label="대상 학기" :value="semesterStore.getSemesterLabel(selectedSemester)" />
+        <SummaryStatCard label="총 수혜액" :value="formatCurrency(totalAmount)" highlight />
+      </section>
+
       <div v-if="availableSemesters.length === 0 || filteredScholarships.length === 0">
         <p class="notice">장학금 수혜 내역이 없습니다.</p>
       </div>
@@ -57,6 +62,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
+import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 
 const router = useRouter();
 const appStore = useScholarshipApplicationStore();
@@ -79,6 +85,8 @@ const filteredScholarships = computed(() => {
   if (!selectedSemester.value) return [];
   return appStore.myScholarships.filter(s => s.semesterId === selectedSemester.value);
 });
+
+const totalAmount = computed(() => filteredScholarships.value.reduce((sum, item) => sum + Number(item.amount || 0), 0));
 
 const selectedTuitionBillId = computed(() => {
   if (filteredScholarships.value.length > 0) {
@@ -118,6 +126,13 @@ select {
   background-color: var(--personal-color-white);
   font-size: 0.9rem;
 }
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
 .notice {
   padding: 40px;
   background-color: var(--personal-color-bg-surface-frost);

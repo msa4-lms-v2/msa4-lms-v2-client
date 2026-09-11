@@ -139,7 +139,6 @@ onMounted(() => load());
 <template>
   <MyPageContainer
     title="전과 신청 검토"
-    subtitle="현재 지도학생의 신청 서류를 검토하고 승인된 문서를 학장에게 전달합니다."
   >
     <section class="filter-card professor-accent">
       <label>신청자<input
@@ -235,7 +234,12 @@ onMounted(() => load());
             <div><dt>희망 학과</dt><dd>{{ selectedRequest.targetDepartmentName }}</dd></div>
             <div><dt>적용 학기</dt><dd>{{ formatAcademicChangeSemester(selectedRequest, TYPE) }}</dd></div>
             <div><dt>신청일</dt><dd>{{ formatDate(selectedRequest.createdAt) }}</dd></div>
-            <div><dt>현재 상태</dt><dd>{{ formatAcademicChangeStatus(selectedRequest.status) }}</dd></div>
+            <div>
+              <dt>현재 상태</dt>
+              <dd :class="{ rejected: selectedRequest.status === 'ADVISOR_REJECTED' }">
+                {{ formatAcademicChangeStatus(selectedRequest.status) }}
+              </dd>
+            </div>
           </dl>
         </section>
 
@@ -303,7 +307,7 @@ onMounted(() => load());
 .professor-accent { border-top: 3px solid var(--personal-color-professor-primary-navy); }
 .filter-card label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; font-weight: 600; }
 .filter-card input { height: 38px; padding: 0 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: white; }
-.filter-actions { display: flex; gap: 8px; }
+.filter-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .reset-action { border: 1px solid var(--personal-color-black); }
 .professor-primary { background: var(--personal-color-professor-primary-navy); }
 .review-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, .85fr); gap: 18px; margin-top: 20px; }
@@ -314,13 +318,14 @@ onMounted(() => load());
 .section-title span { color: var(--personal-color-professor-primary-navy); font-size: .8rem; font-weight: 700; }
 .table-scroll { overflow-x: auto; }
 .selected { background: var(--personal-color-info-soft-ice); }
-.rejected, .form-error { color: var(--personal-color-danger-coral); }
+.rejected { color: var(--personal-color-danger-coral); }
+.form-error { color: var(--personal-color-danger-coral); }
 .detail-column { display: flex; flex-direction: column; gap: 14px; }
 .empty-detail { margin: 24px 0; color: var(--personal-color-text-muted-slate); text-align: center; }
 .detail-list { margin: 12px 0 0; }
 .detail-list div { display: grid; grid-template-columns: 90px 1fr; gap: 10px; padding: 8px 0; }
 .detail-list dt, .guide { color: var(--personal-color-text-muted-slate); font-size: .8rem; }
-.detail-list dd { margin: 0; text-align: right; font-size: .82rem; font-weight: 600; }
+.detail-list dd { margin: 0; text-align: right; font-size: .82rem; font-weight: 400; }
 .guide { margin: 6px 0 10px; }
 .file-row { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-top: 8px; padding: 10px; border: 1px solid var(--personal-color-border-mist); border-radius: 5px; background: var(--personal-color-bg-surface-frost); cursor: pointer; text-align: left; }
 .file-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -328,8 +333,8 @@ onMounted(() => load());
 .file-row strong { color: var(--personal-color-professor-primary-navy); font-size: .75rem; }
 .review-card textarea { width: 100%; margin-top: 12px; padding: 9px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; resize: vertical; }
 .form-error { font-size: .78rem; }
-.decision-actions { display: flex; gap: 10px; margin-top: 12px; }
-.decision-actions :deep(button) { flex: 1; width: auto; }
+.decision-actions { display: flex; gap: 10px; margin-top: 12px; justify-content: flex-end; }
+.decision-actions :deep(button) { width: auto; }
 @media (max-width: 1000px) { .review-grid { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .filter-card { grid-template-columns: 1fr; } .filter-actions { justify-content: flex-end; } }
 </style>

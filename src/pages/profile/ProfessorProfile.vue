@@ -83,14 +83,14 @@ const employmentRows = computed(() => [
       </div>
 
       <div class="profile-actions">
+        <PasswordChange />
         <MyButton
           btn-type="button"
           color="white"
-          size="middle"
+          size="big"
           content="정보 변경 신청"
           @click="router.push('/professor/profile/info-change')"
         />
-        <PasswordChange />
       </div>
     </article>
 

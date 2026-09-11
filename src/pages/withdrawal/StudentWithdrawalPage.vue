@@ -277,7 +277,7 @@ onMounted(async () => {
                 btn-type="button"
                 class="file-select-action"
                 color="white"
-                size="small"
+                size="middle"
                 content="파일 선택"
                 @click="openFilePicker"
               />
@@ -349,7 +349,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.withdrawal-page { max-width: 1120px; }
+.withdrawal-page { width: 100%; }
 .student-info-scroll { overflow-x: auto; }
 .student-info-table {
   width: 100%;
@@ -373,7 +373,7 @@ onMounted(async () => {
 }
 .student-info-table th {
   width: 14%;
-  background: var(--personal-color-bg-surface-frost);
+  background: var(--personal-color-table-header-smoke);
   font-weight: 600;
 }
 .student-info-table td { width: 19.33%; }
@@ -403,11 +403,11 @@ onMounted(async () => {
 .file-field,
 .reason-field { margin-top: 16px; }
 .file-picker {
-  min-height: 40px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);

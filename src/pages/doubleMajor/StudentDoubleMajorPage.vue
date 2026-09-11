@@ -532,7 +532,7 @@ onMounted(async () => {
 
 <style scoped>
 .double-major-page {
-  max-width: 1120px;
+  width: 100%;
 }
 
 .page-actions,
@@ -624,11 +624,11 @@ onMounted(async () => {
 }
 
 .file-picker {
-  min-height: 38px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);

@@ -49,6 +49,7 @@ const activeMenus = ref({
   adminNotice: false,
   adminApplicationManagement: false,
   adminLecture: false,
+  adminAcademicOps: false,
   studentAcademic: false,
   studentCourse: false,
   studentGrade: false,
@@ -69,9 +70,22 @@ watch(() => route.path, path => {
   if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
   if (path.startsWith('/admin/academic-schedules')) activeMenus.value.adminAcademicSchedule = true;
   if (path.startsWith('/admin/notices')) activeMenus.value.adminNotice = true;
-  if (path.startsWith('/admin/application-management/')) activeMenus.value.adminApplicationManagement = true;
+  if (
+    path.startsWith('/admin/application-management/')
+    || path.startsWith('/admin/academic-status-histories')
+  ) {
+    activeMenus.value.adminApplicationManagement = true;
+  }
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
   if (path.startsWith('/graduation-diagnoses')) activeMenus.value.professorStudent = true;
+  if (
+    path.startsWith('/admin/attendance')
+    || path.startsWith('/admin/counseling')
+    || path.startsWith('/admin/withdrawals')
+    || path.startsWith('/admin/dismissals')
+  ) {
+    activeMenus.value.adminAcademicOps = true;
+  }
 }, { immediate: true });
 
 const toggleMenu = (menuKey) => {
@@ -148,6 +162,9 @@ const toggleMenu = (menuKey) => {
             <router-link v-if="canRegisterCourse" to="/registration" class="submenu-item">{{
               getMenuTitle("/registration")
             }}</router-link>
+            <router-link v-if="canRegisterCourse" to="/registration/cart" class="submenu-item">{{
+              getMenuTitle("/registration/cart")
+            }}</router-link>
           </div>
         </div>
 
@@ -212,6 +229,9 @@ const toggleMenu = (menuKey) => {
               getMenuTitle("/tuition/history")
             }}</router-link>
             <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
+            <router-link to="/certificates/apply" class="submenu-item">{{
+              getMenuTitle("/certificates/apply")
+            }}</router-link>
           </div>
         </div>
 
@@ -264,6 +284,9 @@ const toggleMenu = (menuKey) => {
             }}</router-link>
             <router-link to="/professor/profile/info-change" class="submenu-item">{{
               getMenuTitle("/professor/profile/info-change")
+            }}</router-link>
+            <router-link to="/professor/certificates/apply" class="submenu-item">{{
+              getMenuTitle("/professor/certificates/apply")
             }}</router-link>
           </div>
         </div>
@@ -446,6 +469,11 @@ const toggleMenu = (menuKey) => {
               class="submenu-item"
               exact-active-class="router-link-active"
             >{{ getMenuTitle("/admin/academic-change-requests/double-major") }}</router-link>
+            <router-link
+              to="/admin/academic-status-histories"
+              class="submenu-item"
+              exact-active-class="router-link-active"
+            >{{ getMenuTitle("/admin/academic-status-histories") }}</router-link>
           </div>
         </div>
         <div class="menu-group">
@@ -484,6 +512,22 @@ const toggleMenu = (menuKey) => {
         <router-link to="/admin/dismissals" class="nav-item">
           {{ getMenuTitle("/admin/dismissals") }}
         </router-link>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminAcademicOps" @click="toggleMenu('adminAcademicOps')">
+            <span>학사 운영 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminAcademicOps }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminAcademicOps" class="submenu-list">
+            <router-link to="/admin/attendance" class="submenu-item">
+              {{ getMenuTitle("/admin/attendance") }}
+            </router-link>
+            <router-link to="/admin/counseling" class="submenu-item">
+              {{ getMenuTitle("/admin/counseling") }}
+            </router-link>
+            <router-link to="/admin/withdrawals" class="submenu-item">
+              {{ getMenuTitle("/admin/withdrawals") }}
+            </router-link>
+          </div>
+        </div>
         <router-link to="/students" class="nav-item">{{
           getMenuTitle("/students")
         }}</router-link>
