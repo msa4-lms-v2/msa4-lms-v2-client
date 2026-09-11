@@ -39,17 +39,14 @@ const payload = () => ({
   ...(isEdit.value ? { reason: form.reason.trim() } : {}),
 });
 
-const loadTemplates = async () => { templates.value = (await getAcademicScheduleTemplates()).data.data || []; };
+const loadTemplates = async () => { templates.value = (await getAcademicScheduleTemplates({ pageLoad: true })).data.data || []; };
 const loadSchedule = async () => {
   if (!isEdit.value) return;
   loading.value = true;
   try {
-    const schedule = (await getAcademicSchedule(scheduleId.value)).data.data;
+    const schedule = (await getAcademicSchedule(scheduleId.value, { pageLoad: true })).data.data;
     Object.assign(form, { category: schedule.category, title: schedule.title, content: schedule.content || '', targetRole: schedule.targetRole, startDate: toInputDate(schedule.startDate), endDate: toInputDate(schedule.endDate) });
     assignment.value = schedule;
-  } catch (error) {
-    await notify(error.response?.data?.message || '학사일정을 불러오지 못했습니다.');
-    router.replace({ name: 'AcademicScheduleIndex' });
   } finally { loading.value = false; }
 };
 
@@ -67,7 +64,7 @@ const save = async () => {
   finally { saving.value = false; }
 };
 
-onMounted(async () => { try { await loadTemplates(); await loadSchedule(); } catch (error) { await notify(error.response?.data?.message || '작성 정보를 준비하지 못했습니다.'); } });
+onMounted(async () => { await loadTemplates(); await loadSchedule(); });
 </script>
 
 <template>

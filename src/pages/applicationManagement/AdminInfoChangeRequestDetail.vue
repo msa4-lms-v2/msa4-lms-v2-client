@@ -37,12 +37,7 @@ const changedRows = computed(() => {
 const hasProfileImageChange = computed(() => Boolean(currentRequest.value?.newProfileImageUrl));
 
 const load = async () => {
-  try {
-    await infoChangeStore.fetchRequestDetail(route.params.requesterType, Number(route.params.requestId));
-  } catch (error) {
-    await notify(error.response?.data?.message || '정보 변경 신청 상세를 불러오지 못했습니다.');
-    router.replace({ name: 'AdminInfoChangeRequestIndex' });
-  }
+  await infoChangeStore.fetchRequestDetail(route.params.requesterType, Number(route.params.requestId), { pageLoad: true });
 };
 
 const goList = () => {

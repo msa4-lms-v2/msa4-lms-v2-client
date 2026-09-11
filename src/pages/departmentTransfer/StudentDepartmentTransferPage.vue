@@ -193,9 +193,11 @@ const loadFormData = async () => {
     const [departmentResponse, periodResponse] = await Promise.all([
       myAxios.get('/api/academic/catalog/departments', {
         params: { page: 1, size: 100, active: true },
+        pageLoad: true,
       }),
       myAxios.get('/api/academic/catalog/department-transfer-periods', {
         params: { page: 1, size: 100, active: true },
+        pageLoad: true,
       }),
     ]);
 
@@ -204,10 +206,6 @@ const loadFormData = async () => {
     selectedCollegeId.value = colleges.value[0]?.id || '';
     selectedDepartmentId.value = filteredDepartments.value[0]?.id || '';
     selectedSemesterId.value = openPeriods.value[0]?.semesterId || '';
-  } catch (error) {
-    departments.value = [];
-    periods.value = [];
-    await notify(error.response?.data?.message || '전과 신청 정보를 불러오지 못했습니다.');
   } finally {
     isLoadingForm.value = false;
   }

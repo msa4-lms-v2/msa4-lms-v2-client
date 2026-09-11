@@ -93,6 +93,9 @@ const isRowChanged = (row) => {
   return SCORE_FIELDS.some((field) => normalizeScore(row[field]) !== normalizeScore(original[field]));
 };
 
+const completedCount = computed(() => rows.value.filter(hasCompleteScores).length);
+const incompleteCount = computed(() => rows.value.filter((row) => !hasAnyScore(row)).length);
+
 const hasUnsavedChanges = computed(() => rows.value.some(isRowChanged));
 const canFinalize = computed(() => rows.value.length > 0
   && rows.value.every((row) => row.gradeStatus === 'DRAFT' && hasCompleteScores(row))
@@ -286,6 +289,17 @@ onMounted(async () => {
       </div>
     </MySearchFilter>
 
+    <div v-if="selectedLecture" class="grade-stats">
+      <div class="grade-stat">
+        <span>입력 완료</span>
+        <strong>{{ completedCount }}/{{ rows.length }}</strong>
+      </div>
+      <div class="grade-stat">
+        <span>미입력</span>
+        <strong>{{ incompleteCount }}명</strong>
+      </div>
+    </div>
+
     <h3 class="section-title">수강생 성적 입력</h3>
     <MyTable :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="활성 수강생이 없습니다.">
       <tr v-for="row in rows" :key="row.enrollmentId">
@@ -330,6 +344,10 @@ onMounted(async () => {
 .lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
 .lecture-summary strong { padding: 8px 0; color: var(--personal-color-professor-primary-navy); font-size: 0.95rem; }
 .section-title { margin: 0 0 14px; font-size: 1rem; }
+.grade-stats { display: flex; gap: 24px; margin: 20px 0; }
+.grade-stat { display: flex; flex-direction: column; gap: 6px; padding: 16px 24px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
+.grade-stat span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; }
+.grade-stat strong { color: var(--personal-color-primary-blue); font-size: 1.4rem; }
 .score-input { width: 64px; text-align: center; }
 .score-input:disabled { background: var(--personal-color-table-header-smoke); color: var(--personal-color-text-muted-slate); }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }

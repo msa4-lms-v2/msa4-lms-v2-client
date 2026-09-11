@@ -4,16 +4,17 @@ const BASE_URL = '/api/academic/attendance';
 const RECORDS_URL = `${BASE_URL}/records`;
 const EXCUSES_URL = `${BASE_URL}/excuses`;
 
-export const getProfessorLectures = () =>
+export const getProfessorLectures = (config = {}) =>
     myAxios.get('/api/academic/classes', {
         params: { page: 1, size: 100, current: true, status: 'OPEN' },
+        ...config,
     });
 
 export const getCurrentAttendanceSession = (classId) =>
     myAxios.get(`${BASE_URL}/sessions/current`, { params: { classId } });
 
-export const getAttendanceSessions = () =>
-    myAxios.get(`${BASE_URL}/sessions`, { params: { page: 1, size: 100 } });
+export const getAttendanceSessions = (config = {}) =>
+    myAxios.get(`${BASE_URL}/sessions`, { params: { page: 1, size: 100 }, ...config });
 
 export const openAttendanceSession = (classId) =>
     myAxios.post(`${BASE_URL}/sessions`, { classId });

@@ -107,15 +107,15 @@ const loadLectures = async ({ showError = true } = {}) => {
     if (showError) await notify(lectureLoadError.value);
   } finally { isLoadingLectures.value = false; }
 };
-const loadCart = async ({ showError = true } = {}) => {
+const loadCart = async ({ showError = true, pageLoad = false } = {}) => {
   if (!selectedSemester.value) return;
   isLoadingCart.value = true;
   try {
-    const response = await getMyCart(semesterParams());
+    const response = await getMyCart(semesterParams(), { pageLoad });
     cartItems.value = response.data.data?.items || [];
   } catch (error) {
     cartItems.value = [];
-    if (showError) await notify(errorMessage(error, '장바구니를 불러오지 못했습니다.'));
+    if (showError && !pageLoad) await notify(errorMessage(error, '장바구니를 불러오지 못했습니다.'));
   } finally { isLoadingCart.value = false; }
 };
 const search = async () => Promise.all([loadLectures(), loadCart({ showError: false })]);
@@ -157,7 +157,7 @@ onMounted(async () => {
     const semester = semesterStore.semesters.find(item => item.isCurrent ?? item.current)
       || [...semesterStore.semesters].sort((a, b) => Number(b.academicYear) - Number(a.academicYear) || (TERM_NUMBER[b.term] || 0) - (TERM_NUMBER[a.term] || 0))[0];
     selectedSemesterKey.value = semester ? semesterKey(semester) : '';
-    await search();
+    await Promise.all([loadLectures(), loadCart({ pageLoad: true })]);
   } catch (error) { await notify(errorMessage(error, '수강신청 장바구니 화면을 준비하지 못했습니다.')); }
 });
 </script>

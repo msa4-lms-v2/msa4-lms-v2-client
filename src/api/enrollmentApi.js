@@ -28,8 +28,8 @@ export const cancelEnrollment = (enrollmentId) =>
   myAxios.delete(`${ENROLLMENTS_URL}/${enrollmentId}`);
 
 // 학생 본인 수강 장바구니 조회 (academicYear/term 생략 시 전체 조회)
-export const getMyCart = (params = {}) =>
-  myAxios.get(CART_URL, { params });
+export const getMyCart = (params = {}, config = {}) =>
+  myAxios.get(CART_URL, { params, ...config });
 
 // 학생 본인 수강 장바구니에 개설 강의 추가
 export const addCartItem = (lectureId) =>
