@@ -420,6 +420,7 @@ onMounted(() => loadRequests());
               <MyButton
                 v-if="item.status === 'PENDING'"
                 btn-type="button"
+                class="student-secondary"
                 color="white"
                 size="small"
                 :content="uploadingRequestId === item.id ? '업로드 중' : (item.attachmentOriginalName ? '교체' : '첨부')"
@@ -637,6 +638,11 @@ onMounted(() => loadRequests());
 .attachment-button:disabled {
   color: var(--personal-color-text-faint-fog);
   cursor: wait;
+}
+
+.student-secondary {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-primary-navy);
 }
 
 .visually-hidden {

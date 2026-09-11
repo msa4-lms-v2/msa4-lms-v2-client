@@ -177,7 +177,7 @@ onMounted(async () => {
 <template>
   <MyPageContainer :title="isDetail ? '강의평가 결과(상세)' : '강의평가 결과'">
     <template v-if="!isDetail">
-      <MySearchFilter submit-text="조회" @search="load(1)">
+      <MySearchFilter class="professor-search" submit-text="조회" @search="load(1)">
         <div class="search-group semester-filter">
           <label for="evaluation-semester">학기 선택</label>
           <MySelect id="evaluation-semester" v-model="selectedSemesterKey" :disabled="isLoadingLectures">
@@ -198,7 +198,7 @@ onMounted(async () => {
           <td>{{ formatAverage(item.responseRate) }}%</td>
           <td>{{ overallAverageLabel(item.overallAverage) }}</td>
           <td>{{ item.capacity ?? item.activeEnrollmentCount }}명</td>
-          <td><MyButton class="detail-button" color="deep-blue" size="small" content="상세보기" @click="openDetail(item.lectureId)" /></td>
+          <td><MyButton class="secondary-button" color="white" size="middle" content="상세보기" @click="openDetail(item.lectureId)" /></td>
         </tr>
       </MyTable>
 
@@ -207,7 +207,7 @@ onMounted(async () => {
 
     <template v-else>
       <div class="detail-top-actions">
-        <MyButton class="list-button" color="gray" size="middle" content="목록" @click="closeDetail" />
+        <MyButton class="secondary-button" color="white" size="middle" content="목록" @click="closeDetail" />
       </div>
 
       <section v-if="detail" class="lecture-info-card">
@@ -233,8 +233,8 @@ onMounted(async () => {
       </section>
 
       <div v-if="detail" class="detail-actions">
-        <MyButton class="wide-button" color="deep-blue" size="middle" content="결과 다운로드" @click="downloadResults" />
-        <MyButton class="wide-button" color="deep-blue" size="middle" content="서술형 의견보기" @click="commentsOpen = true" />
+        <MyButton class="professor-primary" color="deep-blue" size="big" content="결과 다운로드" @click="downloadResults" />
+        <MyButton class="professor-primary" color="deep-blue" size="big" content="서술형 의견보기" @click="commentsOpen = true" />
       </div>
 
       <div v-if="!isLoading && !detail" class="empty-detail">해당 강의평가 결과를 찾을 수 없습니다.</div>
@@ -246,7 +246,7 @@ onMounted(async () => {
       </ul>
       <p v-else class="empty-comments">등록된 서술형 의견이 없습니다.</p>
       <template #footer>
-        <MyButton color="gray" size="middle" content="닫기" @click="commentsOpen = false" />
+        <MyButton class="secondary-button" color="white" size="middle" content="닫기" @click="commentsOpen = false" />
       </template>
     </MyModal>
   </MyPageContainer>
@@ -254,9 +254,7 @@ onMounted(async () => {
 
 <style scoped>
 .semester-filter :deep(select) { min-width: 360px; }
-.detail-button { width: auto; min-width: 64px; padding: 0 10px; }
 .detail-top-actions { display: flex; justify-content: flex-end; margin: -46px 0 18px; }
-.list-button { width: 64px; }
 .lecture-info-card,
 .evaluation-result-card { padding: 22px 24px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .lecture-info-card h3,
@@ -271,14 +269,16 @@ onMounted(async () => {
 .question-result p span { margin-right: 4px; font-weight: 700; }
 .score-row { display: flex; align-items: center; gap: 14px; }
 .score-track { flex: 1; height: 14px; overflow: hidden; border-radius: 999px; background: var(--personal-color-table-header-smoke); }
-.score-track span { display: block; height: 100%; border-radius: inherit; background: var(--personal-color-primary-navy); }
-.score-row strong { width: 28px; color: var(--personal-color-primary-navy); font-size: 0.92rem; }
+.score-track span { display: block; height: 100%; border-radius: inherit; background: var(--personal-color-professor-primary-navy); }
+.score-row strong { width: 28px; color: var(--personal-color-professor-primary-navy); font-size: 0.92rem; }
 .detail-actions { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
-.wide-button { width: auto; min-width: 118px; padding: 0 14px; }
+.professor-primary { background: var(--personal-color-professor-primary-navy); }
+.professor-search :deep(button.deep-blue) { background: var(--personal-color-professor-primary-navy); }
+:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
 .empty-detail { padding: 60px 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: white; color: var(--personal-color-text-muted-slate); text-align: center; }
 .comment-list { max-height: 440px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
 .comment-list li { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--personal-color-border-mist); }
-.comment-list li > span { display: grid; flex: 0 0 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--personal-color-table-header-smoke); color: var(--personal-color-primary-navy); font-size: 0.78rem; font-weight: 700; }
+.comment-list li > span { display: grid; flex: 0 0 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--personal-color-table-header-smoke); color: var(--personal-color-professor-primary-navy); font-size: 0.78rem; font-weight: 700; }
 .comment-list p { margin: 3px 0 0; white-space: pre-wrap; line-height: 1.55; }
 .empty-comments { margin: 20px 0; color: var(--personal-color-text-muted-slate); text-align: center; }
 @media (max-width: 800px) {

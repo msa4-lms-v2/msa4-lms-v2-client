@@ -165,7 +165,7 @@ onMounted(async () => {
 <style scoped>
 .grade-filters {
   display: grid;
-  grid-template-columns: 180px 180px minmax(240px, 1fr) 150px 92px;
+  grid-template-columns: 180px 180px minmax(240px, 1fr) 150px 77px;
   align-items: end;
   gap: 18px;
   min-height: 104px;
@@ -199,11 +199,6 @@ onMounted(async () => {
   color: var(--personal-color-login-primary-navy);
   font-size: 0.86rem;
   line-height: 38px;
-}
-
-.grade-filters :deep(button) {
-  width: 92px;
-  height: 38px;
 }
 
 .summary-bar {
@@ -250,8 +245,5 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
 
-  .grade-filters :deep(button) {
-    width: 100%;
-  }
 }
 </style>

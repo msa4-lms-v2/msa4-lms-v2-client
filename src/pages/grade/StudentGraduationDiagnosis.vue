@@ -462,7 +462,7 @@ onMounted(loadDiagnosis);
 
 .course-filters {
   display: grid;
-  grid-template-columns: 150px 150px 150px minmax(220px, 1fr) 92px;
+  grid-template-columns: 150px 150px 150px minmax(220px, 1fr) 77px;
   align-items: end;
   gap: 18px;
   padding: 18px 22px;
@@ -480,11 +480,6 @@ onMounted(loadDiagnosis);
   color: var(--personal-color-text-secondary-steel);
   font-size: 0.72rem;
   font-weight: 700;
-}
-
-.course-filters :deep(button) {
-  width: 92px;
-  height: 38px;
 }
 
 .completed-course-section :deep(.table-container) {

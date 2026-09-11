@@ -124,7 +124,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="출결 확인" subtitle="담당 강의 학생들의 출결 기록을 조회하고 수정합니다.">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+    <MySearchFilter class="professor-search" submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="attendance-class">강의</label>
         <MySelect id="attendance-class" v-model="filters.classId">
@@ -173,7 +173,7 @@ onMounted(async () => {
         </td>
         <td>{{ record.remarks || '-' }}</td>
         <td>
-          <MyButton btn-type="button" color="white" size="small" content="수정" @click="openEdit(record)" />
+          <MyButton btn-type="button" class="secondary-button" color="white" size="small" content="수정" @click="openEdit(record)" />
         </td>
       </tr>
     </MyTable>
@@ -211,8 +211,8 @@ onMounted(async () => {
       </template>
 
       <template #footer>
-        <MyButton color="white" size="middle" content="취소" :disabled="isSaving" @click="closeEdit" />
-        <MyButton color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="saveEdit" />
+        <MyButton class="secondary-button" color="white" size="middle" content="취소" :disabled="isSaving" @click="closeEdit" />
+        <MyButton class="professor-primary" color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="saveEdit" />
       </template>
     </MyModal>
   </MyPageContainer>
@@ -256,5 +256,18 @@ onMounted(async () => {
 
 .attendance-status.late {
   color: var(--personal-color-status-warning-text-amber);
+}
+
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+.professor-search :deep(button.deep-blue) {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-professor-primary-navy);
 }
 </style>
