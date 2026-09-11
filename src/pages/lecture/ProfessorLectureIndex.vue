@@ -212,7 +212,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="강의 조회" subtitle="담당 강의의 시간표와 수강 현황, 강의계획서를 관리합니다.">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+    <MySearchFilter class="professor-search" submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="lecture-year">학년도</label>
         <MySelect id="lecture-year" v-model="filters.academicYear">
@@ -257,6 +257,7 @@ onMounted(async () => {
         <td>
           <MyButton
             btn-type="button"
+            class="secondary-button"
             color="white"
             size="small"
             :content="selectedLecture?.classId === lecture.classId ? '관리 중' : '관리'"
@@ -299,6 +300,7 @@ onMounted(async () => {
           <span>{{ syllabus.length.toLocaleString() }} / 65,535자</span>
           <MyButton
             btn-type="button"
+            class="professor-primary"
             color="deep-blue"
             size="middle"
             :content="isSavingSyllabus ? '저장 중...' : '내용 저장'"
@@ -323,6 +325,7 @@ onMounted(async () => {
               />
               <MyButton
                 btn-type="button"
+                class="professor-primary"
                 color="deep-blue"
                 size="middle"
                 :content="isUploading ? '업로드 중...' : 'PDF 업로드'"
@@ -340,6 +343,7 @@ onMounted(async () => {
               </div>
               <MyButton
                 btn-type="button"
+                class="secondary-button"
                 color="white"
                 size="small"
                 :content="downloadingFileId === file.fileId ? '받는 중...' : '다운로드'"
@@ -432,7 +436,7 @@ onMounted(async () => {
 }
 
 .syllabus-field textarea:focus {
-  border-color: var(--personal-color-primary-navy);
+  border-color: var(--personal-color-professor-primary-navy);
   outline: none;
 }
 
@@ -507,6 +511,19 @@ onMounted(async () => {
 
 .empty-files {
   margin: 16px 0 0;
+}
+
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+.professor-search :deep(button.deep-blue) {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-professor-primary-navy);
 }
 
 @media (max-width: 700px) {

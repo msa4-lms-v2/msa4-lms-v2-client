@@ -193,6 +193,7 @@ onMounted(() => load());
         <td>
           <MyButton
             btn-type="button"
+            :class="item.status === 'PENDING' ? 'professor-primary' : 'secondary-button'"
             :color="item.status === 'PENDING' ? 'deep-blue' : 'white'"
             size="small"
             :content="item.status === 'PENDING' ? '검토' : '상세'"
@@ -254,9 +255,9 @@ onMounted(() => load());
       </template>
 
       <template #footer>
-        <MyButton color="gray" size="small" content="닫기" :disabled="isReviewing" @click="closeReview" />
-        <MyButton v-if="reviewTarget?.status === 'PENDING'" color="red" size="small" content="반려" :disabled="isReviewing" @click="reject" />
-        <MyButton v-if="reviewTarget?.status === 'PENDING'" color="deep-blue" size="small" content="승인" :disabled="isReviewing" @click="approve" />
+        <MyButton class="secondary-button" color="white" size="middle" content="닫기" :disabled="isReviewing" @click="closeReview" />
+        <MyButton v-if="reviewTarget?.status === 'PENDING'" color="red" size="middle" content="반려" :disabled="isReviewing" @click="reject" />
+        <MyButton v-if="reviewTarget?.status === 'PENDING'" class="professor-primary" color="deep-blue" size="middle" content="승인" :disabled="isReviewing" @click="approve" />
       </template>
     </MyModal>
   </MyPageContainer>
@@ -315,7 +316,7 @@ onMounted(() => load());
   padding: 0;
   overflow: hidden;
   border: 0;
-  color: var(--personal-color-secondary-blue);
+  color: var(--personal-color-professor-primary-navy);
   background: transparent;
   font: inherit;
   font-size: 0.82rem;
@@ -376,6 +377,15 @@ onMounted(() => load());
   margin-top: 4px;
   color: var(--personal-color-text-faint-fog);
   font-size: 0.75rem;
+}
+
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-professor-primary-navy);
 }
 
 @media (max-width: 620px) {

@@ -430,7 +430,7 @@ onMounted(async () => {
           <td>
             <MyButton
               btn-type="button"
-              color="white"
+              color="red"
               size="small"
               class="cancel-action"
               :content="cancellingEnrollmentId === item.enrollmentId ? '취소 중' : '취소'"
@@ -499,34 +499,21 @@ onMounted(async () => {
 
 .period-badge {
   flex-shrink: 0;
-  padding: 5px 10px;
-  border-radius: var(--personal-radius-badge);
   font-size: 0.78rem;
   font-weight: 700;
 }
 
-.period-open {
-  background: var(--personal-color-bg-success-soft-honeydew);
-}
-
 .period-open .period-badge {
   color: var(--personal-color-status-success-text-forest);
-  background: var(--personal-color-status-success-bg-mint);
-}
-
-.period-upcoming {
-  background: var(--personal-color-info-soft-ice);
 }
 
 .period-upcoming .period-badge {
   color: var(--personal-color-status-processing-text-navy);
-  background: var(--personal-color-status-processing-bg-sky);
 }
 
 .period-closed .period-badge,
 .period-unavailable .period-badge {
   color: var(--personal-color-status-warning-text-amber);
-  background: var(--personal-color-status-warning-bg-butter);
 }
 
 .add-section {
@@ -595,6 +582,11 @@ h3 {
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+
+:deep(.action-cell button.white) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-primary-navy);
 }
 
 .cancel-action {

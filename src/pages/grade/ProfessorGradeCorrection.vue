@@ -311,7 +311,7 @@ onMounted(async () => {
       </div>
       <div class="save-area">
         <span v-if="changedRows.length">{{ changedRows.length }}명 변경</span>
-        <MyButton class="action-button" color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '변경 사항 저장'" :disabled="isSaving || isLoadingGrades || !changedRows.length" @click="saveCorrections" />
+        <MyButton class="professor-primary" color="deep-blue" size="big" :content="isSaving ? '저장 중...' : '변경 사항 저장'" :disabled="isSaving || isLoadingGrades || !changedRows.length" @click="saveCorrections" />
       </div>
     </div>
 
@@ -341,18 +341,18 @@ onMounted(async () => {
 .lecture-group :deep(select) { min-width: 300px; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
 .lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
-.lecture-summary strong { padding: 8px 0; color: var(--personal-color-primary-blue); font-size: 0.95rem; }
+.lecture-summary strong { padding: 8px 0; color: var(--personal-color-professor-primary-navy); font-size: 0.95rem; }
 .section-title { margin: 0 0 14px; font-size: 1rem; }
 .score-input { width: 64px; text-align: center; }
-.changed-row { background: #f3f8ff; }
+.changed-row { background: var(--personal-color-sidebar-active-bg-sky); }
 .correction-controls { display: flex; align-items: flex-end; gap: 16px; margin-top: 16px; }
 .reason-field { display: flex; flex: 1; flex-direction: column; gap: 6px; }
 .reason-field label { display: flex; justify-content: space-between; color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
 .reason-field textarea { min-height: 58px; padding: 10px 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; box-sizing: border-box; font: inherit; resize: vertical; }
-.save-area { display: flex; align-items: center; gap: 10px; color: var(--personal-color-primary-blue); font-size: 0.85rem; font-weight: 700; }
-.action-button { width: auto; min-width: 112px; padding: 0 14px; }
+.save-area { display: flex; align-items: center; gap: 10px; color: var(--personal-color-professor-primary-navy); font-size: 0.85rem; font-weight: 700; }
 .history-section { margin-top: 36px; }
 .history-reason { max-width: 260px; white-space: pre-wrap; text-align: left; }
+.professor-primary { background: var(--personal-color-professor-primary-navy); }
 @media (max-width: 900px) {
   .correction-controls { align-items: stretch; flex-direction: column; }
   .save-area { justify-content: flex-end; }
