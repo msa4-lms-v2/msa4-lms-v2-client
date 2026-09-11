@@ -1,7 +1,12 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { getMyEnrollments } from '../../api/enrollmentApi';
-import { createExcuseRequest, searchExcuseRequests, uploadExcuseAttachment } from '../../api/attendanceApi';
+import {
+  createExcuseRequest,
+  downloadExcuseAttachment,
+  searchExcuseRequests,
+  uploadExcuseAttachment,
+} from '../../api/attendanceApi';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
@@ -42,10 +47,22 @@ const isLoadingEnrollments = ref(false);
 const isLoadingRequests = ref(false);
 const isSubmitting = ref(false);
 const uploadingRequestId = ref(null);
+const downloadingRequestId = ref(null);
 const fileInputRefs = ref({});
 const formError = ref('');
 
 const activeEnrollments = computed(() => enrollments.value.filter((item) => item.enrollmentStatus === 'ACTIVE'));
+const toLocalDateString = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+const today = new Date();
+const earliestExcuseDate = new Date(today);
+earliestExcuseDate.setDate(earliestExcuseDate.getDate() - 7);
+const minLectureDate = toLocalDateString(earliestExcuseDate);
+const maxLectureDate = toLocalDateString(today);
 
 const loadEnrollments = async () => {
   isLoadingEnrollments.value = true;
@@ -92,6 +109,10 @@ const submitRequest = async () => {
     formError.value = '결석 수업일을 선택해 주세요.';
     return;
   }
+  if (form.lectureDate < minLectureDate || form.lectureDate > maxLectureDate) {
+    formError.value = '공결은 오늘을 포함해 최근 7일 이내 수업만 신청할 수 있습니다.';
+    return;
+  }
   const period = Number(form.period);
   if (!Number.isInteger(period) || period < 1 || period > 20) {
     formError.value = '교시는 1~20 사이의 숫자로 입력해 주세요.';
@@ -131,6 +152,24 @@ const setFileInputRef = (requestId) => (el) => {
 
 const openAttachmentPicker = (requestId) => {
   fileInputRefs.value[requestId]?.click();
+};
+
+const downloadAttachment = async (request) => {
+  if (!request.attachmentOriginalName || downloadingRequestId.value) return;
+  downloadingRequestId.value = request.id;
+  try {
+    const response = await downloadExcuseAttachment(request.id);
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = request.attachmentOriginalName;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  } catch (error) {
+    await notify(error.response?.data?.message || '증빙 파일을 다운로드하지 못했습니다.');
+  } finally {
+    downloadingRequestId.value = null;
+  }
 };
 
 const onAttachmentChange = async (requestId, event) => {
@@ -179,7 +218,13 @@ onMounted(async () => {
 
         <label class="form-field" for="excuse-date">
           <span>결석 수업일</span>
-          <MyInput id="excuse-date" v-model="form.lectureDate" type="date" />
+          <MyInput
+            id="excuse-date"
+            v-model="form.lectureDate"
+            type="date"
+            :min="minLectureDate"
+            :max="maxLectureDate"
+          />
         </label>
 
         <label class="form-field" for="excuse-period">
@@ -226,8 +271,18 @@ onMounted(async () => {
             <div v-if="item.status === 'REJECTED' && item.rejectReason" class="reject-reason">{{ item.rejectReason }}</div>
           </td>
           <td>
-            <template v-if="item.status === 'PENDING'">
+            <div v-if="item.attachmentOriginalName || item.status === 'PENDING'" class="attachment-actions">
+              <button
+                v-if="item.attachmentOriginalName"
+                type="button"
+                class="attachment-button"
+                :disabled="downloadingRequestId === item.id"
+                @click="downloadAttachment(item)"
+              >
+                {{ downloadingRequestId === item.id ? '받는 중...' : item.attachmentOriginalName }}
+              </button>
               <input
+                v-if="item.status === 'PENDING'"
                 :ref="setFileInputRef(item.id)"
                 class="visually-hidden"
                 type="file"
@@ -235,6 +290,7 @@ onMounted(async () => {
                 @change="onAttachmentChange(item.id, $event)"
               >
               <MyButton
+                v-if="item.status === 'PENDING'"
                 btn-type="button"
                 color="white"
                 size="small"
@@ -242,8 +298,7 @@ onMounted(async () => {
                 :disabled="uploadingRequestId === item.id"
                 @click="openAttachmentPicker(item.id)"
               />
-            </template>
-            <span v-else-if="item.attachmentOriginalName">{{ item.attachmentOriginalName }}</span>
+            </div>
             <span v-else>-</span>
           </td>
           <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
@@ -341,6 +396,31 @@ onMounted(async () => {
   margin-top: 4px;
   color: var(--personal-color-red);
   font-size: 0.74rem;
+}
+
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attachment-button {
+  max-width: 180px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  color: var(--personal-color-link-blue);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-button:disabled {
+  color: var(--personal-color-text-faint-fog);
+  cursor: wait;
 }
 
 .visually-hidden {
