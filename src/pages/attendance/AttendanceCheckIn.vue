@@ -9,6 +9,7 @@ const router = useRouter();
 const state = ref('loading');
 const message = ref('출석 정보를 확인하고 있습니다.');
 const attendance = ref(null);
+const statusLabels = { PRESENT: '출석', LATE: '지각', ABSENT: '결석', EXCUSED: '공결' };
 
 const title = computed(() => {
     if (state.value === 'success') return '출석 완료';
@@ -61,7 +62,7 @@ onMounted(checkIn);
                 </div>
                 <div>
                     <dt>출석 상태</dt>
-                    <dd>{{ attendance.status }}</dd>
+                    <dd>{{ statusLabels[attendance.status] || attendance.status }}</dd>
                 </div>
                 <div>
                     <dt>처리 시각</dt>
@@ -78,20 +79,22 @@ onMounted(checkIn);
 
 <style scoped>
 .check-in-page {
+    box-sizing: border-box;
     min-height: 100vh;
     padding: 24px;
     display: grid;
     place-items: center;
-    color: #172033;
-    background: #f3f6fb;
+    color: var(--personal-color-primary-text-navy);
+    background: var(--personal-color-bg-surface-frost);
 }
 
 .check-in-card {
+    box-sizing: border-box;
     width: min(420px, 100%);
     padding: 38px 26px;
-    border: 1px solid #dbe3f0;
+    border: 1px solid var(--personal-color-border-mist);
     border-radius: 22px;
-    background: #fff;
+    background: var(--personal-color-white);
     box-shadow: 0 18px 50px #1d397018;
     text-align: center;
 }
@@ -104,7 +107,7 @@ onMounted(checkIn);
     place-items: center;
     border-radius: 50%;
     color: #fff;
-    background: #3153a4;
+    background: var(--personal-color-student-primary-cyan);
     font-size: 34px;
     font-weight: 800;
 }
@@ -122,7 +125,7 @@ onMounted(checkIn);
 }
 
 .brand {
-    color: #3153a4;
+    color: var(--personal-color-student-primary-cyan);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.13em;
@@ -134,7 +137,7 @@ h1 {
 }
 
 .message {
-    color: #657188;
+    color: var(--personal-color-text-muted-slate);
     line-height: 1.6;
 }
 
@@ -142,7 +145,7 @@ h1 {
     margin: 24px 0 0;
     padding: 6px 16px;
     border-radius: 14px;
-    background: #f6f8fc;
+    background: var(--personal-color-bg-surface-frost);
     text-align: left;
 }
 
@@ -151,11 +154,11 @@ h1 {
     display: flex;
     justify-content: space-between;
     gap: 16px;
-    border-bottom: 1px solid #e5eaf2;
+    border-bottom: 1px solid var(--personal-color-border-mist);
 }
 
 .attendance-result div:last-child { border-bottom: 0; }
-.attendance-result dt { color: #778197; }
+.attendance-result dt { color: var(--personal-color-text-tertiary-slate); }
 .attendance-result dd { margin: 0; font-weight: 700; text-align: right; }
 
 button {
@@ -164,8 +167,8 @@ button {
     margin-top: 24px;
     border: 0;
     border-radius: 11px;
-    color: #fff;
-    background: #3153a4;
+    color: var(--personal-color-white);
+    background: var(--personal-color-primary-navy);
     font-weight: 700;
     cursor: pointer;
 }

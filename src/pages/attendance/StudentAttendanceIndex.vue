@@ -51,7 +51,13 @@ const load = async (pageNumber = 1) => {
   }
 };
 
-const applyFilters = () => load(1);
+const applyFilters = async () => {
+  if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) {
+    await notify('조회 시작일은 종료일보다 늦을 수 없습니다.');
+    return;
+  }
+  await load(1);
+};
 
 onMounted(() => load());
 </script>
