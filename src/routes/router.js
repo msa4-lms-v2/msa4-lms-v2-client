@@ -282,6 +282,16 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/evaluations',
+        name: 'StudentLectureEvaluation',
+        component: () => import('../pages/grade/StudentLectureEvaluation.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
+    },
+    {
         path: '/attendance',
         name: 'StudentAttendanceIndex',
         component: () => import('../pages/attendance/StudentAttendanceIndex.vue'),
