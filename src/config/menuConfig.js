@@ -10,6 +10,7 @@ export const MENU_TITLES = {
     '/admin/academic-schedules/new': { default: '학사일정 작성' },
     '/admin/notices': { default: '공지사항 목록' },
     '/admin/notices/new': { default: '공지사항 작성' },
+    '/admin/lecture-opening-requests': { default: '강의 개설 승인' },
     '/main': { default: '메인 화면' },
     '/profile': { STUDENT: '학적 조회', PROFESSOR: '교적 조회', default: '내 정보' },
     '/profile/info-change': { default: '정보 변경 신청' },

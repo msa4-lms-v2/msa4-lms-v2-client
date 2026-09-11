@@ -24,6 +24,10 @@ export const createLectureOpeningRequest = (payload) =>
 export const updateLectureOpeningRequest = (requestId, payload) =>
   myAxios.patch(`${OPENING_REQUESTS_URL}/${requestId}`, payload);
 
+// 관리자 강의 개설 신청 승인·반려
+export const reviewLectureOpeningRequest = (payload) =>
+  myAxios.patch(`${CLASSES_URL}/opening-approvals`, payload);
+
 // 담당 강의 강의계획서 조회
 export const getLectureSyllabus = (classId) =>
   myAxios.get(`${CLASSES_URL}/${classId}/syllabus`);
