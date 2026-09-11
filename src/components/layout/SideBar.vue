@@ -69,6 +69,7 @@ watch(() => route.path, path => {
   if (path.startsWith('/admin/academic-schedules')) activeMenus.value.adminAcademicSchedule = true;
   if (path.startsWith('/admin/notices')) activeMenus.value.adminNotice = true;
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
+  if (path.startsWith('/graduation-diagnoses')) activeMenus.value.professorStudent = true;
 }, { immediate: true });
 
 const toggleMenu = (menuKey) => {
@@ -291,6 +292,9 @@ const toggleMenu = (menuKey) => {
             >
               {{ getMenuTitle("/professor/academic-change-requests/double-major") }}
             </router-link>
+            <router-link to="/graduation-diagnoses" class="submenu-item">
+              {{ getMenuTitle("/graduation-diagnoses") }}
+            </router-link>
           </div>
         </div>
 
@@ -440,6 +444,9 @@ const toggleMenu = (menuKey) => {
         </div>
         <router-link to="/admin/graduation-requirements" class="nav-item">
           {{ getMenuTitle("/admin/graduation-requirements") }}
+        </router-link>
+        <router-link to="/graduation-diagnoses" class="nav-item">
+          {{ getMenuTitle("/graduation-diagnoses") }}
         </router-link>
         <router-link to="/admin/grades/retake-reflection" class="nav-item">
           {{ getMenuTitle("/admin/grades/retake-reflection") }}

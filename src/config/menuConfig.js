@@ -29,6 +29,7 @@ export const MENU_TITLES = {
     '/registration': { default: '수강 신청' },
     '/grade': { default: '성적 조회' },
     '/graduation-diagnosis': { default: '졸업 학점 진단' },
+    '/graduation-diagnoses': { default: '졸업요건 진단 현황' },
     '/evaluations': { default: '강의 평가' },
     '/attendance': { default: '출결 조회' },
     '/excuses': { default: '공결 신청' },
