@@ -18,11 +18,8 @@ const counseling = computed(() => store.selected);
 
 onMounted(async () => {
   try {
-    const data = await store.fetchCounseling(route.params.counselingId);
+    const data = await store.fetchCounseling(route.params.counselingId, { pageLoad: true });
     answer.value = data.answer || '';
-  } catch (error) {
-    await notify(error.response?.data?.message || '상담 정보를 불러오지 못했습니다.');
-    await router.replace({ name: 'ProfessorCounselingList' });
   } finally {
     loading.value = false;
   }

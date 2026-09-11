@@ -120,7 +120,7 @@ const loadDiagnosis = async () => {
   isLoading.value = true;
   try {
     const [diagnosisResponse] = await Promise.all([
-      getCreditRequirementDiagnoses({ page: 1, size: 1 }),
+      getCreditRequirementDiagnoses({ page: 1, size: 1 }, { pageLoad: true }),
       profileStore.fetchStudentProfile(),
     ]);
     diagnosis.value = diagnosisResponse.data.data.items?.[0] || null;
@@ -128,7 +128,7 @@ const loadDiagnosis = async () => {
   } catch (error) {
     diagnosis.value = null;
     creditRecords.value = [];
-    await notify(error.response?.data?.message || '졸업요건 진단을 불러오지 못했습니다.');
+    if (!error.config?.pageLoad) await notify(error.response?.data?.message || '졸업요건 진단을 불러오지 못했습니다.');
   } finally {
     isLoading.value = false;
   }

@@ -15,8 +15,8 @@ const resourcePath = (requesterType) => resourcePathByRequesterType[requesterTyp
 
 export const searchAdminInfoChangeRequests = (params) => myAxios.get(ADMIN_INFO_CHANGE_URL, { params });
 
-export const getInfoChangeRequestDetail = (requesterType, requestId) => (
-  myAxios.get(`${resourcePath(requesterType)}/${requestId}`)
+export const getInfoChangeRequestDetail = (requesterType, requestId, config = {}) => (
+  myAxios.get(`${resourcePath(requesterType)}/${requestId}`, config)
 );
 
 export const approveInfoChangeRequest = (requesterType, requestId) => (
