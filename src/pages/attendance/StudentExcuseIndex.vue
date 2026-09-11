@@ -12,7 +12,6 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
@@ -267,7 +266,9 @@ onMounted(async () => {
           <td>{{ formatDate(item.lectureDate) }} {{ item.period }}교시</td>
           <td class="reason-cell" :title="item.reason">{{ item.reason }}</td>
           <td>
-            <MyStatusBadge :label="statusLabels[item.status] || item.status" :variant="statusVariants[item.status] || 'processing'" />
+            <span :class="['status-text', `status-text--${statusVariants[item.status] || 'processing'}`]">
+              {{ statusLabels[item.status] || item.status }}
+            </span>
             <div v-if="item.status === 'REJECTED' && item.rejectReason" class="reject-reason">{{ item.rejectReason }}</div>
           </td>
           <td>
@@ -396,6 +397,22 @@ onMounted(async () => {
   margin-top: 4px;
   color: var(--personal-color-red);
   font-size: 0.74rem;
+}
+
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text--processing {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text--warning {
+  color: var(--personal-color-status-warning-text-amber);
+}
+
+.status-text--fail {
+  color: var(--personal-color-status-fail-text-maroon);
 }
 
 .attachment-actions {
