@@ -28,6 +28,10 @@ const routes = [
     { path: '/admin/lecture-opening-requests', name: 'AdminLectureOpeningApproval', component: () => import('../pages/lecture/AdminLectureOpeningApproval.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/application-management/leave-requests', name: 'AdminLeaveRequestIndex', component: () => import('../pages/leaveReturn/AdminLeaveRequestIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/application-management/leave-requests/:requestId(\\d+)', name: 'AdminLeaveRequestDetail', component: () => import('../pages/leaveReturn/AdminLeaveRequestDetail.vue'), props: true, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/academic-status-histories', name: 'AdminAcademicStatusHistoryIndex', component: () => import('../pages/academicStatus/AdminAcademicStatusHistoryIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/attendance', name: 'AdminAttendanceManagement', component: () => import('../pages/attendance/AdminAttendanceManagement.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/counseling', name: 'AdminCounselingIndex', component: () => import('../pages/counseling/AdminCounselingIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/withdrawals', name: 'AdminWithdrawalManagement', component: () => import('../pages/withdrawal/AdminWithdrawalManagement.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {
@@ -218,6 +222,18 @@ const routes = [
         component: () => import('../pages/payment/CertificateVerify.vue'),
     },
     {
+        path: '/certificates/apply',
+        name: 'StudentCertificateApply',
+        component: () => import('../pages/payment/StudentCertificateApply.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/professor/certificates/apply',
+        name: 'ProfessorCertificateApply',
+        component: () => import('../pages/payment/ProfessorCertificateApply.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
         path: '/admin/certificates/revoke',
         name: 'AdminCertificateRevoke',
         component: () => import('../pages/payment/AdminCertificateRevoke.vue'),
@@ -291,6 +307,16 @@ const routes = [
         path: '/registration',
         name: 'StudentRegistrationIndex',
         component: () => import('../pages/enrollment/StudentRegistrationIndex.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
+    },
+    {
+        path: '/registration/cart',
+        name: 'StudentCartIndex',
+        component: () => import('../pages/enrollment/StudentCartIndex.vue'),
         meta: {
             requiresAuth: true,
             roles: ['STUDENT'],

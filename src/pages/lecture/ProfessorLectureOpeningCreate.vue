@@ -11,7 +11,6 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -28,7 +27,6 @@ const DAY_OPTIONS = [
 ];
 
 const statusLabels = { PENDING: '심사중', APPROVED: '승인', REJECTED: '반려' };
-const statusVariants = { PENDING: 'processing', APPROVED: 'success', REJECTED: 'fail' };
 
 const historyColumns = [
   { key: 'course', label: '교과목' },
@@ -395,8 +393,8 @@ onMounted(async () => {
           <td>{{ item.courseName }} ({{ item.courseCode }})</td>
           <td>{{ item.academicYear }}학년도 {{ item.term === 'FIRST' ? 1 : 2 }}학기</td>
           <td>{{ item.sectionNo }}</td>
-          <td>
-            <MyStatusBadge :label="statusLabels[item.status] || item.status" :variant="statusVariants[item.status] || 'processing'" />
+          <td :class="{ rejected: item.status === 'REJECTED' }">
+            {{ statusLabels[item.status] || item.status }}
             <div v-if="item.status === 'REJECTED' && item.rejectReason" class="reject-reason">{{ item.rejectReason }}</div>
           </td>
           <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
@@ -563,6 +561,10 @@ onMounted(async () => {
 
 .history-status {
   max-width: 150px;
+}
+
+.rejected {
+  color: var(--personal-color-danger-coral);
 }
 
 .reject-reason {
