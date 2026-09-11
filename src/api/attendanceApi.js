@@ -52,6 +52,10 @@ export const reviewExcuseRequest = (requestId, status, rejectReason, idempotency
         headers: { 'Idempotency-Key': idempotencyKey },
     });
 
+// 공결 증빙 다운로드 (학생 본인·담당 교수·관리자)
+export const downloadExcuseAttachment = (requestId) =>
+    myAxios.get(`${EXCUSES_URL}/${requestId}/attachment`, { responseType: 'blob' });
+
 // 공결 증빙 등록·교체 (10MB 이하 PDF)
 export const uploadExcuseAttachment = (requestId, file) => {
     const formData = new FormData();

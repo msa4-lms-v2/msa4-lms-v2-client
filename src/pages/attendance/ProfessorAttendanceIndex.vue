@@ -48,6 +48,11 @@ const loadLectures = async () => {
 };
 
 const load = async (pageNumber = 1) => {
+  if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) {
+    await notify('시작일은 종료일보다 늦을 수 없습니다.');
+    return;
+  }
+
   isLoading.value = true;
   try {
     const response = await searchAttendanceRecords({
@@ -84,15 +89,26 @@ const closeEdit = () => {
 };
 
 const saveEdit = async () => {
+  if (isSaving.value || !editTarget.value) return;
+
   if (!editForm.reason.trim()) {
     await notify('수정 사유를 입력해 주세요.');
     return;
   }
+
+  const remarks = editForm.remarks.trim();
+  const statusChanged = editForm.status !== editTarget.value.status;
+  const remarksChanged = remarks !== (editTarget.value.remarks || '');
+  if (!statusChanged && !remarksChanged) {
+    await notify('변경된 출결 내용이 없습니다.');
+    return;
+  }
+
   isSaving.value = true;
   try {
-    await updateAttendanceRecord(editTarget.value.id, editForm.status, editForm.remarks.trim(), editForm.reason.trim());
+    await updateAttendanceRecord(editTarget.value.id, editForm.status, remarks, editForm.reason.trim());
     await notify('출결 기록이 수정되었습니다.');
-    closeEdit();
+    editTarget.value = null;
     await load(page.value.page);
   } catch (error) {
     await notify(error.response?.data?.message || '출결 기록 수정 중 오류가 발생했습니다.');
