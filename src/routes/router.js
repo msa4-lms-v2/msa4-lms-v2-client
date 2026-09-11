@@ -26,6 +26,8 @@ const routes = [
     { path: '/admin/notices/new', name: 'AdminNoticeCreate', component: () => import('../pages/notice/AdminNoticeForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/notices/:noticeId', name: 'AdminNoticeEdit', component: () => import('../pages/notice/AdminNoticeForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/lecture-opening-requests', name: 'AdminLectureOpeningApproval', component: () => import('../pages/lecture/AdminLectureOpeningApproval.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/application-management/leave-requests', name: 'AdminLeaveRequestIndex', component: () => import('../pages/leaveReturn/AdminLeaveRequestIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/application-management/leave-requests/:requestId(\\d+)', name: 'AdminLeaveRequestDetail', component: () => import('../pages/leaveReturn/AdminLeaveRequestDetail.vue'), props: true, meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {

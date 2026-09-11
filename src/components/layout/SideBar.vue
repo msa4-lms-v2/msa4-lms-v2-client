@@ -69,7 +69,7 @@ watch(() => route.path, path => {
   if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
   if (path.startsWith('/admin/academic-schedules')) activeMenus.value.adminAcademicSchedule = true;
   if (path.startsWith('/admin/notices')) activeMenus.value.adminNotice = true;
-  if (path.startsWith('/admin/application-management/info-change-requests')) activeMenus.value.adminApplicationManagement = true;
+  if (path.startsWith('/admin/application-management/')) activeMenus.value.adminApplicationManagement = true;
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
   if (path.startsWith('/graduation-diagnoses')) activeMenus.value.professorStudent = true;
 }, { immediate: true });
@@ -426,6 +426,11 @@ const toggleMenu = (menuKey) => {
             <span>신청 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminApplicationManagement }">▼</span>
           </button>
           <div v-show="activeMenus.adminApplicationManagement" class="submenu-list">
+            <router-link
+              to="/admin/application-management/leave-requests"
+              class="submenu-item"
+              exact-active-class="router-link-active"
+            >휴·복학 신청 목록</router-link>
             <router-link
               to="/admin/application-management/info-change-requests"
               class="submenu-item"
