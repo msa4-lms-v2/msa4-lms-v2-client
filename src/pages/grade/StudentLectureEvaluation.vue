@@ -471,9 +471,7 @@ onMounted(async () => {
 .lecture-list-section :deep(.my-table th:nth-child(6)) { width: 20%; }
 
 .lecture-list-section :deep(.my-table button) {
-  height: 38px;
   margin: 0 auto;
-  font-size: 0.8rem;
 }
 
 .status-incomplete {

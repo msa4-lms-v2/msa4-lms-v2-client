@@ -274,7 +274,7 @@ onMounted(loadRequests);
           @click="applyFilters"
         />
         <MyButton
-          class="reset-action"
+          :class="['reset-action', isAdmin ? 'admin-secondary' : 'professor-secondary']"
           color="white"
           size="middle"
           content="초기화"
@@ -314,6 +314,7 @@ onMounted(loadRequests);
               </td>
               <td>
                 <MyButton
+                  :class="isAdmin ? 'admin-secondary' : 'professor-secondary'"
                   color="white"
                   size="small"
                   content="선택"
@@ -481,19 +482,21 @@ onMounted(loadRequests);
   align-items: end;
   padding: 20px;
   border: 1px solid var(--personal-color-border-mist);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--personal-color-white);
 }
 .filter-card label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; font-weight: 600; }
 .filter-card input { height: 38px; padding: 0 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: var(--personal-color-white); }
 .filter-actions { display: flex; gap: 8px; }
-.reset-action { border: 1px solid var(--personal-color-black); }
+.reset-action { border: 1px solid var(--personal-color-border-mist); }
+.admin-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
+.professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
 .professor-primary { background: var(--personal-color-professor-primary-navy); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .professor-text { color: var(--personal-color-professor-primary-navy); }
 .admin-text { color: var(--personal-color-admin-secondary-indigo); }
 .review-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(310px, .85fr); gap: 18px; margin-top: 20px; }
-.list-card, .detail-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; background: var(--personal-color-white); }
+.list-card, .detail-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .professor-accent { border-top: 3px solid var(--personal-color-professor-primary-navy); }
 .admin-accent { border-top: 3px solid var(--personal-color-admin-secondary-indigo); }
 .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -501,9 +504,9 @@ onMounted(loadRequests);
 .section-title span { font-size: .8rem; font-weight: 700; }
 .table-scroll { overflow-x: auto; }
 .selected { background: var(--personal-color-indigo-soft-lavender); }
-.status-approved { color: var(--personal-color-success-text-forest); font-weight: 600; }
-.status-rejected { color: var(--personal-color-danger-coral); font-weight: 600; }
-.status-pending { color: var(--personal-color-text-muted-slate); font-weight: 600; }
+.status-approved { color: var(--personal-color-status-success-text-forest); font-weight: 600; }
+.status-rejected { color: var(--personal-color-status-fail-text-maroon); font-weight: 600; }
+.status-pending { color: var(--personal-color-status-processing-text-navy); font-weight: 600; }
 .detail-column { display: flex; flex-direction: column; gap: 14px; }
 .empty-detail { margin: 24px 0; color: var(--personal-color-text-muted-slate); text-align: center; }
 .detail-list { margin: 12px 0 0; }
@@ -521,8 +524,7 @@ onMounted(loadRequests);
 .action-card .approval-guide, .form-error { color: var(--personal-color-danger-coral); }
 .action-card textarea { width: 100%; margin-top: 8px; padding: 9px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; resize: vertical; }
 .form-error { margin: 8px 0 0; font-size: .78rem; }
-.decision-actions { display: flex; gap: 10px; margin-top: 12px; }
-.decision-actions :deep(button) { flex: 1; width: auto; }
+.decision-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
 @media (max-width: 1050px) { .review-grid { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .filter-card { grid-template-columns: 1fr; } .filter-actions { justify-content: flex-end; } }
 </style>

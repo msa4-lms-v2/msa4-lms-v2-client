@@ -353,9 +353,9 @@ onMounted(async () => {
           <span>강의 시간표</span>
           <MyButton
             btn-type="button"
-            class="schedule-add-button"
+            class="secondary-button"
             color="white"
-            size="small"
+            size="middle"
             content="시간 추가"
             :disabled="schedules.length >= 10"
             @click="addScheduleRow"
@@ -370,6 +370,7 @@ onMounted(async () => {
           <MyInput v-model="schedule.endPeriod" numeric-only :max-number="20" placeholder="종료 교시" />
           <MyButton
             btn-type="button"
+            class="secondary-button"
             color="white"
             size="small"
             content="삭제"
@@ -421,6 +422,7 @@ onMounted(async () => {
         <MyButton
           v-if="editingRequestId"
           btn-type="button"
+          class="secondary-button"
           color="white"
           size="middle"
           content="수정 취소"
@@ -429,6 +431,7 @@ onMounted(async () => {
         />
         <MyButton
           btn-type="submit"
+          class="professor-primary"
           color="deep-blue"
           size="middle"
           :content="isSubmitting
@@ -468,6 +471,7 @@ onMounted(async () => {
             <MyButton
               v-if="item.status === 'PENDING'"
               btn-type="button"
+              class="secondary-button"
               color="white"
               size="small"
               :content="isLoadingEdit ? '불러오는 중...' : '수정'"
@@ -657,12 +661,6 @@ onMounted(async () => {
   color: var(--personal-color-primary-text-navy);
   font-size: 1rem;
   font-weight: 700;
-}
-
-.schedule-add-button {
-  width: 72px;
-  flex: 0 0 72px;
-  white-space: nowrap;
 }
 
 .history-header {

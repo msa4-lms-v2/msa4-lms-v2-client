@@ -16,6 +16,7 @@ import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/acade
 defineOptions({ name: 'GraduationDiagnosisManagement' });
 
 const authStore = useAuthStore();
+const isAdmin = computed(() => authStore.userInfo?.role === 'ADMIN');
 const departments = ref([]);
 const diagnoses = ref([]);
 const selectedDiagnosis = ref(null);
@@ -185,8 +186,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="졸업요건 진단 현황" :subtitle="subtitle">
-    <MySearchFilter submit-text="조회" @search="loadDiagnoses(1)">
+  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role'" title="졸업요건 진단 현황" :subtitle="subtitle">
+    <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" @search="loadDiagnoses(1)">
       <div class="search-group">
         <label for="diagnosis-keyword">학생 이름</label>
         <MyInput id="diagnosis-keyword" v-model="filters.keyword" placeholder="학생 이름" @keyup-enter="loadDiagnoses(1)" />
@@ -271,9 +272,11 @@ onMounted(async () => {
         </td>
         <td>
           <MyButton
-            size="small"
-            :color="selectedDiagnosis?.studentId === item.studentId ? 'gray' : 'deep-blue'"
+            :class="selectedDiagnosis?.studentId === item.studentId ? '' : (isAdmin ? 'admin-secondary' : 'professor-secondary')"
+            size="middle"
+            :color="selectedDiagnosis?.studentId === item.studentId ? 'gray' : 'white'"
             :content="selectedDiagnosis?.studentId === item.studentId ? '선택됨' : '상세'"
+            :disabled="selectedDiagnosis?.studentId === item.studentId"
             @click="selectDiagnosis(item)"
           />
         </td>
@@ -323,7 +326,7 @@ onMounted(async () => {
         <strong>{{ recordPage.totalCount.toLocaleString() }}건</strong>
       </div>
 
-      <MySearchFilter submit-text="조회" submit-at-end @search="loadCreditRecords(1)">
+      <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" submit-at-end @search="loadCreditRecords(1)">
         <div class="search-group compact-filter">
           <label for="record-year">수강 연도</label>
           <MyInput id="record-year" v-model="recordFilters.academicYear" numeric-only placeholder="예: 2025" @keyup-enter="loadCreditRecords(1)" />
@@ -389,6 +392,16 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.admin-role {
+  --role-accent: var(--personal-color-admin-secondary-indigo);
+  --role-selection: var(--personal-color-indigo-soft-lavender);
+}
+
+.professor-role {
+  --role-accent: var(--personal-color-professor-primary-navy);
+  --role-selection: var(--personal-color-info-soft-ice);
+}
+
 .result-summary {
   display: flex;
   align-items: baseline;
@@ -399,7 +412,7 @@ onMounted(async () => {
 }
 
 .result-summary strong {
-  color: var(--personal-color-primary-navy);
+  color: var(--role-accent);
   font-size: 1rem;
 }
 
@@ -445,7 +458,7 @@ onMounted(async () => {
 }
 
 .total-credit {
-  color: var(--personal-color-primary-navy);
+  color: var(--role-accent);
   font-weight: 800;
 }
 
@@ -470,7 +483,7 @@ onMounted(async () => {
 }
 
 .selected-row {
-  background: var(--personal-color-sidebar-active-bg-sky);
+  background: var(--role-selection);
 }
 
 .detail-section {
@@ -488,7 +501,7 @@ onMounted(async () => {
 }
 
 .section-eyebrow {
-  color: var(--personal-color-link-blue);
+  color: var(--role-accent);
   font-size: 0.74rem;
   font-weight: 800;
 }
@@ -539,7 +552,7 @@ onMounted(async () => {
 
 .credit-card strong {
   margin-top: 14px;
-  color: var(--personal-color-login-primary-navy);
+  color: var(--role-accent);
   font-size: 1.32rem;
 }
 
@@ -565,8 +578,30 @@ onMounted(async () => {
 }
 
 .record-heading > strong {
-  color: var(--personal-color-primary-navy);
+  color: var(--role-accent);
   font-size: 0.9rem;
+}
+
+.admin-search :deep(button.deep-blue) {
+  background: var(--personal-color-admin-secondary-indigo);
+}
+
+.professor-search :deep(button.deep-blue) {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+.admin-secondary,
+.professor-secondary {
+  border: 1px solid var(--personal-color-border-mist);
+  background: var(--personal-color-white);
+}
+
+.admin-secondary {
+  color: var(--personal-color-admin-secondary-indigo);
+}
+
+.professor-secondary {
+  color: var(--personal-color-professor-primary-navy);
 }
 
 @media (max-width: 1100px) {

@@ -177,6 +177,73 @@ onMounted(() => load());
           >
             {{ option.label }}
           </button>
+          <span v-else>-</span>
+        </td>
+        <td :class="{ rejected: item.status === 'REJECTED' }">
+          {{ statusLabels[item.status] || item.status }}
+        </td>
+        <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
+        <td>
+          <MyButton
+            btn-type="button"
+            :class="item.status === 'PENDING' ? 'professor-primary' : 'secondary-button'"
+            :color="item.status === 'PENDING' ? 'deep-blue' : 'white'"
+            size="small"
+            :content="item.status === 'PENDING' ? '검토' : '상세'"
+            @click="openReview(item)"
+          />
+        </td>
+      </tr>
+    </MyTable>
+
+    <PrevNextPagination
+      v-if="page.page > 1 || page.hasNext"
+      :page="page.page"
+      :has-next="page.hasNext"
+      @page-change="load"
+    />
+
+    <MyModal :is-open="Boolean(reviewTarget)" title="공결 신청 검토" max-width="520px" @close="closeReview">
+      <template v-if="reviewTarget">
+        <dl class="detail-list">
+          <div class="detail-row">
+            <dt>학생</dt>
+            <dd>{{ reviewTarget.studentName }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt>교과목</dt>
+            <dd>{{ reviewTarget.courseName }} ({{ reviewTarget.sectionNo }}분반)</dd>
+          </div>
+          <div class="detail-row">
+            <dt>결석일</dt>
+            <dd>{{ formatDate(reviewTarget.lectureDate) }} {{ reviewTarget.period }}교시</dd>
+          </div>
+          <div class="detail-row">
+            <dt>신청 사유</dt>
+            <dd>{{ reviewTarget.reason }}</dd>
+          </div>
+          <div v-if="reviewTarget.attachmentOriginalName" class="detail-row">
+            <dt>증빙 파일</dt>
+            <dd>
+              <button type="button" class="attachment-button" @click="downloadAttachment(reviewTarget)">
+                {{ downloadingRequestId === reviewTarget.id ? '받는 중...' : reviewTarget.attachmentOriginalName }}
+              </button>
+            </dd>
+          </div>
+          <div class="detail-row">
+            <dt>처리 상태</dt>
+            <dd :class="{ rejected: reviewTarget.status === 'REJECTED' }">
+              {{ statusLabels[reviewTarget.status] || reviewTarget.status }}
+            </dd>
+          </div>
+          <div v-if="reviewTarget.status === 'REJECTED' && reviewTarget.rejectReason" class="detail-row">
+            <dt>반려 사유</dt>
+            <dd>{{ reviewTarget.rejectReason }}</dd>
+          </div>
+        </dl>
+        <div v-if="reviewTarget.status === 'PENDING'" class="review-area">
+          <textarea v-model="rejectReason" rows="2" maxlength="500" placeholder="반려 시 사유를 입력해 주세요."></textarea>
+          <span class="text-counter">{{ rejectReason.length }} / 500</span>
         </div>
       </div>
 
@@ -264,6 +331,9 @@ onMounted(() => load());
       <template #footer>
         <MyButton color="white" size="middle" content="취소" :disabled="isReviewing" @click="closeReject" />
         <MyButton color="red" size="middle" :content="isReviewing ? '처리 중...' : '반려'" :disabled="isReviewing" @click="reject" />
+        <MyButton class="secondary-button" color="white" size="middle" content="닫기" :disabled="isReviewing" @click="closeReview" />
+        <MyButton v-if="reviewTarget?.status === 'PENDING'" color="red" size="middle" content="반려" :disabled="isReviewing" @click="reject" />
+        <MyButton v-if="reviewTarget?.status === 'PENDING'" class="professor-primary" color="deep-blue" size="middle" content="승인" :disabled="isReviewing" @click="approve" />
       </template>
     </MyModal>
   </MyPageContainer>
@@ -370,7 +440,7 @@ onMounted(() => load());
   padding: 0;
   overflow: hidden;
   border: 0;
-  color: var(--personal-color-secondary-blue);
+  color: var(--personal-color-professor-primary-navy);
   background: transparent;
   font: inherit;
   font-size: 0.8rem;
@@ -438,6 +508,19 @@ onMounted(() => load());
   .section-heading {
     align-items: stretch;
     flex-direction: column;
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-professor-primary-navy);
+}
+
+@media (max-width: 620px) {
+  .status-tabs {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .status-tabs {

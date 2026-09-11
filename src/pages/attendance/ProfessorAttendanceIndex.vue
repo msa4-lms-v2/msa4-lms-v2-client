@@ -153,6 +153,12 @@ onMounted(async () => {
         <span>강의 선택</span>
         <MySelect id="attendance-class" v-model="filters.classId" @change="load(1)">
           <option value="">전체 강의</option>
+  <MyPageContainer title="출결 확인" subtitle="담당 강의 학생들의 출결 기록을 조회하고 수정합니다.">
+    <MySearchFilter class="professor-search" submit-text="조회" @search="applyFilters">
+      <div class="search-group">
+        <label for="attendance-class">강의</label>
+        <MySelect id="attendance-class" v-model="filters.classId">
+          <option value="">전체</option>
           <option v-for="lecture in lectures" :key="lecture.classId" :value="String(lecture.classId)">
             [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.sectionNo }}분반)
           </option>
@@ -234,6 +240,87 @@ onMounted(async () => {
       />
     </section>
 
+      <div class="search-group">
+        <label for="attendance-from">시작일</label>
+        <MyInput id="attendance-from" v-model="filters.fromDate" type="date" />
+      </div>
+      <div class="search-group">
+        <label for="attendance-to">종료일</label>
+        <MyInput id="attendance-to" v-model="filters.toDate" type="date" />
+      </div>
+      <div class="search-group">
+        <label for="attendance-status">출결 상태</label>
+        <MySelect id="attendance-status" v-model="filters.status">
+          <option value="">전체</option>
+          <option value="PRESENT">출석</option>
+          <option value="LATE">지각</option>
+          <option value="ABSENT">결석</option>
+          <option value="EXCUSED">공결</option>
+        </MySelect>
+      </div>
+    </MySearchFilter>
+
+    <MyTable
+      :columns="columns"
+      :loading="isLoading"
+      :empty="!isLoading && records.length === 0"
+      empty-message="조회된 출결 기록이 없습니다."
+    >
+      <tr v-for="record in records" :key="record.id">
+        <td>{{ record.studentName }}</td>
+        <td>
+          <div class="course-name">{{ record.courseName }}</div>
+          <div class="course-code">{{ record.courseCode }} · {{ record.sectionNo }}분반</div>
+        </td>
+        <td>{{ formatDate(record.lectureDate) }}</td>
+        <td>{{ record.period }}교시</td>
+        <td :class="statusClass(record.status)">
+          {{ statusLabels[record.status] || record.status }}
+        </td>
+        <td>{{ record.remarks || '-' }}</td>
+        <td>
+          <MyButton btn-type="button" class="secondary-button" color="white" size="small" content="수정" @click="openEdit(record)" />
+        </td>
+      </tr>
+    </MyTable>
+
+    <PrevNextPagination
+      v-if="page.page > 1 || page.hasNext"
+      :page="page.page"
+      :has-next="page.hasNext"
+      @page-change="load"
+    />
+
+    <MyModal :is-open="Boolean(editTarget)" title="출결 기록 수정" max-width="480px" @close="closeEdit">
+      <template v-if="editTarget">
+        <p class="edit-target-info">{{ editTarget.studentName }} · {{ editTarget.courseName }} · {{ formatDate(editTarget.lectureDate) }} {{ editTarget.period }}교시</p>
+
+        <label class="edit-field" for="edit-status">
+          <span>출결 상태</span>
+          <MySelect id="edit-status" v-model="editForm.status">
+            <option value="PRESENT">출석</option>
+            <option value="LATE">지각</option>
+            <option value="ABSENT">결석</option>
+            <option value="EXCUSED">공결</option>
+          </MySelect>
+        </label>
+
+        <label class="edit-field" for="edit-remarks">
+          <span>비고</span>
+          <MyInput id="edit-remarks" v-model="editForm.remarks" maxlength="255" />
+        </label>
+
+        <label class="edit-field" for="edit-reason">
+          <span>수정 사유</span>
+          <MyInput id="edit-reason" v-model="editForm.reason" maxlength="255" placeholder="수정 사유를 입력해 주세요." />
+        </label>
+      </template>
+
+      <template #footer>
+        <MyButton class="secondary-button" color="white" size="middle" content="취소" :disabled="isSaving" @click="closeEdit" />
+        <MyButton class="professor-primary" color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="saveEdit" />
+      </template>
+    </MyModal>
   </MyPageContainer>
 </template>
 
@@ -378,5 +465,16 @@ onMounted(async () => {
     align-items: stretch;
     flex-direction: column;
   }
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+.professor-search :deep(button.deep-blue) {
+  background: var(--personal-color-professor-primary-navy);
+}
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-professor-primary-navy);
 }
 </style>

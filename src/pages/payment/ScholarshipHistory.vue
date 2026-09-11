@@ -39,11 +39,11 @@
         </MyTable>
 
         <div class="action-area" v-if="selectedTuitionBillId">
-          <MyButton 
-            color="black" 
-            content="분할납부 신청" 
-            size="middle"
-            @click="goToInstallment" 
+          <MyButton
+            color="deep-blue"
+            content="분할납부 신청"
+            size="big"
+            @click="goToInstallment"
           />
         </div>
       </div>
@@ -107,7 +107,7 @@ const goToInstallment = () => {
   margin-bottom: 20px;
   padding: 16px 20px;
   background: var(--personal-color-white);
-  border-radius: var(--personal-radius);
+  border-radius: 8px;
   border: 1px solid var(--personal-color-border-mist);
   display: inline-flex;
   flex-direction: column;
@@ -138,7 +138,7 @@ select {
   background-color: var(--personal-color-bg-surface-frost);
   color: var(--personal-color-text-secondary-steel);
   text-align: center;
-  border-radius: var(--personal-radius-card);
+  border-radius: 8px;
   font-weight: 500;
 }
 .action-area {

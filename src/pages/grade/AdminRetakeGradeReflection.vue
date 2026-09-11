@@ -208,13 +208,13 @@ const submit = async () => {
 </template>
 
 <style scoped>
-.policy-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; background: var(--personal-color-border-mist); }
+.policy-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-border-mist); }
 .policy-card > div { display: flex; align-items: flex-start; gap: 12px; padding: 18px; background: var(--personal-color-white); }
 .policy-number { flex: 0 0 auto; color: var(--personal-color-admin-secondary-indigo); font-size: .75rem; font-weight: 800; }
 .policy-card p { display: flex; flex-direction: column; gap: 5px; margin: 0; color: var(--personal-color-text-muted-slate); font-size: .78rem; line-height: 1.5; }
 .policy-card strong { color: var(--personal-color-primary-text-navy); font-size: .85rem; }
 .content-grid { display: grid; grid-template-columns: minmax(340px, .8fr) minmax(0, 1.2fr); gap: 20px; }
-.form-card, .result-card { padding: 22px; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; background: var(--personal-color-white); }
+.form-card, .result-card { padding: 22px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .section-heading h3 { margin: 0; color: var(--personal-color-primary-text-navy); font-size: 1.05rem; }
 .section-heading p { margin: 6px 0 0; color: var(--personal-color-text-muted-slate); font-size: .8rem; line-height: 1.5; }
@@ -228,7 +228,6 @@ textarea:disabled { background: var(--personal-color-bg-subtle-snow); }
 .character-count { align-self: flex-end; }
 .form-error { margin: -6px 0 0; color: var(--personal-color-danger-coral); font-size: .78rem; }
 .form-actions { display: flex; justify-content: flex-end; }
-.form-actions :deep(button) { width: 150px; }
 .empty-result { display: flex; min-height: 270px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--personal-color-text-muted-slate); text-align: center; }
 .empty-result strong { color: var(--personal-color-primary-text-navy); font-size: .9rem; }
 .empty-result span { font-size: .78rem; }

@@ -53,7 +53,7 @@
             <MyButton
               color="deep-blue"
               content="신청하기"
-              size="middle"
+              size="big"
               @click="onSubmit"
               :disabled="appStore.isSubmittingApplication"
             />

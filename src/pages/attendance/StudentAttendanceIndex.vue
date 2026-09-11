@@ -242,8 +242,9 @@ onMounted(async () => {
         </div>
         <MyButton
           btn-type="button"
-          color="deep-blue"
-          size="small"
+          class="secondary-button"
+          color="white"
+          size="middle"
           content="뒤로가기"
           @click="clearSelectedCourse"
         />
@@ -356,6 +357,11 @@ onMounted(async () => {
 
 .status-text--fail {
   color: var(--personal-color-status-fail-text-maroon);
+}
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-primary-navy);
 }
 
 @media (max-width: 760px) {
