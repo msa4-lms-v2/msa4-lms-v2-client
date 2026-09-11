@@ -1,6 +1,7 @@
 import myAxios from './myAxios';
 
 const GRADES_URL = '/api/academic/grades';
+const EVALUATIONS_URL = '/api/academic/evaluations';
 const CREDIT_RECORDS_URL = (studentId) => `/api/academic/students/${studentId}/graduation-credit-records`;
 
 // 담당 교수·관리자의 강의 성적 입력 현황 조회
@@ -34,3 +35,7 @@ export const getGraduationCreditRecords = (studentId, params = {}) =>
 // 학생 본인 성적 조회(로그인 사용자 기준, studentId 불필요)
 export const getMyGrades = (params = {}) =>
   myAxios.get(`${GRADES_URL}/me`, { params });
+
+// 학생 본인 강의평가 제출
+export const submitLectureEvaluation = (payload) =>
+  myAxios.post(EVALUATIONS_URL, payload);
