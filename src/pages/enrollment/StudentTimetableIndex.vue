@@ -356,7 +356,7 @@ h3 {
 
 .grid-header {
   color: var(--personal-color-white);
-  background: var(--personal-color-student-primary-cyan);
+  background: var(--personal-color-text-muted-slate);
   font-size: 0.85rem;
   font-weight: 700;
 }
