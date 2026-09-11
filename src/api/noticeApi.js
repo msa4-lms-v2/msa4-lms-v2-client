@@ -1,13 +1,17 @@
 import myAxios from './myAxios';
 
-const BASE_URL = '/api/academic/catalog/notices';
+const NOTICE_URL = '/api/academic/catalog/notices';
 
-export const searchNotices = (params) => myAxios.get(BASE_URL, { params });
+const requestHeaders = () => ({
+  'X-Request-Id': `notice-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+});
 
-export const getNotice = (noticeId) => myAxios.get(`${BASE_URL}/${noticeId}`);
+export const searchNotices = (params = {}) => myAxios.get(NOTICE_URL, { params });
 
-export const createNotice = (formData) => myAxios.post(BASE_URL, formData);
+export const getNotice = (noticeId) => myAxios.get(`${NOTICE_URL}/${noticeId}`);
 
-export const updateNotice = (noticeId, formData) => myAxios.patch(`${BASE_URL}/${noticeId}`, formData);
+export const createNotice = (payload) => myAxios.post(NOTICE_URL, payload, { headers: requestHeaders() });
 
-export const deactivateNotice = (noticeId) => myAxios.patch(`${BASE_URL}/${noticeId}/status`);
+export const updateNotice = (noticeId, payload) => myAxios.patch(`${NOTICE_URL}/${noticeId}`, payload, { headers: requestHeaders() });
+
+export const deactivateNotice = (noticeId) => myAxios.patch(`${NOTICE_URL}/${noticeId}/status`, null, { headers: requestHeaders() });

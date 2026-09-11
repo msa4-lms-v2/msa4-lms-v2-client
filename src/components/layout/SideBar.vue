@@ -160,6 +160,9 @@ const toggleMenu = (menuKey) => {
             <router-link to="/grade" class="submenu-item">{{
               getMenuTitle("/grade")
             }}</router-link>
+            <router-link to="/graduation-diagnosis" class="submenu-item">{{
+              getMenuTitle("/graduation-diagnosis")
+            }}</router-link>
             <router-link to="/evaluations" class="submenu-item">{{
               getMenuTitle("/evaluations")
             }}</router-link>
@@ -323,6 +326,9 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/grades/input" class="submenu-item">{{
               getMenuTitle("/professor/grades/input")
             }}</router-link>
+            <router-link to="/professor/evaluations" class="submenu-item">{{
+              getMenuTitle("/professor/evaluations")
+            }}</router-link>
             <router-link to="/professor/grades/correct" class="submenu-item">{{
               getMenuTitle("/professor/grades/correct")
             }}</router-link>
@@ -406,6 +412,12 @@ const toggleMenu = (menuKey) => {
             <router-link to="/admin/notices/new" class="submenu-item">공지사항 작성</router-link>
           </div>
         </div>
+        <router-link to="/admin/graduation-requirements" class="nav-item">
+          {{ getMenuTitle("/admin/graduation-requirements") }}
+        </router-link>
+        <router-link to="/admin/dismissals" class="nav-item">
+          {{ getMenuTitle("/admin/dismissals") }}
+        </router-link>
         <router-link to="/students" class="nav-item">{{
           getMenuTitle("/students")
         }}</router-link>
