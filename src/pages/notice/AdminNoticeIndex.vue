@@ -101,7 +101,7 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="공지사항 목록">
-    <MySearchFilter submit-text="조회" @search="load(1)">
+    <MySearchFilter class="admin-search" submit-text="조회" @search="load(1)">
       <div class="search-group">
         <label for="notice-keyword">통합 검색</label>
         <MyInput id="notice-keyword" v-model="filters.keyword" placeholder="제목 · 내용 검색" @keyup-enter="load(1)" />
@@ -149,7 +149,7 @@ onMounted(() => load());
         <MyInput id="notice-created-to" v-model="filters.createdTo" type="date" />
       </div>
 
-      <MyButton btn-type="button" color="white" size="middle" content="초기화" @click="resetFilters" />
+      <MyButton btn-type="button" class="secondary-button" color="white" size="middle" content="초기화" @click="resetFilters" />
     </MySearchFilter>
 
     <div class="list-heading">
@@ -190,10 +190,22 @@ onMounted(() => load());
           </span>
         </td>
         <td class="management">
-          <button type="button" @click="router.push({ name: 'AdminNoticeEdit', params: { noticeId: notice.id } })">
-            수정
-          </button>
-          <button v-if="notice.isActive" type="button" @click="deactivate(notice)">삭제</button>
+          <MyButton
+            btn-type="button"
+            class="secondary-button"
+            color="white"
+            size="small"
+            content="수정"
+            @click="router.push({ name: 'AdminNoticeEdit', params: { noticeId: notice.id } })"
+          />
+          <MyButton
+            v-if="notice.isActive"
+            btn-type="button"
+            color="red"
+            size="small"
+            content="삭제"
+            @click="deactivate(notice)"
+          />
         </td>
       </tr>
     </MyTable>
@@ -221,7 +233,7 @@ onMounted(() => load());
 }
 
 .list-heading span {
-  color: var(--personal-color-link-blue);
+  color: var(--personal-color-admin-secondary-indigo);
   font-size: 0.86rem;
   font-weight: 600;
 }
@@ -236,45 +248,40 @@ onMounted(() => load());
   
 .category-badge { 
   display: inline-block;
-  padding: 3px 8px;
   font-size: 0.78rem;
   font-weight: 700;
-  border-radius: 999px;
 }
     
 .category-badge--normal {
-  color: #526476;
-  background: #eef2f7;
+  color: var(--personal-color-text-secondary-steel);
 }
     
 .category-badge--important {
-  color: #d33;
-  background: #fff0f0;
+  color: var(--personal-color-red);
 }
        
 .active-status { 
-  color: #16803c;
+  color: var(--personal-color-status-success-text-forest);
   font-weight: 700;
 }
        
 .inactive-status { 
-  color: #7d8792;
+  color: var(--personal-color-text-tertiary-slate);
 }
         
 .management { 
+  display: flex;
+  justify-content: center;
+  gap: 8px;
   white-space: nowrap;
 }
-        
-.management button { 
-  padding: 0 4px;
-  color: var(--personal-color-link-blue);
-  font: inherit;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
+
+.admin-search :deep(.deep-blue) {
+  background: var(--personal-color-admin-secondary-indigo);
 }
-        
-.management button + button { 
-  border-left: 1px solid var(--personal-color-border-mist);
+
+:deep(.secondary-button) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-admin-secondary-indigo);
 }
 </style>

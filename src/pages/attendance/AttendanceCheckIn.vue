@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { checkInAttendance } from '../../api/attendanceApi';
+import MyButton from '../../components/button/MyButton.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -70,9 +71,15 @@ onMounted(checkIn);
                 </div>
             </dl>
 
-            <button v-if="state !== 'loading'" type="button" @click="router.replace('/main')">
-                메인 화면으로 이동
-            </button>
+            <MyButton
+                v-if="state !== 'loading'"
+                class="home-button"
+                btn-type="button"
+                color="deep-blue"
+                size="big"
+                content="메인 화면으로 이동"
+                @click="router.replace('/main')"
+            />
         </section>
     </main>
 </template>
@@ -93,9 +100,8 @@ onMounted(checkIn);
     width: min(420px, 100%);
     padding: 38px 26px;
     border: 1px solid var(--personal-color-border-mist);
-    border-radius: 22px;
+    border-radius: 8px;
     background: var(--personal-color-white);
-    box-shadow: 0 18px 50px #1d397018;
     text-align: center;
 }
 
@@ -106,20 +112,20 @@ onMounted(checkIn);
     display: grid;
     place-items: center;
     border-radius: 50%;
-    color: #fff;
+    color: var(--personal-color-white);
     background: var(--personal-color-student-primary-cyan);
     font-size: 34px;
     font-weight: 800;
 }
 
-.status-icon.success { background: #2f9e5b; }
-.status-icon.error { background: #d64545; }
+.status-icon.success { background: var(--personal-color-green); }
+.status-icon.error { background: var(--personal-color-red); }
 
 .spinner {
     width: 26px;
     height: 26px;
-    border: 3px solid #ffffff55;
-    border-top-color: #fff;
+    border: 3px solid var(--personal-color-border-mist);
+    border-top-color: var(--personal-color-white);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -144,7 +150,7 @@ h1 {
 .attendance-result {
     margin: 24px 0 0;
     padding: 6px 16px;
-    border-radius: 14px;
+    border-radius: 8px;
     background: var(--personal-color-bg-surface-frost);
     text-align: left;
 }
@@ -161,16 +167,10 @@ h1 {
 .attendance-result dt { color: var(--personal-color-text-tertiary-slate); }
 .attendance-result dd { margin: 0; font-weight: 700; text-align: right; }
 
-button {
-    width: 100%;
-    height: 50px;
+.home-button {
     margin-top: 24px;
-    border: 0;
-    border-radius: 11px;
-    color: var(--personal-color-white);
-    background: var(--personal-color-primary-navy);
-    font-weight: 700;
-    cursor: pointer;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 @keyframes spin {

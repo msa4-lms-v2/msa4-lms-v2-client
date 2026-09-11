@@ -53,6 +53,7 @@ const form = reactive({
 });
 
 const schedules = ref([{ dayOfWeek: 'MON', startPeriod: '1', endPeriod: '2' }]);
+const weeklyPlans = ref([{ week: '1', content: '' }]);
 const formError = ref('');
 const isSubmitting = ref(false);
 const editingRequestId = ref(null);
@@ -66,6 +67,35 @@ const ratioTotal = computed(() => (
   [form.midtermRatio, form.finalRatio, form.assignmentRatio, form.attendanceRatio]
     .reduce((sum, value) => sum + (Number(value) || 0), 0)
 ));
+
+const serializeWeeklyPlans = () => weeklyPlans.value
+  .map((plan) => `${Number(plan.week)}주차: ${plan.content.trim()}`)
+  .join('\n');
+
+const parseWeeklyPlans = (syllabus) => {
+  const plans = String(syllabus || '')
+    .split('\n')
+    .map((line) => line.match(/^(\d{1,2})주차:\s*(.*)$/))
+    .filter(Boolean)
+    .map((matched) => ({ week: matched[1], content: matched[2] }));
+
+  return plans.length > 0
+    ? plans
+    : [{ week: '1', content: String(syllabus || '').trim() }];
+};
+
+const addWeeklyPlan = async () => {
+  if (weeklyPlans.value.length >= 16) {
+    await notify('주차별 강의 내용은 최대 16개까지 입력할 수 있습니다.');
+    return;
+  }
+  weeklyPlans.value.push({ week: String(weeklyPlans.value.length + 1), content: '' });
+};
+
+const removeWeeklyPlan = (index) => {
+  if (weeklyPlans.value.length <= 1) return;
+  weeklyPlans.value.splice(index, 1);
+};
 
 const addScheduleRow = async () => {
   if (schedules.value.length >= 10) {
@@ -92,6 +122,7 @@ const resetForm = () => {
   form.attendanceRatio = '10';
   form.syllabus = '';
   schedules.value = [{ dayOfWeek: 'MON', startPeriod: '1', endPeriod: '2' }];
+  weeklyPlans.value = [{ week: '1', content: '' }];
   formError.value = '';
   editingRequestId.value = null;
 };
@@ -108,8 +139,16 @@ const validate = () => {
     return '성적 반영 비율은 각각 0~100 사이로 입력해 주세요.';
   }
   if (ratioTotal.value !== 100) return '성적 반영 비율(중간·기말·과제·출석)의 합은 100이어야 합니다.';
-  if (!form.syllabus.trim()) return '강의계획서 내용을 입력해 주세요.';
-  if (form.syllabus.trim().length > 65535) return '강의계획서는 65,535자 이하여야 합니다.';
+  const weekSet = new Set();
+  for (const plan of weeklyPlans.value) {
+    const week = Number(plan.week);
+    if (!Number.isInteger(week) || week < 1 || week > 16 || !plan.content.trim()) {
+      return '주차와 주차별 강의 내용을 모두 입력해 주세요.';
+    }
+    if (weekSet.has(week)) return '같은 주차를 중복해서 입력할 수 없습니다.';
+    weekSet.add(week);
+  }
+  if (serializeWeeklyPlans().length > 65535) return '강의계획서는 65,535자 이하여야 합니다.';
   if (schedules.value.length === 0) return '강의 시간표를 하나 이상 입력해 주세요.';
   if (schedules.value.length > 10) return '강의 시간표는 최대 10개까지 입력할 수 있습니다.';
   const occupiedPeriods = new Set();
@@ -171,6 +210,7 @@ const editRequest = async (item) => {
     form.assignmentRatio = String(detail.assignmentRatio ?? 0);
     form.attendanceRatio = String(detail.attendanceRatio ?? 0);
     form.syllabus = detail.syllabus || '';
+    weeklyPlans.value = parseWeeklyPlans(detail.syllabus);
     schedules.value = (detail.schedules || []).map((schedule) => ({
       dayOfWeek: schedule.dayOfWeek,
       startPeriod: String(schedule.startPeriod),
@@ -209,7 +249,7 @@ const submitRequest = async () => {
     finalRatio: Number(form.finalRatio),
     assignmentRatio: Number(form.assignmentRatio),
     attendanceRatio: Number(form.attendanceRatio),
-    syllabus: form.syllabus.trim(),
+    syllabus: serializeWeeklyPlans(),
     schedules: schedules.value.map((schedule) => ({
       dayOfWeek: schedule.dayOfWeek,
       startPeriod: Number(schedule.startPeriod),
@@ -248,12 +288,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    :title="editingRequestId ? '강의 개설 신청 수정' : '강의 개설'"
-    :subtitle="editingRequestId
-      ? '처리 대기 중인 강의 개설 신청을 보완합니다.'
-      : '담당 예정 교과목의 개설을 신청합니다. 관리자 승인 후 강의가 생성됩니다.'"
-  >
+  <MyPageContainer :title="editingRequestId ? '강의 개설 신청 수정' : '강의 개설 신청'">
     <form class="request-card" @submit.prevent="submitRequest">
       <div v-if="editingRequestId" class="edit-notice">
         <strong>신청 번호 {{ editingRequestId }} 수정 중</strong>
@@ -318,9 +353,9 @@ onMounted(async () => {
           <span>강의 시간표</span>
           <MyButton
             btn-type="button"
-            class="schedule-add-button"
+            class="secondary-button"
             color="white"
-            size="small"
+            size="middle"
             content="시간 추가"
             :disabled="schedules.length >= 10"
             @click="addScheduleRow"
@@ -335,6 +370,7 @@ onMounted(async () => {
           <MyInput v-model="schedule.endPeriod" numeric-only :max-number="20" placeholder="종료 교시" />
           <MyButton
             btn-type="button"
+            class="secondary-button"
             color="white"
             size="small"
             content="삭제"
@@ -344,10 +380,41 @@ onMounted(async () => {
         </div>
       </div>
 
-      <label class="form-field" for="opening-syllabus">
-        <span>강의계획서</span>
-        <textarea id="opening-syllabus" v-model="form.syllabus" rows="4" maxlength="65535" placeholder="강의 목표와 진행 방식을 입력해 주세요."></textarea>
-      </label>
+      <section class="weekly-plan-section">
+        <div class="weekly-plan-header">
+          <div>
+            <span>강의 계획서</span>
+          </div>
+          <MyButton
+            btn-type="button"
+            color="white"
+            size="big"
+            content="주차 입력란 추가"
+            :disabled="weeklyPlans.length >= 16"
+            @click="addWeeklyPlan"
+          />
+        </div>
+
+        <div v-for="(plan, index) in weeklyPlans" :key="index" class="weekly-plan-row">
+          <MySelect v-model="plan.week" :aria-label="`${index + 1}번째 주차 선택`">
+            <option v-for="week in 16" :key="week" :value="String(week)">{{ week }}주차</option>
+          </MySelect>
+          <MyInput
+            v-model="plan.content"
+            maxlength="500"
+            :placeholder="`${plan.week}주차 강의 내용을 입력하세요.`"
+            :aria-label="`${plan.week}주차 강의 내용`"
+          />
+          <MyButton
+            btn-type="button"
+            color="white"
+            size="small"
+            content="삭제"
+            :disabled="weeklyPlans.length <= 1"
+            @click="removeWeeklyPlan(index)"
+          />
+        </div>
+      </section>
 
       <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
 
@@ -355,6 +422,7 @@ onMounted(async () => {
         <MyButton
           v-if="editingRequestId"
           btn-type="button"
+          class="secondary-button"
           color="white"
           size="middle"
           content="수정 취소"
@@ -363,6 +431,7 @@ onMounted(async () => {
         />
         <MyButton
           btn-type="submit"
+          class="professor-primary"
           color="deep-blue"
           size="middle"
           :content="isSubmitting
@@ -402,6 +471,7 @@ onMounted(async () => {
             <MyButton
               v-if="item.status === 'PENDING'"
               btn-type="button"
+              class="secondary-button"
               color="white"
               size="small"
               :content="isLoadingEdit ? '불러오는 중...' : '수정'"
@@ -424,6 +494,10 @@ onMounted(async () => {
 
 <style scoped>
 .request-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: start;
+  gap: 14px 16px;
   padding: 20px;
   margin-bottom: 28px;
   border: 1px solid var(--personal-color-border-mist);
@@ -432,12 +506,14 @@ onMounted(async () => {
 }
 
 .course-guide {
+  grid-column: 1;
   margin: 0 0 14px;
   color: var(--personal-color-text-muted-slate);
   font-size: 0.82rem;
 }
 
 .edit-notice {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -452,13 +528,15 @@ onMounted(async () => {
 }
 
 .form-grid {
+  grid-column: 1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
 
 .ratio-grid {
+  grid-column: 1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
   align-items: end;
@@ -500,6 +578,7 @@ onMounted(async () => {
 }
 
 .schedule-section {
+  grid-column: 1;
   margin-bottom: 16px;
 }
 
@@ -526,13 +605,52 @@ onMounted(async () => {
   color: var(--personal-color-text-muted-slate);
 }
 
+.weekly-plan-section {
+  grid-column: 2;
+  grid-row: 2 / span 4;
+  min-height: 420px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 6px;
+  background: var(--personal-color-bg-subtle-snow);
+}
+
+.weekly-plan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.weekly-plan-header small {
+  display: block;
+  margin-top: 4px;
+  color: var(--personal-color-text-muted-slate);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.weekly-plan-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .form-error {
+  grid-column: 1 / -1;
   margin: 8px 0 0;
   color: var(--personal-color-red);
   font-size: 0.82rem;
 }
 
 .form-actions {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   margin-top: 14px;
@@ -543,12 +661,6 @@ onMounted(async () => {
   color: var(--personal-color-primary-text-navy);
   font-size: 1rem;
   font-weight: 700;
-}
-
-.schedule-add-button {
-  width: 72px;
-  flex: 0 0 72px;
-  white-space: nowrap;
 }
 
 .history-header {
@@ -578,7 +690,32 @@ onMounted(async () => {
   font-size: 0.76rem;
 }
 
+:deep(.page-container) {
+  max-width: 1120px;
+  padding: 18px 16px 40px;
+}
+
+:deep(.page-heading h2) {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+}
+
 @media (max-width: 860px) {
+  .request-card {
+    grid-template-columns: 1fr;
+  }
+
+  .course-guide,
+  .form-grid,
+  .ratio-grid,
+  .schedule-section,
+  .weekly-plan-section,
+  .form-error,
+  .form-actions {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .form-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -606,6 +743,15 @@ onMounted(async () => {
 
   .schedule-row {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .weekly-plan-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .weekly-plan-row {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -374,6 +374,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['PROFESSOR'] },
     },
     {
+        path: '/professor/withdrawals',
+        name: 'ProfessorWithdrawalReview',
+        component: () => import('../pages/withdrawal/WithdrawalReviewIndex.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
         path: '/professor/academic-change-requests/department-transfer',
         name: 'ProfessorDepartmentTransferReview',
         component: () => import('../pages/departmentTransfer/ProfessorDepartmentTransferReview.vue'),

@@ -306,8 +306,8 @@ onMounted(async () => {
     </MyTable>
 
     <div class="form-actions">
-      <MyButton class="action-button" color="gray" size="middle" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isSaving || isLoadingGrades || !hasUnsavedChanges" @click="saveGrades" />
-      <MyButton class="action-button" color="deep-blue" size="middle" :content="isFinalizing ? '처리 중...' : '성적 일괄 제출'" :disabled="isFinalizing || isLoadingGrades || !canFinalize" @click="finalizeClassGrades" />
+      <MyButton class="secondary-button" color="white" size="middle" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isSaving || isLoadingGrades || !hasUnsavedChanges" @click="saveGrades" />
+      <MyButton class="professor-primary" color="deep-blue" size="big" :content="isFinalizing ? '처리 중...' : '성적 일괄 제출'" :disabled="isFinalizing || isLoadingGrades || !canFinalize" @click="finalizeClassGrades" />
     </div>
   </MyPageContainer>
 </template>
@@ -328,12 +328,13 @@ onMounted(async () => {
 .lecture-group :deep(select) { min-width: 300px; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
 .lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
-.lecture-summary strong { padding: 8px 0; color: var(--personal-color-primary-blue); font-size: 0.95rem; }
+.lecture-summary strong { padding: 8px 0; color: var(--personal-color-professor-primary-navy); font-size: 0.95rem; }
 .section-title { margin: 0 0 14px; font-size: 1rem; }
 .score-input { width: 64px; text-align: center; }
 .score-input:disabled { background: var(--personal-color-table-header-smoke); color: var(--personal-color-text-muted-slate); }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.action-button { width: auto; min-width: 92px; padding: 0 14px; }
+.professor-primary { background: var(--personal-color-professor-primary-navy); }
+:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
 @media (max-width: 900px) {
   .lecture-group :deep(select) { min-width: 220px; }
 }

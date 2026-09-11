@@ -128,7 +128,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="졸업요건 관리" subtitle="학과와 입학연도별 졸업 학점 기준을 관리합니다.">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+    <MySearchFilter class="admin-search" submit-text="조회" @search="applyFilters">
       <div class="search-group"><label for="requirement-keyword">학과명/코드</label><MyInput id="requirement-keyword" v-model="filters.keyword" placeholder="컴퓨터공학과" /></div>
       <div class="search-group"><label for="requirement-department-filter">학과</label><MySelect id="requirement-department-filter" v-model="filters.departmentId"><option value="">전체</option><option v-for="department in departments" :key="department.id" :value="department.id">{{ department.name }}</option></MySelect></div>
       <div class="search-group"><label for="requirement-year-filter">입학연도</label><MyInput id="requirement-year-filter" v-model="filters.admissionYear" numeric-only placeholder="예: 2024" /></div>
@@ -145,8 +145,8 @@ onMounted(async () => {
         <label v-if="isEdit" class="wide">수정 사유<MyInput v-model="form.reason" placeholder="교육과정 개편 반영" /></label>
       </div>
       <div class="actions">
-        <MyButton v-if="isEdit" btn-type="button" color="white" size="middle" content="취소" @click="resetForm" />
-        <MyButton btn-type="button" color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="save" />
+        <MyButton v-if="isEdit" btn-type="button" class="secondary-button" color="white" size="middle" content="취소" @click="resetForm" />
+        <MyButton btn-type="button" color="admin-indigo" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="save" />
       </div>
     </section>
 
@@ -157,7 +157,7 @@ onMounted(async () => {
         <td>{{ item.requiredMajorCredits }}학점</td>
         <td>{{ item.requiredGeneralCredits }}학점</td>
         <td>{{ item.requiredTotalCredits }}학점</td>
-        <td><MyButton btn-type="button" color="white" size="small" content="수정" @click="edit(item)" /></td>
+        <td><MyButton btn-type="button" class="secondary-button" color="white" size="small" content="수정" @click="edit(item)" /></td>
       </tr>
     </MyTable>
     <PrevNextPagination v-if="page.page > 1 || page.hasNext" :page="page.page" :has-next="page.hasNext" @page-change="load" />
@@ -173,5 +173,7 @@ onMounted(async () => {
 .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .department-name { font-weight: 700; }
 .department-code { margin-top: 3px; color: var(--personal-color-text-muted-slate); font-size: 0.8rem; }
+.admin-search :deep(.deep-blue) { background: var(--personal-color-admin-secondary-indigo); }
+:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
 @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } }
 </style>

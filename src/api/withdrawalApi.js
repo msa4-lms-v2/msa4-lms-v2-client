@@ -10,6 +10,12 @@ export const searchWithdrawals = (params = {}) =>
 export const getWithdrawal = (withdrawalId) =>
   myAxios.get(`${WITHDRAWALS_URL}/${withdrawalId}`);
 
+// 학생 본인 자퇴 신청 취소 (PENDING/ADVISOR_APPROVED 상태만 가능)
+export const cancelWithdrawal = (withdrawalId, cancelReason, idempotencyKey) =>
+  myAxios.patch(`${WITHDRAWALS_URL}/${withdrawalId}/status`, { cancelReason }, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+
 // 관리자 자퇴 신청 최종 검토 (ADVISOR_APPROVED 상태만 처리 가능)
 export const reviewWithdrawalByAdmin = (withdrawalId, payload, idempotencyKey) =>
   myAxios.patch(`${WITHDRAWALS_URL}/${withdrawalId}/final-review`, payload, {
@@ -19,3 +25,9 @@ export const reviewWithdrawalByAdmin = (withdrawalId, payload, idempotencyKey) =
 // 자퇴 증빙 다운로드
 export const downloadWithdrawalAttachment = (withdrawalId) =>
   myAxios.get(`${WITHDRAWALS_URL}/${withdrawalId}/attachment`, { responseType: 'blob' });
+
+// 지도교수 자퇴 신청 검토 (PENDING 상태만 처리 가능)
+export const reviewWithdrawalByAdvisor = (withdrawalId, payload, idempotencyKey) =>
+  myAxios.patch(`${WITHDRAWALS_URL}/${withdrawalId}/advisor-review`, payload, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });

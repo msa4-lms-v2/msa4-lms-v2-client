@@ -86,6 +86,7 @@ watch(() => route.path, path => {
   ) {
     activeMenus.value.adminAcademicOps = true;
   }
+  if (path.startsWith('/professor/withdrawals')) activeMenus.value.professorStudent = true;
 }, { immediate: true });
 
 const toggleMenu = (menuKey) => {
@@ -304,6 +305,9 @@ const toggleMenu = (menuKey) => {
           <div class="submenu-list" v-show="activeMenus.professorStudent">
             <router-link to="/professor/leave-return" class="submenu-item">{{
               getMenuTitle("/professor/leave-return")
+            }}</router-link>
+            <router-link to="/professor/withdrawals" class="submenu-item">{{
+              getMenuTitle("/professor/withdrawals")
             }}</router-link>
             <router-link
               to="/professor/academic-change-requests/department-transfer"
