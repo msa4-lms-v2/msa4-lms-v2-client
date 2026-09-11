@@ -156,9 +156,9 @@ label {
 select, textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid var(--personal-color-gray);
+  border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 textarea {
   height: 120px;

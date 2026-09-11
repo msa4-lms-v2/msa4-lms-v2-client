@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { searchAttendanceRecords, updateAttendanceRecord } from '../../api/attendanceApi';
-import { getMyLectures } from '../../api/lectureApi';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -13,7 +12,7 @@ import PrevNextPagination from '../../components/pagination/PrevNextPagination.v
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
-defineOptions({ name: 'ProfessorAttendanceIndex' });
+defineOptions({ name: 'AdminAttendanceManagement' });
 
 const columns = [
   { key: 'student', label: '학생' },
@@ -28,8 +27,7 @@ const columns = [
 const statusLabels = { PRESENT: '출석', LATE: '지각', ABSENT: '결석', EXCUSED: '공결' };
 const statusClass = (status) => `attendance-status ${(status || '').toLowerCase()}`;
 
-const lectures = ref([]);
-const filters = reactive({ classId: '', fromDate: '', toDate: '', status: '' });
+const filters = reactive({ classId: '', enrollmentId: '', fromDate: '', toDate: '', status: '' });
 const records = ref([]);
 const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 const isLoading = ref(false);
@@ -37,25 +35,12 @@ const editTarget = ref(null);
 const editForm = reactive({ status: 'PRESENT', remarks: '', reason: '' });
 const isSaving = ref(false);
 
-const loadLectures = async () => {
-  try {
-    const response = await getMyLectures({ page: 1, size: 100, current: true });
-    lectures.value = response.data.data.items || [];
-  } catch {
-    lectures.value = [];
-  }
-};
-
 const load = async (pageNumber = 1) => {
-  if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) {
-    await notify('시작일은 종료일보다 늦을 수 없습니다.');
-    return;
-  }
-
   isLoading.value = true;
   try {
     const response = await searchAttendanceRecords({
       classId: filters.classId || undefined,
+      enrollmentId: filters.enrollmentId || undefined,
       fromDate: filters.fromDate || undefined,
       toDate: filters.toDate || undefined,
       status: filters.status || undefined,
@@ -88,26 +73,15 @@ const closeEdit = () => {
 };
 
 const saveEdit = async () => {
-  if (isSaving.value || !editTarget.value) return;
-
   if (!editForm.reason.trim()) {
     await notify('수정 사유를 입력해 주세요.');
     return;
   }
-
-  const remarks = editForm.remarks.trim();
-  const statusChanged = editForm.status !== editTarget.value.status;
-  const remarksChanged = remarks !== (editTarget.value.remarks || '');
-  if (!statusChanged && !remarksChanged) {
-    await notify('변경된 출결 내용이 없습니다.');
-    return;
-  }
-
   isSaving.value = true;
   try {
-    await updateAttendanceRecord(editTarget.value.id, editForm.status, remarks, editForm.reason.trim());
+    await updateAttendanceRecord(editTarget.value.id, editForm.status, editForm.remarks.trim(), editForm.reason.trim());
     await notify('출결 기록이 수정되었습니다.');
-    editTarget.value = null;
+    closeEdit();
     await load(page.value.page);
   } catch (error) {
     await notify(error.response?.data?.message || '출결 기록 수정 중 오류가 발생했습니다.');
@@ -116,23 +90,19 @@ const saveEdit = async () => {
   }
 };
 
-onMounted(async () => {
-  await loadLectures();
-  await load();
-});
+onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="출결 확인" subtitle="담당 강의 학생들의 출결 기록을 조회하고 수정합니다.">
+  <MyPageContainer title="출결 관리" subtitle="전체 강의의 출결 기록을 조건별로 조회하고 수정합니다.">
     <MySearchFilter submit-text="조회" @search="applyFilters">
       <div class="search-group">
-        <label for="attendance-class">강의</label>
-        <MySelect id="attendance-class" v-model="filters.classId">
-          <option value="">전체</option>
-          <option v-for="lecture in lectures" :key="lecture.classId" :value="String(lecture.classId)">
-            {{ lecture.courseName }} ({{ lecture.sectionNo }}분반)
-          </option>
-        </MySelect>
+        <label for="attendance-class">강의 ID</label>
+        <MyInput id="attendance-class" v-model="filters.classId" numeric-only placeholder="전체" />
+      </div>
+      <div class="search-group">
+        <label for="attendance-enrollment">수강신청 ID</label>
+        <MyInput id="attendance-enrollment" v-model="filters.enrollmentId" numeric-only placeholder="전체" />
       </div>
       <div class="search-group">
         <label for="attendance-from">시작일</label>
@@ -164,7 +134,7 @@ onMounted(async () => {
         <td>{{ record.studentName }}</td>
         <td>
           <div class="course-name">{{ record.courseName }}</div>
-          <div class="course-code">{{ record.courseCode }} · {{ record.sectionNo }}분반</div>
+          <div class="course-code">{{ record.courseCode }} · {{ record.sectionNo }}분반 · {{ record.professorName }}</div>
         </td>
         <td>{{ formatDate(record.lectureDate) }}</td>
         <td>{{ record.period }}교시</td>

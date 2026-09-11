@@ -145,7 +145,6 @@ onMounted(() => load());
 <template>
   <MyPageContainer
     title="복수전공 신청 검토"
-    subtitle="현재 지도학생의 신청 서류를 검토하고 승인된 문서를 학장에게 전달합니다."
   >
     <section class="filter-card professor-accent">
       <label>
@@ -248,7 +247,12 @@ onMounted(() => load());
             <div><dt>희망 학과</dt><dd>{{ selectedRequest.targetDepartmentName }}</dd></div>
             <div><dt>모집 학기</dt><dd>{{ formatAcademicChangeSemester(selectedRequest, TYPE) }}</dd></div>
             <div><dt>신청일</dt><dd>{{ formatDate(selectedRequest.createdAt) }}</dd></div>
-            <div><dt>현재 상태</dt><dd>{{ formatAcademicChangeStatus(selectedRequest.status) }}</dd></div>
+            <div>
+              <dt>현재 상태</dt>
+              <dd :class="{ rejected: selectedRequest.status === 'ADVISOR_REJECTED' }">
+                {{ formatAcademicChangeStatus(selectedRequest.status) }}
+              </dd>
+            </div>
           </dl>
         </section>
 
@@ -350,6 +354,7 @@ onMounted(() => load());
 .decision-actions {
   display: flex;
   gap: 8px;
+  justify-content: flex-end;
 }
 
 .reset-action {
@@ -406,7 +411,10 @@ onMounted(() => load());
   background: var(--personal-color-info-soft-ice);
 }
 
-.rejected,
+.rejected {
+  color: var(--personal-color-danger-coral);
+}
+
 .form-error {
   color: var(--personal-color-danger-coral);
 }
@@ -444,7 +452,7 @@ onMounted(() => load());
   margin: 0;
   text-align: right;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .guide {
@@ -498,7 +506,6 @@ onMounted(() => load());
 
 .decision-actions :deep(button) {
   width: auto;
-  flex: 1;
 }
 
 @media (max-width: 1000px) {
