@@ -39,3 +39,12 @@ export const getMyGrades = (params = {}) =>
 // 학생 본인 강의평가 제출
 export const submitLectureEvaluation = (payload) =>
   myAxios.post(EVALUATIONS_URL, payload);
+
+
+// 교수 본인 담당 강의의 강의평가 결과 조회
+export const getProfessorLectureEvaluations = (params = {}) =>
+  myAxios.get(EVALUATIONS_URL, { params });
+
+// 역할 범위별 졸업 학점 진단 현황 조회
+export const getCreditRequirementDiagnoses = (params = {}) =>
+  myAxios.get('/api/academic/credit-requirement-diagnoses', { params });
