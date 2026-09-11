@@ -3,7 +3,7 @@ import myAxios from './myAxios';
 const CERTIFICATES_URL = '/api/payment/certificates';
 const EMPLOYMENT_CERTIFICATES_URL = '/api/payment/employment-certificates';
 
-// 학생 재학/졸업증명서 발급 (documentType: 'ENROLLMENT' | 'GRADUATION')
+// 학생 재학/성적/졸업증명서 발급 (documentType: 'ENROLLMENT' | 'GRADE' | 'GRADUATION')
 export const issueCertificate = (documentType) =>
   myAxios.post(CERTIFICATES_URL, { documentType });
 

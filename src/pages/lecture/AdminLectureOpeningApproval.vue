@@ -276,10 +276,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    title="강의 개설 승인"
-    subtitle="교수의 강의 개설 신청을 검토하고 필요한 정보를 보정한 뒤 승인하거나 반려합니다."
-  >
+  <MyPageContainer title="강의 개설 승인">
     <section class="filter-card">
       <label for="opening-status">처리 상태</label>
       <MySelect

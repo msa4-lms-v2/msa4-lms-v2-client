@@ -198,7 +198,7 @@ onMounted(async () => {
           <td>{{ formatAverage(item.responseRate) }}%</td>
           <td>{{ overallAverageLabel(item.overallAverage) }}</td>
           <td>{{ item.capacity ?? item.activeEnrollmentCount }}명</td>
-          <td><MyButton class="secondary-button" color="white" size="middle" content="상세보기" @click="openDetail(item.lectureId)" /></td>
+          <td><MyButton class="professor-primary" color="deep-blue" size="middle" content="상세보기" @click="openDetail(item.lectureId)" /></td>
         </tr>
       </MyTable>
 

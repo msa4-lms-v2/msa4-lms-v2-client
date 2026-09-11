@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { getMyTimetable } from '../../api/enrollmentApi';
-import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
@@ -30,12 +30,24 @@ const TIMETABLE_COLORS = [
   'var(--personal-color-timetable-pink)',
   'var(--personal-color-timetable-periwinkle)',
 ];
+const TIME_SLOTS = {
+  1: '09:00~09:50',
+  2: '10:00~10:50',
+  3: '11:00~11:50',
+  4: '12:00~12:50',
+  5: '13:00~13:50',
+  6: '14:00~14:50',
+  7: '15:00~15:50',
+  8: '16:00~16:50',
+  9: '17:00~17:50',
+};
 
 const columns = [
-  { key: 'course', label: '교과목' },
-  { key: 'schedule', label: '요일·교시' },
+  { key: 'courseCode', label: '과목코드' },
+  { key: 'courseName', label: '과목명' },
+  { key: 'professor', label: '교수명' },
   { key: 'classroom', label: '강의실' },
-  { key: 'professor', label: '담당교수' },
+  { key: 'schedule', label: '수강시간' },
   { key: 'credits', label: '학점' },
 ];
 
@@ -123,12 +135,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    title="시간표 조회"
-    subtitle="학년도·학기별 수강 과목을 주간 시간표로 확인합니다."
-  >
-    <div class="filter-row">
-      <div class="filter-field">
+  <MyPageContainer title="내 수강 내역 및 시간표">
+    <MySearchFilter submit-text="조회" @search="loadTimetable">
+      <div class="search-group compact">
         <label for="timetable-year">학년도</label>
         <MySelect
           id="timetable-year"
@@ -143,7 +152,7 @@ onMounted(async () => {
           </option>
         </MySelect>
       </div>
-      <div class="filter-field">
+      <div class="search-group compact">
         <label for="timetable-term">학기</label>
         <MySelect
           id="timetable-term"
@@ -157,15 +166,7 @@ onMounted(async () => {
           </option>
         </MySelect>
       </div>
-      <MyButton
-        btn-type="button"
-        color="deep-blue"
-        size="middle"
-        :content="isLoading ? '조회 중' : '조회'"
-        :disabled="isLoading"
-        @click="loadTimetable"
-      />
-    </div>
+    </MySearchFilter>
 
     <p
       v-if="loadError"
@@ -175,15 +176,17 @@ onMounted(async () => {
       {{ loadError }}
     </p>
 
-    <div class="section-title-row">
-      <h3>주간 시간표</h3>
-      <span class="summary-text">총 신청학점 <strong>{{ totalCredits }}</strong>학점</span>
+    <div class="summary-card">
+      <p>신청 과목 합계 학점: <strong>{{ totalCredits }}</strong> 학점</p>
     </div>
 
     <section
       class="timetable-section"
       aria-label="주간 시간표"
     >
+      <div class="common-section-header">
+        <h3>주간 시간표</h3>
+      </div>
       <p
         v-if="isLoading"
         class="timetable-message"
@@ -211,7 +214,7 @@ onMounted(async () => {
           :style="timetableStyle"
         >
           <div class="grid-cell grid-header time-header">
-            교시
+            시간
           </div>
           <div
             v-for="day in DAYS"
@@ -230,7 +233,8 @@ onMounted(async () => {
               class="grid-cell period-label"
               :style="{ gridColumn: 1, gridRow: period + 1 }"
             >
-              {{ period }}교시
+              <strong>{{ period }}교시</strong>
+              <span>{{ TIME_SLOTS[period] || '' }}</span>
             </div>
             <div
               v-for="day in DAYS"
@@ -256,7 +260,9 @@ onMounted(async () => {
     </section>
 
     <section class="list-section">
-      <h3>수강 과목 목록</h3>
+      <div class="common-section-header">
+        <h3>수강 신청 목록</h3>
+      </div>
       <MyTable
         :columns="columns"
         :loading="isLoading"
@@ -267,18 +273,12 @@ onMounted(async () => {
           v-for="item in items"
           :key="item.enrollmentId"
         >
-          <td>
-            <div class="course-name">
-              {{ item.courseName }}
-            </div>
-            <div class="course-code">
-              {{ item.courseCode }} · {{ item.sectionNo }}분반
-            </div>
-          </td>
-          <td>{{ formatSchedule(item.schedules) }}</td>
-          <td>{{ item.classroom || '-' }}</td>
+          <td>{{ item.courseCode }}</td>
+          <td class="course-name">{{ item.courseName }}</td>
           <td>{{ item.professorName || '-' }}</td>
-          <td>{{ item.credits }}</td>
+          <td>{{ item.classroom || '-' }}</td>
+          <td>{{ formatSchedule(item.schedules) }}</td>
+          <td>{{ item.credits }}학점</td>
         </tr>
       </MyTable>
     </section>
@@ -286,41 +286,14 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.filter-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  padding: 18px 20px;
-  margin-bottom: 24px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  background: var(--personal-color-white);
-}
-
-.filter-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 160px;
-}
-
-.filter-field label {
-  color: var(--personal-color-text-secondary-steel);
-  font-size: 0.85rem;
-  font-weight: 600;
+.compact {
+  flex: 0 0 160px;
 }
 
 .error-text {
   margin: 0 0 12px;
   color: var(--personal-color-red);
   font-size: 0.85rem;
-}
-
-.section-title-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 10px;
 }
 
 h3 {
@@ -330,23 +303,25 @@ h3 {
   font-weight: 700;
 }
 
-.summary-text {
-  color: var(--personal-color-text-muted-slate);
-  font-size: 0.85rem;
+.summary-card {
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--personal-color-border-mist);
+  background: var(--personal-color-white);
 }
 
-.summary-text strong {
+.summary-card p {
+  margin: 0;
+}
+
+.summary-card strong {
   color: var(--personal-color-student-primary-cyan);
   font-size: 1rem;
 }
 
 .timetable-section {
   min-height: 220px;
-  margin-bottom: 32px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--personal-color-white);
+  margin-bottom: 40px;
 }
 
 .timetable-message {
@@ -364,9 +339,11 @@ h3 {
 
 .timetable-grid {
   display: grid;
-  grid-template-columns: 82px repeat(5, minmax(128px, 1fr));
-  grid-template-rows: 44px repeat(var(--period-count), 58px);
+  grid-template-columns: 100px repeat(5, minmax(128px, 1fr));
+  grid-template-rows: 45px repeat(var(--period-count), 70px);
   min-width: 760px;
+  border-top: 1px solid var(--personal-color-table-border-frost);
+  border-left: 1px solid var(--personal-color-table-border-frost);
 }
 
 .grid-cell {
@@ -390,10 +367,19 @@ h3 {
 }
 
 .period-label {
+  flex-direction: column;
   color: var(--personal-color-text-secondary-steel);
   background: var(--personal-color-bg-subtle-snow);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.period-label strong {
+  color: var(--personal-color-primary-text-navy);
+  font-size: 0.85rem;
+}
+
+.period-label span {
+  margin-top: 2px;
 }
 
 .empty-cell {
@@ -441,20 +427,10 @@ h3 {
   font-weight: 600;
 }
 
-.course-code {
-  margin-top: 2px;
-  color: var(--personal-color-text-muted-slate);
-  font-size: 0.78rem;
-}
-
 @media (max-width: 640px) {
-  .filter-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .filter-field {
+  .compact {
     width: 100%;
+    flex-basis: auto;
   }
 }
 </style>

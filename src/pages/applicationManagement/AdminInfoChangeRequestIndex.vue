@@ -3,8 +3,11 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import MyInput from '../../components/input/MyInput.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { useAdminInfoChangeStore } from '../../store/infochange/useAdminInfoChangeStore';
 import { INFO_CHANGE_STATUS_LABEL, INFO_CHANGE_STATUS_VARIANT } from '../../util/academic/enumLabels';
@@ -84,48 +87,52 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="정보 변경 신청 목록">
-    <section class="filter-card" aria-label="정보 변경 신청 검색 조건">
-      <div class="filter-fields">
-        <label class="filter-field" for="info-change-keyword">
-          <span>통합 검색</span>
-          <input id="info-change-keyword" v-model.trim="filters.keyword" maxlength="50" placeholder="이름 검색" @keyup.enter="search" />
-        </label>
+    <MySearchFilter :show-submit="false" aria-label="정보 변경 신청 검색 조건">
+      <div class="search-group keyword-filter">
+        <label for="info-change-keyword">통합 검색</label>
+        <MyInput
+          id="info-change-keyword"
+          v-model.trim="filters.keyword"
+          maxlength="50"
+          placeholder="이름을 입력해 주세요."
+          @keyup-enter="search"
+        />
+      </div>
 
-        <label class="filter-field" for="info-change-requester-type">
-          <span>신청자 유형</span>
-          <select id="info-change-requester-type" v-model="filters.requesterType">
+      <div class="search-group">
+        <label for="info-change-requester-type">신청자 유형</label>
+        <MySelect id="info-change-requester-type" v-model="filters.requesterType">
             <option value="">전체</option>
             <option value="STUDENT">학생</option>
             <option value="PROFESSOR">교수</option>
-          </select>
-        </label>
+        </MySelect>
+      </div>
 
-        <label class="filter-field" for="info-change-status">
-          <span>처리 상태</span>
-          <select id="info-change-status" v-model="filters.status">
+      <div class="search-group">
+        <label for="info-change-status">처리 상태</label>
+        <MySelect id="info-change-status" v-model="filters.status">
             <option value="">전체</option>
             <option value="REQUESTED">처리중</option>
             <option value="APPROVED">승인</option>
             <option value="REJECTED">반려</option>
             <option value="CANCELLED">취소</option>
-          </select>
-        </label>
+        </MySelect>
+      </div>
 
-        <div class="filter-field date-field">
-          <span>신청일</span>
-          <div class="date-range">
-            <input v-model="filters.requestedFrom" type="date" aria-label="신청일 시작" />
-            <span aria-hidden="true">~</span>
-            <input v-model="filters.requestedTo" type="date" aria-label="신청일 종료" />
-          </div>
+      <div class="search-group date-field">
+        <label>신청일</label>
+        <div class="date-range">
+          <MyInput v-model="filters.requestedFrom" type="date" aria-label="신청일 시작" />
+          <span aria-hidden="true">~</span>
+          <MyInput v-model="filters.requestedTo" type="date" aria-label="신청일 종료" />
         </div>
       </div>
 
       <div class="filter-actions">
         <MyButton color="admin-indigo" size="middle" content="조회" @click="search" />
-        <MyButton color="white" size="middle" content="초기화" @click="reset" />
+        <MyButton class="reset-button" color="white" size="middle" content="초기화" @click="reset" />
       </div>
-    </section>
+    </MySearchFilter>
 
     <section class="result-card">
       <div class="result-heading">
@@ -167,49 +174,14 @@ onMounted(() => load());
 </template>
 
 <style scoped>
-.filter-card,
 .result-card {
   border: 1px solid var(--personal-color-border-mist);
-  border-radius: var(--personal-radius);
+  border-radius: 8px;
   background: var(--personal-color-white);
 }
 
-.filter-card {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-
-.filter-fields {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr));
-  flex: 1;
-  gap: 16px;
-}
-
-.filter-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--personal-color-primary-text-navy);
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.filter-field input,
-.filter-field select {
-  width: 100%;
-  min-height: 38px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  padding: 0 10px;
-  color: var(--personal-color-primary-text-navy);
-  background: var(--personal-color-white);
-  font: inherit;
-  font-weight: 400;
+.keyword-filter {
+  flex: 1 1 210px;
 }
 
 .date-range {
@@ -226,9 +198,10 @@ onMounted(() => load());
 .filter-actions {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 
-.filter-actions :deep(.white) {
+.filter-actions :deep(.reset-button) {
   border: 1px solid var(--personal-color-border-mist);
   color: var(--personal-color-primary-text-navy);
 }
@@ -259,28 +232,13 @@ onMounted(() => load());
   font-size: 0.8rem;
 }
 
-@media (max-width: 960px) {
-  .filter-card {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .filter-fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 640px) {
+  .date-range {
+    flex-wrap: wrap;
   }
 
   .filter-actions {
-    justify-content: end;
-  }
-}
-
-@media (max-width: 640px) {
-  .filter-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .date-range {
-    flex-wrap: wrap;
+    margin-left: 0;
   }
 }
 </style>

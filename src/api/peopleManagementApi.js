@@ -6,6 +6,7 @@ const urls = {
 };
 export const searchPeople = (kind, params) => myAxios.get(urls[kind], { params });
 export const getPerson = (kind, id) => myAxios.get(`${urls[kind]}/${id}`);
+export const updatePerson = (kind, id, data) => myAxios.patch(`${urls[kind]}/${id}`, data);
 export const getAdmissionAccount = id => myAxios.get(`/api/auth/accounts/admission-candidates/${id}`);
 export const retryAdmissionProvisioning = id => myAxios.post(`${urls.admission}/${id}/provisioning/retry`);
 export const cancelAdmissionProvisioning = id => myAxios.post(`${urls.admission}/${id}/provisioning/cancel`);

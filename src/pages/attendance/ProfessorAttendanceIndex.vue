@@ -6,6 +6,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
@@ -25,7 +26,7 @@ const columns = [
   { key: 'courseName', label: '강의명' },
   { key: 'currentStatus', label: '출결 상태' },
   { key: 'status', label: '출결 수정' },
-  { key: 'remarks', label: '사유' },
+  { key: 'remarks', label: '비고' },
 ];
 
 const toLocalDate = (date = new Date()) => {
@@ -40,11 +41,7 @@ const records = ref([]);
 const page = ref({ page: 1, size: 100, totalCount: 0, hasNext: false });
 const isLoading = ref(false);
 const isSaving = ref(false);
-
-const filters = reactive({
-  classId: '',
-  lectureDate: toLocalDate(),
-});
+const filters = reactive({ classId: '', lectureDate: toLocalDate() });
 
 const selectedLecture = computed(() => lectures.value.find(
   (lecture) => String(lecture.classId) === filters.classId,
@@ -70,16 +67,21 @@ const loadLectures = async () => {
   }
 };
 
+const clearRecords = () => {
+  records.value = [];
+  page.value = { page: 1, size: 100, totalCount: 0, hasNext: false };
+};
+
 const load = async (pageNumber = 1) => {
-  if (!filters.lectureDate) {
-    await notify('출결 일자를 선택해 주세요.');
+  if (!filters.classId || !filters.lectureDate) {
+    clearRecords();
     return;
   }
 
   isLoading.value = true;
   try {
     const response = await searchAttendanceRecords({
-      classId: filters.classId || undefined,
+      classId: filters.classId,
       fromDate: filters.lectureDate,
       toDate: filters.lectureDate,
       page: pageNumber,
@@ -98,8 +100,7 @@ const load = async (pageNumber = 1) => {
       hasNext: data.hasNext,
     };
   } catch (error) {
-    records.value = [];
-    page.value = { page: 1, size: 100, totalCount: 0, hasNext: false };
+    clearRecords();
     await notify(error.response?.data?.message || '출결 기록을 불러오지 못했습니다.');
   } finally {
     isLoading.value = false;
@@ -140,53 +141,45 @@ const requestSave = async () => {
   }
 };
 
-onMounted(async () => {
-  await loadLectures();
-  await load();
-});
+onMounted(loadLectures);
 </script>
 
 <template>
   <MyPageContainer title="출결 확인">
-    <section class="filter-card" aria-label="출결 조회 조건">
-      <label class="filter-field" for="attendance-class">
-        <span>강의 선택</span>
-        <MySelect id="attendance-class" v-model="filters.classId" @change="load(1)">
-          <option value="">전체 강의</option>
-  <MyPageContainer title="출결 확인" subtitle="담당 강의 학생들의 출결 기록을 조회하고 수정합니다.">
-    <MySearchFilter class="professor-search" submit-text="조회" @search="applyFilters">
+    <MySearchFilter :show-submit="false">
       <div class="search-group">
-        <label for="attendance-class">강의</label>
-        <MySelect id="attendance-class" v-model="filters.classId">
-          <option value="">전체</option>
+        <label for="attendance-class">강의 선택</label>
+        <MySelect id="attendance-class" v-model="filters.classId" @change="load(1)">
+          <option value="" disabled>강의를 선택하세요</option>
           <option v-for="lecture in lectures" :key="lecture.classId" :value="String(lecture.classId)">
-            [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.sectionNo }}분반)
+            [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.classroom || `${lecture.sectionNo}분반` }})
           </option>
         </MySelect>
-      </label>
+      </div>
 
-      <label class="filter-field date-field" for="attendance-date">
-        <span>출결 일자</span>
+      <div v-if="filters.classId" class="search-group">
+        <label for="attendance-date">출결 일자</label>
         <MyInput id="attendance-date" v-model="filters.lectureDate" type="date" @change="load(1)" />
-      </label>
+      </div>
 
-      <p class="lecture-summary">
-        <template v-if="selectedLecture">
-          강의 정원: <strong>{{ selectedLecture.capacity }}명</strong>
-          · {{ selectedLecture.academicYear }}학년도 {{ selectedLecture.term === 'FIRST' ? 1 : 2 }}학기
-        </template>
-        <template v-else>강의와 일자를 선택해 출결을 조회하세요.</template>
-      </p>
-    </section>
+      <div v-if="selectedLecture" class="lecture-info">
+        <span class="label">강의 정보</span>
+        <span class="value">
+          정원 {{ selectedLecture.capacity }}명 ·
+          {{ selectedLecture.academicYear }}학년도 {{ selectedLecture.term === 'FIRST' ? 1 : 2 }}학기
+        </span>
+      </div>
+    </MySearchFilter>
 
     <section class="attendance-section">
-      <div class="section-heading">
+      <div class="common-section-header">
         <div>
           <h3>수강생 출결 관리</h3>
-          <p>{{ page.totalCount }}건의 출결 기록</p>
+          <p v-if="filters.classId">{{ page.totalCount }}건의 출결 기록</p>
         </div>
         <MyButton
           btn-type="button"
+          class="professor-primary"
           color="deep-blue"
           size="middle"
           :content="isSaving ? '저장 중...' : '출결 일괄 저장'"
@@ -199,7 +192,7 @@ onMounted(async () => {
         :columns="columns"
         :loading="isLoading"
         :empty="!isLoading && records.length === 0"
-        empty-message="선택한 조건의 출결 기록이 없습니다."
+        :empty-message="filters.classId ? '선택한 조건의 출결 기록이 없습니다.' : '강의와 출결 일자를 선택해 주세요.'"
       >
         <tr v-for="record in records" :key="record.id">
           <td>{{ record.studentName }}</td>
@@ -224,7 +217,7 @@ onMounted(async () => {
               v-model="record.remarks"
               class="remarks-input"
               maxlength="255"
-              placeholder="사유 입력"
+              placeholder="비고 입력"
               aria-label="출결 변경 사유"
               :disabled="isReasonDisabled(record)"
             />
@@ -239,177 +232,44 @@ onMounted(async () => {
         @page-change="load"
       />
     </section>
-
-      <div class="search-group">
-        <label for="attendance-from">시작일</label>
-        <MyInput id="attendance-from" v-model="filters.fromDate" type="date" />
-      </div>
-      <div class="search-group">
-        <label for="attendance-to">종료일</label>
-        <MyInput id="attendance-to" v-model="filters.toDate" type="date" />
-      </div>
-      <div class="search-group">
-        <label for="attendance-status">출결 상태</label>
-        <MySelect id="attendance-status" v-model="filters.status">
-          <option value="">전체</option>
-          <option value="PRESENT">출석</option>
-          <option value="LATE">지각</option>
-          <option value="ABSENT">결석</option>
-          <option value="EXCUSED">공결</option>
-        </MySelect>
-      </div>
-    </MySearchFilter>
-
-    <MyTable
-      :columns="columns"
-      :loading="isLoading"
-      :empty="!isLoading && records.length === 0"
-      empty-message="조회된 출결 기록이 없습니다."
-    >
-      <tr v-for="record in records" :key="record.id">
-        <td>{{ record.studentName }}</td>
-        <td>
-          <div class="course-name">{{ record.courseName }}</div>
-          <div class="course-code">{{ record.courseCode }} · {{ record.sectionNo }}분반</div>
-        </td>
-        <td>{{ formatDate(record.lectureDate) }}</td>
-        <td>{{ record.period }}교시</td>
-        <td :class="statusClass(record.status)">
-          {{ statusLabels[record.status] || record.status }}
-        </td>
-        <td>{{ record.remarks || '-' }}</td>
-        <td>
-          <MyButton btn-type="button" class="secondary-button" color="white" size="small" content="수정" @click="openEdit(record)" />
-        </td>
-      </tr>
-    </MyTable>
-
-    <PrevNextPagination
-      v-if="page.page > 1 || page.hasNext"
-      :page="page.page"
-      :has-next="page.hasNext"
-      @page-change="load"
-    />
-
-    <MyModal :is-open="Boolean(editTarget)" title="출결 기록 수정" max-width="480px" @close="closeEdit">
-      <template v-if="editTarget">
-        <p class="edit-target-info">{{ editTarget.studentName }} · {{ editTarget.courseName }} · {{ formatDate(editTarget.lectureDate) }} {{ editTarget.period }}교시</p>
-
-        <label class="edit-field" for="edit-status">
-          <span>출결 상태</span>
-          <MySelect id="edit-status" v-model="editForm.status">
-            <option value="PRESENT">출석</option>
-            <option value="LATE">지각</option>
-            <option value="ABSENT">결석</option>
-            <option value="EXCUSED">공결</option>
-          </MySelect>
-        </label>
-
-        <label class="edit-field" for="edit-remarks">
-          <span>비고</span>
-          <MyInput id="edit-remarks" v-model="editForm.remarks" maxlength="255" />
-        </label>
-
-        <label class="edit-field" for="edit-reason">
-          <span>수정 사유</span>
-          <MyInput id="edit-reason" v-model="editForm.reason" maxlength="255" placeholder="수정 사유를 입력해 주세요." />
-        </label>
-      </template>
-
-      <template #footer>
-        <MyButton class="secondary-button" color="white" size="middle" content="취소" :disabled="isSaving" @click="closeEdit" />
-        <MyButton class="professor-primary" color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="saveEdit" />
-      </template>
-    </MyModal>
   </MyPageContainer>
 </template>
 
 <style scoped>
-.filter-card {
-  display: grid;
-  grid-template-columns: minmax(240px, 1.4fr) minmax(150px, 0.7fr) minmax(190px, 0.9fr);
-  align-items: end;
-  gap: 20px;
-  padding: 20px;
+.lecture-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 8px 12px;
   border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  background: var(--personal-color-white);
+  border-radius: 4px;
+  background: var(--personal-color-bg-subtle-snow);
 }
 
-.filter-field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  color: var(--personal-color-primary-text-navy);
-  font-size: 0.84rem;
+.lecture-info .label {
+  color: var(--personal-color-text-muted-slate);
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
-.lecture-summary {
-  margin: 0 0 10px;
-  color: var(--personal-color-text-secondary-steel);
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.lecture-summary strong {
+.lecture-info .value {
   color: var(--personal-color-primary-text-navy);
+  font-size: 0.84rem;
 }
 
 .attendance-section {
-  margin-top: 22px;
+  margin-top: 32px;
 }
 
-.section-heading {
-  display: flex;
+.common-section-header {
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 14px;
 }
 
-.section-heading h3 {
-  margin: 0;
-  color: var(--personal-color-primary-text-navy);
-  font-size: 1rem;
-}
-
-.section-heading p {
-  margin: 5px 0 0;
+.common-section-header p {
+  margin: 4px 0 0;
   color: var(--personal-color-text-muted-slate);
-  font-size: 0.8rem;
-}
-
-:deep(.page-container) {
-  max-width: 820px;
-  padding: 18px 14px 40px;
-}
-
-:deep(.page-heading h2) {
-  margin: 0 0 16px;
-  font-size: 1.35rem;
-}
-
-:deep(.my-table th) {
-  padding: 11px 8px;
-  font-size: 0.74rem;
-}
-
-:deep(.my-table td) {
-  padding: 10px 8px;
-  font-size: 0.76rem;
-}
-
-:deep(.my-table td:nth-child(5)),
-:deep(.my-table td:nth-child(6)) {
-  padding: 7px 6px;
-}
-
-:deep(.row-select select),
-:deep(.remarks-input input) {
-  height: 28px;
-  padding: 0 7px;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
 }
 
 .course-name {
@@ -428,6 +288,13 @@ onMounted(async () => {
   min-width: 106px;
 }
 
+:deep(.row-select select),
+:deep(.remarks-input input) {
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.82rem;
+}
+
 .attendance-status.present,
 .attendance-status.excused {
   color: var(--personal-color-status-success-text-forest);
@@ -441,40 +308,15 @@ onMounted(async () => {
   color: var(--personal-color-status-warning-text-amber);
 }
 
-@media (max-width: 900px) {
-  .filter-card {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .lecture-summary {
-    grid-column: 1 / -1;
-    margin-bottom: 0;
-  }
-}
-
-@media (max-width: 620px) {
-  .filter-card {
-    grid-template-columns: 1fr;
-  }
-
-  .lecture-summary {
-    grid-column: auto;
-  }
-
-  .section-heading {
-    align-items: stretch;
-    flex-direction: column;
-  }
 .professor-primary {
   background: var(--personal-color-professor-primary-navy);
 }
 
-.professor-search :deep(button.deep-blue) {
-  background: var(--personal-color-professor-primary-navy);
-}
-
-:deep(.secondary-button) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-professor-primary-navy);
+@media (max-width: 760px) {
+  .lecture-info {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-left: 0;
+  }
 }
 </style>

@@ -61,10 +61,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    title="재수강 성적 반영"
-    subtitle="가장 최근에 공개된 재수강 성적을 최종 성적과 학기별 GPA에 반영합니다."
-  >
+  <MyPageContainer title="재수강 성적 반영">
     <section class="policy-card">
       <div>
         <span class="policy-number">01</span>
@@ -87,10 +84,6 @@ const submit = async () => {
             <h3>반영 대상 입력</h3>
             <p>성적 처리 대상의 수강 ID를 확인한 뒤 사유와 함께 입력해 주세요.</p>
           </div>
-          <MyStatusBadge
-            label="관리자 전용"
-            variant="processing"
-          />
         </div>
 
         <form @submit.prevent="submit">
