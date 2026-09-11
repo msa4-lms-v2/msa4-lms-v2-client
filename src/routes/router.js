@@ -176,8 +176,18 @@ const routes = [
     },
     {
         path: '/admin/info-change-requests',
+        redirect: '/admin/application-management/info-change-requests',
+    },
+    {
+        path: '/admin/application-management/info-change-requests',
         name: 'AdminInfoChangeRequestIndex',
-        component: () => import('../pages/profile/AdminInfoChangeRequestIndex.vue'),
+        component: () => import('../pages/applicationManagement/AdminInfoChangeRequestIndex.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+        path: '/admin/application-management/info-change-requests/:requesterType(STUDENT|PROFESSOR)/:requestId(\\d+)',
+        name: 'AdminInfoChangeRequestDetail',
+        component: () => import('../pages/applicationManagement/AdminInfoChangeRequestDetail.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
