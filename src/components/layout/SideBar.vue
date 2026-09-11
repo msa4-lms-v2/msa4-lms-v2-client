@@ -441,6 +441,9 @@ const toggleMenu = (menuKey) => {
         <router-link to="/admin/graduation-requirements" class="nav-item">
           {{ getMenuTitle("/admin/graduation-requirements") }}
         </router-link>
+        <router-link to="/admin/grades/retake-reflection" class="nav-item">
+          {{ getMenuTitle("/admin/grades/retake-reflection") }}
+        </router-link>
         <router-link to="/admin/dismissals" class="nav-item">
           {{ getMenuTitle("/admin/dismissals") }}
         </router-link>
