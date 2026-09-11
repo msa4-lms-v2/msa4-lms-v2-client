@@ -450,32 +450,23 @@ onMounted(async () => {
 }
 
 .status-badge {
-  display: inline-block;
-  padding: var(--personal-badge-padding);
-  border-radius: var(--personal-radius-badge);
-  font-size: var(--personal-badge-font-size);
-  font-weight: 600;
   white-space: nowrap;
 }
 
 .status-badge--success {
   color: var(--personal-color-status-success-text-forest);
-  background: var(--personal-color-status-success-bg-mint);
 }
 
 .status-badge--processing {
   color: var(--personal-color-status-processing-text-navy);
-  background: var(--personal-color-status-processing-bg-sky);
 }
 
 .status-badge--warning {
   color: var(--personal-color-status-warning-text-amber);
-  background: var(--personal-color-status-warning-bg-butter);
 }
 
 .status-badge--fail {
   color: var(--personal-color-status-fail-text-maroon);
-  background: var(--personal-color-status-fail-bg-blush);
 }
 
 .selected-row {
