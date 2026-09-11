@@ -3,6 +3,11 @@ import myAxios from './myAxios';
 const TIMETABLE_URL = '/api/academic/timetables';
 const ENROLLMENTS_URL = '/api/academic/enrollments';
 const CART_URL = '/api/academic/enrollment-cart-items';
+const AVAILABLE_CLASSES_URL = '/api/academic/classes/available';
+
+// 수강신청 대상 개설 강의 조회
+export const getAvailableLectures = (params = {}) =>
+  myAxios.get(AVAILABLE_CLASSES_URL, { params });
 
 // 학생 본인 시간표 조회
 export const getMyTimetable = (academicYear, term) =>
