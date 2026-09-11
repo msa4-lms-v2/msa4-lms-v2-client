@@ -298,6 +298,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'], academicStatuses: ['ENROLLED', 'ON_LEAVE', 'GRADUATED'] },
     },
     {
+        path: '/graduation-diagnoses',
+        name: 'GraduationDiagnosisManagement',
+        component: () => import('../pages/grade/GraduationDiagnosisManagement.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR', 'ADMIN'] },
+    },
+    {
         path: '/evaluations',
         name: 'StudentLectureEvaluation',
         component: () => import('../pages/grade/StudentLectureEvaluation.vue'),
