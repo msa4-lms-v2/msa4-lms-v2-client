@@ -6,7 +6,6 @@ import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
@@ -99,7 +98,9 @@ onMounted(() => load());
         <td>{{ formatDate(record.lectureDate) }}</td>
         <td>{{ record.period }}교시</td>
         <td>
-          <MyStatusBadge :label="statusLabels[record.status] || record.status" :variant="statusVariants[record.status] || 'processing'" />
+          <span :class="['status-text', `status-text--${statusVariants[record.status] || 'processing'}`]">
+            {{ statusLabels[record.status] || record.status }}
+          </span>
         </td>
         <td>{{ record.checkInTime ? formatDate(record.checkInTime, 'YYYY-MM-DD HH:mm') : '-' }}</td>
         <td>{{ record.remarks || '-' }}</td>
@@ -116,6 +117,22 @@ onMounted(() => load());
 </template>
 
 <style scoped>
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text--processing {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text--warning {
+  color: var(--personal-color-status-warning-text-amber);
+}
+
+.status-text--fail {
+  color: var(--personal-color-status-fail-text-maroon);
+}
+
 .course-name {
   font-weight: 600;
 }

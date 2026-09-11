@@ -8,7 +8,6 @@ import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 
@@ -301,7 +300,7 @@ onMounted(async () => {
         <td><MyInput v-model="row.attendanceScore" type="number" min="0" max="100" step="0.01" class="score-input" /></td>
         <td>{{ calculateTotal(row) === null ? '-' : calculateTotal(row).toFixed(2) }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
-        <td><MyStatusBadge label="공개됨" variant="success" /></td>
+        <td><span class="status-text status-text--success">공개됨</span></td>
       </tr>
     </MyTable>
 
@@ -335,6 +334,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
 .lecture-group :deep(select) { min-width: 300px; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
 .lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }

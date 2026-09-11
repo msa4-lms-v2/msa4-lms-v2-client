@@ -8,7 +8,6 @@ import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 
 defineOptions({ name: 'ProfessorGradeInput' });
@@ -298,7 +297,11 @@ onMounted(async () => {
         <td><MyInput v-model="row.attendanceScore" type="number" min="0" max="100" step="0.01" :disabled="row.gradeStatus === 'OPENED'" class="score-input" /></td>
         <td>{{ displayedTotal(row) }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
-        <td><MyStatusBadge v-bind="statusInfo(row)" /></td>
+        <td>
+          <span :class="['status-text', `status-text--${statusInfo(row).variant}`]">
+            {{ statusInfo(row).label }}
+          </span>
+        </td>
       </tr>
     </MyTable>
 
@@ -310,6 +313,18 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text--processing {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text--warning {
+  color: var(--personal-color-status-warning-text-amber);
+}
+
 .lecture-group :deep(select) { min-width: 300px; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
 .lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
