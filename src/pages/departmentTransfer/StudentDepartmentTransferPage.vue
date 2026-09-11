@@ -571,7 +571,7 @@ onMounted(async () => {
             <MyButton
               type="submit"
               color="deep-blue"
-              size="small"
+              size="big"
               :content="isSubmitting ? '신청 중' : '전과 신청'"
               :disabled="isSubmitting || isLoadingForm || !openPeriods.length || !hasReadGuidelines"
             />
@@ -690,7 +690,7 @@ onMounted(async () => {
 
 <style scoped>
 .department-transfer-page {
-  max-width: 1120px;
+  width: 100%;
 }
 
 .page-actions,
@@ -784,11 +784,11 @@ onMounted(async () => {
 }
 
 .file-picker {
-  min-height: 38px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);

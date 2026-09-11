@@ -13,7 +13,6 @@ import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -35,7 +34,6 @@ const columns = [
 ];
 
 const statusLabels = { OPEN: '개설', CLOSED: '종료' };
-const statusVariants = { OPEN: 'success', CLOSED: 'warning' };
 
 const semesterStore = useSemesterStore();
 const filters = reactive({ academicYear: '', term: '', status: '' });
@@ -255,9 +253,7 @@ onMounted(async () => {
         <td>{{ formatSchedule(lecture.schedules) }}</td>
         <td>{{ lecture.classroom || '-' }}</td>
         <td>{{ lecture.currentEnrollmentCount }} / {{ lecture.capacity }}명</td>
-        <td>
-          <MyStatusBadge :label="statusLabels[lecture.status] || lecture.status" :variant="statusVariants[lecture.status] || 'processing'" />
-        </td>
+        <td>{{ statusLabels[lecture.status] || lecture.status }}</td>
         <td>
           <MyButton
             btn-type="button"
@@ -283,7 +279,7 @@ onMounted(async () => {
           <h3>{{ selectedLecture.courseName }} 강의계획서</h3>
           <p>{{ selectedLecture.courseCode }} · {{ selectedLecture.sectionNo }}분반 · {{ selectedLecture.academicYear }}학년도 {{ selectedLecture.term === 'FIRST' ? 1 : 2 }}학기</p>
         </div>
-        <MyStatusBadge :label="statusLabels[selectedLecture.status] || selectedLecture.status" :variant="statusVariants[selectedLecture.status] || 'processing'" />
+        <span>{{ statusLabels[selectedLecture.status] || selectedLecture.status }}</span>
       </div>
 
       <div v-if="isLoadingSyllabus" class="detail-loading">강의계획서를 불러오는 중입니다.</div>

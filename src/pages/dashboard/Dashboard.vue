@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import DashboardCalendar from '../../components/dashboard/DashboardCalendar.vue';
 import ScheduleList from '../../components/dashboard/ScheduleList.vue';
 import NoticeList from '../../components/dashboard/NoticeList.vue';
+import AdminDashboardStats from '../../components/dashboard/AdminDashboardStats.vue';
 import MyCard from '../../components/common/MyCard.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { useDashboardStore } from '../../store/dashboard/useDashboardStore.js';
@@ -50,6 +51,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer :title="dashboardTitle">
+    <AdminDashboardStats v-if="authStore.userInfo?.role === 'ADMIN'" />
     <div class="dashboard">
     <div class="left">
       <MyCard v-if="dashboardStore.isSchedulesLoading" class="status-msg">일정을 불러오는 중입니다...</MyCard>

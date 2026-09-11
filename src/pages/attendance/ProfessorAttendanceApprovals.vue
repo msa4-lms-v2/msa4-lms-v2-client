@@ -5,7 +5,6 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
@@ -38,7 +37,6 @@ const statusOptions = [
   { value: 'REJECTED', label: '반려' },
 ];
 const statusLabels = { PENDING: '대기', APPROVED: '승인', REJECTED: '반려' };
-const statusVariants = { PENDING: 'processing', APPROVED: 'success', REJECTED: 'fail' };
 const emptyMessage = computed(() => `${statusOptions.find((item) => item.value === selectedStatus.value)?.label || ''} 공결 신청이 없습니다.`);
 
 const createIdempotencyKey = (prefix) => {
@@ -188,8 +186,8 @@ onMounted(() => load());
           </button>
           <span v-else>-</span>
         </td>
-        <td>
-          <MyStatusBadge :label="statusLabels[item.status] || item.status" :variant="statusVariants[item.status] || 'processing'" />
+        <td :class="{ rejected: item.status === 'REJECTED' }">
+          {{ statusLabels[item.status] || item.status }}
         </td>
         <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
         <td>
@@ -240,8 +238,8 @@ onMounted(() => load());
           </div>
           <div class="detail-row">
             <dt>처리 상태</dt>
-            <dd>
-              <MyStatusBadge :label="statusLabels[reviewTarget.status] || reviewTarget.status" :variant="statusVariants[reviewTarget.status] || 'processing'" />
+            <dd :class="{ rejected: reviewTarget.status === 'REJECTED' }">
+              {{ statusLabels[reviewTarget.status] || reviewTarget.status }}
             </dd>
           </div>
           <div v-if="reviewTarget.status === 'REJECTED' && reviewTarget.rejectReason" class="detail-row">
@@ -350,6 +348,10 @@ onMounted(() => load());
 
 .detail-row dd {
   margin: 0;
+}
+
+.rejected {
+  color: var(--personal-color-danger-coral);
 }
 
 .review-area {

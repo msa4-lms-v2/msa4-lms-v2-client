@@ -121,13 +121,15 @@ onMounted(() => {
           </option>
         </MySelect>
       </div>
-      <div class="search-group extra-actions">
+    </MySearchFilter>
+
+    <div class="list-heading">
+      <h3>나의 납부 내역</h3>
+      <div class="document-actions">
         <MyButton btn-type="button" color="white" size="middle" content="고지서 출력" @click="handlePrintNotice" />
         <MyButton btn-type="button" color="white" size="middle" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
       </div>
-    </MySearchFilter>
-
-    <h3>나의 납부 내역</h3>
+    </div>
     <MyTable
       :loading="tuitionStore.isLoadingPaymentHistory"
       :empty="!tuitionStore.isLoadingPaymentHistory && filteredHistory.length === 0"
@@ -157,12 +159,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.extra-actions {
-  flex-direction: row !important;
-  gap: 8px;
+.list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-h3 {
-  margin: 0 0 12px;
+.list-heading h3 {
+  margin: 0;
+}
+
+.document-actions {
+  display: flex;
+  gap: 8px;
 }
 </style>
