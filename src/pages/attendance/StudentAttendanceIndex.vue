@@ -167,11 +167,7 @@ const load = async () => {
 };
 
 onMounted(async () => {
-  try {
-    await semesterStore.fetchSemesters();
-  } catch (error) {
-    await notify(error.response?.data?.message || '학기 목록을 불러오지 못했습니다.');
-  }
+  await semesterStore.fetchSemesters();
   applyDefaultSemester();
   if (selectedSemester.value) await load();
 });

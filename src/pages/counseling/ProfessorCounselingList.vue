@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import { notify } from '../../composables/useDialog';
 import { useCounselingStore } from '../../store/counseling/useCounselingStore';
 
 const store = useCounselingStore();
@@ -29,9 +28,7 @@ const answeredCount = computed(() => store.counselings.filter((item) => item.sta
 const load = async () => {
   loading.value = true;
   try {
-    await store.fetchCounselings({ page: 1, size: 100 });
-  } catch (error) {
-    await notify(error.response?.data?.message || '상담 목록을 불러오지 못했습니다.');
+    await store.fetchCounselings({ page: 1, size: 100 }, { pageLoad: true });
   } finally {
     loading.value = false;
   }

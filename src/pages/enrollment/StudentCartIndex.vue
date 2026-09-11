@@ -69,16 +69,16 @@ const enrollmentErrorMessage = (error) => (
   || '수강신청에 실패했습니다.'
 );
 
-const loadCart = async () => {
+const loadCart = async (config = {}) => {
   isLoadingCart.value = true;
   try {
-    const response = await getMyCart(selectedParams.value);
+    const response = await getMyCart(selectedParams.value, config);
     cartItems.value = response.data.data.items || [];
     cartTotalCredits.value = response.data.data.totalCredits || 0;
   } catch (error) {
     cartItems.value = [];
     cartTotalCredits.value = 0;
-    await notify(error.response?.data?.message || '수강 장바구니를 불러오지 못했습니다.');
+    if (!config.pageLoad) await notify(error.response?.data?.message || '수강 장바구니를 불러오지 못했습니다.');
   } finally {
     isLoadingCart.value = false;
   }
@@ -127,7 +127,7 @@ onMounted(async () => {
   } catch {
     selectedSemesterKey.value = '';
   }
-  await loadCart();
+  await loadCart({ pageLoad: true });
 });
 </script>
 
