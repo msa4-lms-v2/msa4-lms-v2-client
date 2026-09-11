@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { reviewExcuseRequest, searchExcuseRequests } from '../../api/attendanceApi';
+import { computed, onMounted, ref } from 'vue';
+import { downloadExcuseAttachment, reviewExcuseRequest, searchExcuseRequests } from '../../api/attendanceApi';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
@@ -18,16 +18,28 @@ const columns = [
   { key: 'lectureDate', label: '결석일' },
   { key: 'reason', label: '신청 사유' },
   { key: 'attachment', label: '증빙' },
+  { key: 'status', label: '처리 상태' },
   { key: 'createdAt', label: '신청일' },
   { key: 'management', label: '관리' },
 ];
 
 const requests = ref([]);
+const selectedStatus = ref('PENDING');
 const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 const isLoading = ref(false);
 const reviewTarget = ref(null);
 const rejectReason = ref('');
 const isReviewing = ref(false);
+const downloadingRequestId = ref(null);
+
+const statusOptions = [
+  { value: 'PENDING', label: '승인 대기' },
+  { value: 'APPROVED', label: '승인 완료' },
+  { value: 'REJECTED', label: '반려' },
+];
+const statusLabels = { PENDING: '대기', APPROVED: '승인', REJECTED: '반려' };
+const statusVariants = { PENDING: 'processing', APPROVED: 'success', REJECTED: 'fail' };
+const emptyMessage = computed(() => `${statusOptions.find((item) => item.value === selectedStatus.value)?.label || ''} 공결 신청이 없습니다.`);
 
 const createIdempotencyKey = (prefix) => {
   const suffix = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -37,7 +49,7 @@ const createIdempotencyKey = (prefix) => {
 const load = async (pageNumber = 1) => {
   isLoading.value = true;
   try {
-    const response = await searchExcuseRequests({ status: 'PENDING', page: pageNumber, size: 20 });
+    const response = await searchExcuseRequests({ status: selectedStatus.value, page: pageNumber, size: 20 });
     const data = response.data.data;
     requests.value = data.items || [];
     page.value = { page: data.page, size: data.size, totalCount: data.totalCount, hasNext: data.hasNext };
@@ -47,6 +59,14 @@ const load = async (pageNumber = 1) => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const changeStatus = (status) => {
+  if (selectedStatus.value === status || isLoading.value) return;
+  selectedStatus.value = status;
+  reviewTarget.value = null;
+  rejectReason.value = '';
+  load(1);
 };
 
 const openReview = (request) => {
@@ -60,7 +80,26 @@ const closeReview = () => {
   rejectReason.value = '';
 };
 
+const downloadAttachment = async (request) => {
+  if (!request.attachmentOriginalName || downloadingRequestId.value) return;
+  downloadingRequestId.value = request.id;
+  try {
+    const response = await downloadExcuseAttachment(request.id);
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = request.attachmentOriginalName;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  } catch (error) {
+    await notify(error.response?.data?.message || '증빙 파일을 다운로드하지 못했습니다.');
+  } finally {
+    downloadingRequestId.value = null;
+  }
+};
+
 const approve = async () => {
+  if (isReviewing.value || !reviewTarget.value || reviewTarget.value.status !== 'PENDING') return;
   const confirmed = await confirmDialog('이 공결 신청을 승인하시겠습니까?');
   if (!confirmed) return;
 
@@ -68,7 +107,8 @@ const approve = async () => {
   try {
     await reviewExcuseRequest(reviewTarget.value.id, 'APPROVED', null, createIdempotencyKey('excuse-approve'));
     await notify('승인 처리되었습니다.');
-    closeReview();
+    reviewTarget.value = null;
+    rejectReason.value = '';
     await load(page.value.page);
   } catch (error) {
     await notify(error.response?.data?.message || '승인 처리 중 오류가 발생했습니다.');
@@ -78,6 +118,7 @@ const approve = async () => {
 };
 
 const reject = async () => {
+  if (isReviewing.value || !reviewTarget.value || reviewTarget.value.status !== 'PENDING') return;
   if (!rejectReason.value.trim()) {
     await notify('반려 사유를 입력해 주세요.');
     return;
@@ -92,7 +133,8 @@ const reject = async () => {
       createIdempotencyKey('excuse-reject'),
     );
     await notify('반려 처리되었습니다.');
-    closeReview();
+    reviewTarget.value = null;
+    rejectReason.value = '';
     await load(page.value.page);
   } catch (error) {
     await notify(error.response?.data?.message || '반려 처리 중 오류가 발생했습니다.');
@@ -106,11 +148,25 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="출결 승인" subtitle="담당 강의 학생의 공결 신청을 승인·반려합니다.">
+    <div class="status-tabs" role="tablist" aria-label="공결 처리 상태">
+      <button
+        v-for="option in statusOptions"
+        :key="option.value"
+        type="button"
+        role="tab"
+        :aria-selected="selectedStatus === option.value"
+        :class="['status-tab', { active: selectedStatus === option.value }]"
+        @click="changeStatus(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    </div>
+
     <MyTable
       :columns="columns"
       :loading="isLoading"
       :empty="!isLoading && requests.length === 0"
-      empty-message="처리 대기 중인 공결 신청이 없습니다."
+      :empty-message="emptyMessage"
     >
       <tr v-for="item in requests" :key="item.id">
         <td>{{ item.studentName }}</td>
@@ -120,10 +176,30 @@ onMounted(() => load());
         </td>
         <td>{{ formatDate(item.lectureDate) }} {{ item.period }}교시</td>
         <td class="reason-cell" :title="item.reason">{{ item.reason }}</td>
-        <td>{{ item.attachmentOriginalName || '-' }}</td>
+        <td>
+          <button
+            v-if="item.attachmentOriginalName"
+            type="button"
+            class="attachment-button"
+            :disabled="downloadingRequestId === item.id"
+            @click="downloadAttachment(item)"
+          >
+            {{ downloadingRequestId === item.id ? '받는 중...' : item.attachmentOriginalName }}
+          </button>
+          <span v-else>-</span>
+        </td>
+        <td>
+          <MyStatusBadge :label="statusLabels[item.status] || item.status" :variant="statusVariants[item.status] || 'processing'" />
+        </td>
         <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
         <td>
-          <MyButton btn-type="button" color="deep-blue" size="small" content="검토" @click="openReview(item)" />
+          <MyButton
+            btn-type="button"
+            :color="item.status === 'PENDING' ? 'deep-blue' : 'white'"
+            size="small"
+            :content="item.status === 'PENDING' ? '검토' : '상세'"
+            @click="openReview(item)"
+          />
         </td>
       </tr>
     </MyTable>
@@ -156,24 +232,69 @@ onMounted(() => load());
           </div>
           <div v-if="reviewTarget.attachmentOriginalName" class="detail-row">
             <dt>증빙 파일</dt>
-            <dd>{{ reviewTarget.attachmentOriginalName }}</dd>
+            <dd>
+              <button type="button" class="attachment-button" @click="downloadAttachment(reviewTarget)">
+                {{ downloadingRequestId === reviewTarget.id ? '받는 중...' : reviewTarget.attachmentOriginalName }}
+              </button>
+            </dd>
+          </div>
+          <div class="detail-row">
+            <dt>처리 상태</dt>
+            <dd>
+              <MyStatusBadge :label="statusLabels[reviewTarget.status] || reviewTarget.status" :variant="statusVariants[reviewTarget.status] || 'processing'" />
+            </dd>
+          </div>
+          <div v-if="reviewTarget.status === 'REJECTED' && reviewTarget.rejectReason" class="detail-row">
+            <dt>반려 사유</dt>
+            <dd>{{ reviewTarget.rejectReason }}</dd>
           </div>
         </dl>
-        <div class="review-area">
-          <textarea v-model="rejectReason" rows="2" placeholder="반려 시 사유를 입력해 주세요."></textarea>
+        <div v-if="reviewTarget.status === 'PENDING'" class="review-area">
+          <textarea v-model="rejectReason" rows="2" maxlength="500" placeholder="반려 시 사유를 입력해 주세요."></textarea>
+          <span class="text-counter">{{ rejectReason.length }} / 500</span>
         </div>
       </template>
 
       <template #footer>
         <MyButton color="gray" size="small" content="닫기" :disabled="isReviewing" @click="closeReview" />
-        <MyButton color="red" size="small" content="반려" :disabled="isReviewing" @click="reject" />
-        <MyButton color="deep-blue" size="small" content="승인" :disabled="isReviewing" @click="approve" />
+        <MyButton v-if="reviewTarget?.status === 'PENDING'" color="red" size="small" content="반려" :disabled="isReviewing" @click="reject" />
+        <MyButton v-if="reviewTarget?.status === 'PENDING'" color="deep-blue" size="small" content="승인" :disabled="isReviewing" @click="approve" />
       </template>
     </MyModal>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 6px;
+  width: fit-content;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
+  background: var(--personal-color-white);
+}
+
+.status-tab {
+  min-width: 92px;
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--personal-color-text-muted-slate);
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status-tab.active {
+  color: var(--personal-color-white);
+  background: var(--personal-color-professor-primary-navy);
+}
+
 .course-name {
   font-weight: 600;
 }
@@ -189,6 +310,26 @@ onMounted(() => load());
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.attachment-button {
+  max-width: 180px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  color: var(--personal-color-secondary-blue);
+  background: transparent;
+  font: inherit;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.attachment-button:disabled {
+  color: var(--personal-color-text-faint-fog);
+  cursor: wait;
 }
 
 .detail-list {
@@ -212,6 +353,9 @@ onMounted(() => load());
 }
 
 .review-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   margin-top: 16px;
 }
 
@@ -224,5 +368,24 @@ onMounted(() => load());
   font-size: 0.9rem;
   font-family: inherit;
   resize: vertical;
+}
+
+.text-counter {
+  margin-top: 4px;
+  color: var(--personal-color-text-faint-fog);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 620px) {
+  .status-tabs {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .status-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 0 8px;
+  }
 }
 </style>
