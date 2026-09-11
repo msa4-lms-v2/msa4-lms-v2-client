@@ -264,6 +264,7 @@ onBeforeUnmount(stopLiveUpdates);
             :disabled="isLoading || hasOpenSession"
           />
           <MyButton
+            class="professor-primary"
             color="deep-blue"
             size="big"
             :content="isOpening ? '생성 중...' : '세션 생성'"
@@ -324,6 +325,7 @@ onBeforeUnmount(stopLiveUpdates);
               <b>{{ secondsLeft }}초</b>
             </div>
             <MyButton
+              class="professor-primary"
               color="deep-blue"
               size="middle"
               content="QR 확대"
@@ -468,6 +470,9 @@ h2 {
 }
 .section-title-row :deep(.status-badge) {
   margin-bottom: 12px;
+}
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
 }
 .session-panel {
   display: grid;

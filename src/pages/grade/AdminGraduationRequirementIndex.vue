@@ -127,7 +127,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="졸업요건 관리" subtitle="학과와 입학연도별 졸업 학점 기준을 관리합니다.">
+  <MyPageContainer title="졸업요건 관리">
     <MySearchFilter class="admin-search" submit-text="조회" @search="applyFilters">
       <div class="search-group"><label for="requirement-keyword">학과명/코드</label><MyInput id="requirement-keyword" v-model="filters.keyword" placeholder="컴퓨터공학과" /></div>
       <div class="search-group"><label for="requirement-department-filter">학과</label><MySelect id="requirement-department-filter" v-model="filters.departmentId"><option value="">전체</option><option v-for="department in departments" :key="department.id" :value="department.id">{{ department.name }}</option></MySelect></div>
