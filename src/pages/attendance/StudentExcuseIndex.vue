@@ -380,13 +380,9 @@ onMounted(() => loadRequests());
       >
         <tr v-for="item in requests" :key="item.id">
           <td>
-            <div class="course-name">{{ item.courseName }}</div>
-            <div class="course-code">{{ item.courseCode }} · {{ item.sectionNo }}분반</div>
+            {{ item.courseName }}
           </td>
-          <td>
-            <div>{{ formatDate(item.lectureDate) }}</div>
-            <div class="course-code">{{ item.period }}교시</div>
-          </td>
+          <td>{{ formatDate(item.lectureDate) }}</td>
           <td>
             <span :class="`status-text--${statusVariants[item.status] || 'processing'}`">
               {{ statusLabels[item.status] || item.status }}
@@ -449,6 +445,26 @@ onMounted(() => loadRequests());
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
   background: var(--personal-color-white);
+}
+
+:deep(.page-container) {
+  max-width: 1100px;
+  padding: 18px 18px 40px;
+}
+
+:deep(.page-heading h2) {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+}
+
+:deep(.my-table th) {
+  padding: 11px 10px;
+  font-size: 0.76rem;
+}
+
+:deep(.my-table td) {
+  padding: 12px 10px;
+  font-size: 0.78rem;
 }
 
 .request-form {
