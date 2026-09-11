@@ -70,8 +70,10 @@ watch(() => route.path, path => {
   if (path.startsWith('/admin/academic-schedules')) activeMenus.value.adminAcademicSchedule = true;
   if (path.startsWith('/admin/notices')) activeMenus.value.adminNotice = true;
   if (path.startsWith('/admin/application-management/info-change-requests')) activeMenus.value.adminApplicationManagement = true;
+  if (path.startsWith('/admin/withdrawals')) activeMenus.value.adminApplicationManagement = true;
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
   if (path.startsWith('/graduation-diagnoses')) activeMenus.value.professorStudent = true;
+  if (path.startsWith('/professor/withdrawals')) activeMenus.value.professorStudent = true;
 }, { immediate: true });
 
 const toggleMenu = (menuKey) => {
@@ -282,6 +284,9 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/leave-return" class="submenu-item">{{
               getMenuTitle("/professor/leave-return")
             }}</router-link>
+            <router-link to="/professor/withdrawals" class="submenu-item">{{
+              getMenuTitle("/professor/withdrawals")
+            }}</router-link>
             <router-link
               to="/professor/academic-change-requests/department-transfer"
               class="submenu-item"
@@ -441,6 +446,11 @@ const toggleMenu = (menuKey) => {
               class="submenu-item"
               exact-active-class="router-link-active"
             >{{ getMenuTitle("/admin/academic-change-requests/double-major") }}</router-link>
+            <router-link
+              to="/admin/withdrawals"
+              class="submenu-item"
+              exact-active-class="router-link-active"
+            >{{ getMenuTitle("/admin/withdrawals") }}</router-link>
           </div>
         </div>
         <div class="menu-group">

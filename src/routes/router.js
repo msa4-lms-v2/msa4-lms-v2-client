@@ -205,6 +205,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
+        path: '/admin/withdrawals',
+        name: 'AdminWithdrawalManagement',
+        component: () => import('../pages/withdrawal/WithdrawalReviewIndex.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
         path: '/payment/health',
         name: 'PaymentHealthIndex',
         component: () => import('../pages/payment/PaymentHealthIndex.vue'),
@@ -343,6 +349,12 @@ const routes = [
         path: '/professor/leave-return',
         name: 'ProfessorLeaveReturnApproval',
         component: () => import('../pages/leaveReturn/ProfessorLeaveReturnApproval.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/withdrawals',
+        name: 'ProfessorWithdrawalReview',
+        component: () => import('../pages/withdrawal/WithdrawalReviewIndex.vue'),
         meta: { requiresAuth: true, roles: ['PROFESSOR'] },
     },
     {
