@@ -420,6 +420,7 @@ const toggleMenu = (menuKey) => {
             <router-link to="/admin/notices/new" class="submenu-item">공지사항 작성</router-link>
           </div>
         </div>
+         
         <div class="menu-group">
           <button type="button" class="menu-header" :aria-expanded="activeMenus.adminApplicationManagement" @click="toggleMenu('adminApplicationManagement')">
             <span>신청 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminApplicationManagement }">▼</span>
@@ -440,6 +441,9 @@ const toggleMenu = (menuKey) => {
               class="submenu-item"
               exact-active-class="router-link-active"
             >{{ getMenuTitle("/admin/academic-change-requests/double-major") }}</router-link>
+          </div>
+        </div>
+        <div class="menu-group">
           <button
             type="button"
             class="menu-header"
