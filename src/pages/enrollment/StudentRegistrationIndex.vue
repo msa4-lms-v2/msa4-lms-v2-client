@@ -2,17 +2,15 @@
 import dayjs from 'dayjs';
 import { computed, onMounted, ref } from 'vue';
 import {
-  addCartItem,
   cancelEnrollment,
   createEnrollment,
-  getMyCart,
   getMyEnrollments,
-  removeCartItem,
 } from '../../api/enrollmentApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
@@ -20,16 +18,7 @@ import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'StudentRegistrationIndex' });
 
-const DAY_LABELS = { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금' };
 const TERM_ORDER = { FIRST: 1, SECOND: 2 };
-
-const cartColumns = [
-  { key: 'course', label: '교과목' },
-  { key: 'schedule', label: '요일·교시' },
-  { key: 'classroom', label: '강의실' },
-  { key: 'credits', label: '학점' },
-  { key: 'management', label: '관리' },
-];
 
 const enrollmentColumns = [
   { key: 'course', label: '교과목' },
@@ -43,14 +32,9 @@ const enrollmentColumns = [
 const semesterStore = useSemesterStore();
 const selectedSemesterKey = ref('');
 const newLectureId = ref('');
-const cartItems = ref([]);
-const cartTotalCredits = ref(0);
 const enrollments = ref([]);
-const isLoadingCart = ref(false);
 const isLoadingEnrollments = ref(false);
-const isAdding = ref(false);
 const enrollingLectureId = ref(null);
-const removingCartItemId = ref(null);
 const cancellingEnrollmentId = ref(null);
 const formError = ref('');
 
@@ -107,19 +91,13 @@ const registrationPeriod = computed(() => {
 
 const isEnrollmentOpen = computed(() => registrationPeriod.value.state === 'open');
 const isMutating = computed(() => (
-  isAdding.value
-  || enrollingLectureId.value !== null
-  || removingCartItemId.value !== null
+  enrollingLectureId.value !== null
   || cancellingEnrollmentId.value !== null
 ));
 const activeEnrollmentCredits = computed(() => enrollments.value.reduce(
   (total, item) => total + Number(item.credits || 0),
   0,
 ));
-
-const formatSchedule = (schedules = []) => schedules
-  .map((schedule) => `${DAY_LABELS[schedule.dayOfWeek] || schedule.dayOfWeek} ${schedule.startPeriod}~${schedule.endPeriod}교시`)
-  .join(', ') || '-';
 
 const createIdempotencyKey = () => {
   const suffix = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -131,24 +109,6 @@ const errorMessage = (error, fallback) => (
   || error.response?.data?.message
   || fallback
 );
-
-const loadCart = async ({ showError = true } = {}) => {
-  if (!selectedParams.value) return false;
-  isLoadingCart.value = true;
-  try {
-    const response = await getMyCart(selectedParams.value);
-    cartItems.value = response.data.data?.items || [];
-    cartTotalCredits.value = response.data.data?.totalCredits || 0;
-    return true;
-  } catch (error) {
-    cartItems.value = [];
-    cartTotalCredits.value = 0;
-    if (showError) await notify(errorMessage(error, '수강 장바구니를 불러오지 못했습니다.'));
-    return false;
-  } finally {
-    isLoadingCart.value = false;
-  }
-};
 
 const loadEnrollments = async ({ showError = true } = {}) => {
   if (!selectedParams.value) return false;
@@ -172,16 +132,13 @@ const loadRegistrationData = async () => {
     formError.value = '조회할 학기를 선택해 주세요.';
     return;
   }
-  const [cartLoaded, enrollmentsLoaded] = await Promise.all([
-    loadCart({ showError: false }),
-    loadEnrollments({ showError: false }),
-  ]);
-  if (!cartLoaded || !enrollmentsLoaded) {
-    await notify('선택한 학기의 수강 정보를 모두 불러오지 못했습니다. 다시 조회해 주세요.');
+  const loaded = await loadEnrollments({ showError: false });
+  if (!loaded) {
+    await notify('선택한 학기의 수강 정보를 불러오지 못했습니다. 다시 조회해 주세요.');
   }
 };
 
-const addToCart = async () => {
+const enrollLecture = async () => {
   const lectureId = Number(newLectureId.value);
   if (!isEnrollmentOpen.value) {
     formError.value = '현재 선택한 학기는 수강신청 기간이 아닙니다.';
@@ -193,52 +150,15 @@ const addToCart = async () => {
   }
 
   formError.value = '';
-  isAdding.value = true;
+  const confirmed = await confirmDialog(`개설 강의 ${lectureId}번을 수강신청하시겠습니까?`);
+  if (!confirmed) return;
+
+  enrollingLectureId.value = lectureId;
   try {
-    await addCartItem(lectureId);
+    await createEnrollment(lectureId, createIdempotencyKey());
     newLectureId.value = '';
-    await loadCart();
-    await notify('장바구니에 강의를 담았습니다.');
-  } catch (error) {
-    await notify(errorMessage(error, '장바구니 담기에 실패했습니다.'));
-  } finally {
-    isAdding.value = false;
-  }
-};
-
-const removeFromCart = async (item) => {
-  const confirmed = await confirmDialog(`${item.courseName} 강의를 장바구니에서 삭제하시겠습니까?`);
-  if (!confirmed) return;
-
-  removingCartItemId.value = item.cartItemId;
-  try {
-    await removeCartItem(item.cartItemId);
-    await loadCart();
-    await notify('장바구니에서 삭제했습니다.');
-  } catch (error) {
-    await notify(errorMessage(error, '장바구니 삭제에 실패했습니다.'));
-  } finally {
-    removingCartItemId.value = null;
-  }
-};
-
-const enrollFromCart = async (item) => {
-  const confirmed = await confirmDialog(`${item.courseName} 강의를 수강신청하시겠습니까?`);
-  if (!confirmed) return;
-
-  enrollingLectureId.value = item.lectureId;
-  try {
-    await createEnrollment(item.lectureId, createIdempotencyKey());
-    let cartRemovalFailed = false;
-    try {
-      await removeCartItem(item.cartItemId);
-    } catch {
-      cartRemovalFailed = true;
-    }
-    await Promise.all([loadCart({ showError: false }), loadEnrollments({ showError: false })]);
-    await notify(cartRemovalFailed
-      ? '수강신청은 완료됐지만 장바구니 항목은 삭제하지 못했습니다. 새로고침 후 다시 확인해 주세요.'
-      : '수강신청이 완료되었습니다.');
+    await loadEnrollments({ showError: false });
+    await notify('수강신청이 완료되었습니다.');
   } catch (error) {
     await notify(errorMessage(error, '수강신청에 실패했습니다.'));
   } finally {
@@ -283,64 +203,44 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    title="수강 신청"
-    subtitle="선택한 학기의 장바구니와 수강신청 내역을 관리합니다."
-  >
-    <section class="semester-section">
-      <div class="semester-filter">
-        <div class="filter-field">
-          <label for="registration-semester">대상 학기</label>
-          <MySelect
-            id="registration-semester"
-            v-model="selectedSemesterKey"
-            :options="semesterOptions"
-            placeholder="학기 선택"
-          />
-        </div>
-        <MyButton
-          btn-type="button"
-          color="deep-blue"
-          size="middle"
-          content="조회"
-          :disabled="isLoadingCart || isLoadingEnrollments"
-          @click="loadRegistrationData"
+  <MyPageContainer title="수강 신청">
+    <MySearchFilter submit-text="조회" @search="loadRegistrationData">
+      <div class="search-group semester-filter">
+        <label for="registration-semester">대상 학기</label>
+        <MySelect
+          id="registration-semester"
+          v-model="selectedSemesterKey"
+          :options="semesterOptions"
+          placeholder="학기 선택"
         />
       </div>
-      <div
-        class="period-card"
-        :class="`period-${registrationPeriod.state}`"
-      >
-        <div>
-          <span class="period-title">수강신청 기간</span>
-          <strong>{{ registrationPeriod.description }}</strong>
-        </div>
-        <span class="period-badge">{{ registrationPeriod.label }}</span>
+    </MySearchFilter>
+
+    <section class="period-card" :class="`period-${registrationPeriod.state}`">
+      <div>
+        <span class="period-title">수강신청 기간</span>
+        <strong>{{ registrationPeriod.description }}</strong>
       </div>
+      <span class="period-status">{{ registrationPeriod.label }}</span>
     </section>
 
     <section class="add-section">
-      <div>
-        <h3>강의 장바구니 담기</h3>
-        <p class="add-guide">
-          학과사무실이나 강의계획서에서 안내받은 개설 강의 번호를 입력해 주세요.
-        </p>
-      </div>
+      <h3>수강 신청</h3>
       <div class="add-row">
         <MyInput
           v-model="newLectureId"
           numeric-only
-          placeholder="개설 강의 번호"
+          placeholder="개설 강의 번호를 입력해 주세요."
           :disabled="!isEnrollmentOpen || isMutating"
-          @keyup-enter="addToCart"
+          @keyup-enter="enrollLecture"
         />
         <MyButton
           btn-type="button"
           color="deep-blue"
           size="middle"
-          :content="isAdding ? '담는 중' : '담기'"
+          :content="enrollingLectureId ? '신청 중' : '신청'"
           :disabled="!isEnrollmentOpen || isMutating"
-          @click="addToCart"
+          @click="enrollLecture"
         />
       </div>
       <p
@@ -350,54 +250,6 @@ onMounted(async () => {
       >
         {{ formError }}
       </p>
-    </section>
-
-    <section class="cart-section">
-      <div class="section-title-row">
-        <h3>수강 장바구니</h3>
-        <span class="summary-text">예상 신청학점 <strong>{{ cartTotalCredits }}</strong>학점</span>
-      </div>
-      <MyTable
-        :columns="cartColumns"
-        :loading="isLoadingCart"
-        :empty="!isLoadingCart && cartItems.length === 0"
-        empty-message="선택한 학기의 장바구니가 비어 있습니다."
-      >
-        <tr
-          v-for="item in cartItems"
-          :key="item.cartItemId"
-        >
-          <td>
-            <div class="course-name">
-              {{ item.courseName }}
-            </div>
-            <div class="course-code">
-              {{ item.courseCode }} · {{ item.sectionNo }}분반 · {{ item.professorName }}
-            </div>
-          </td>
-          <td>{{ formatSchedule(item.schedules) }}</td>
-          <td>{{ item.classroom || '-' }}</td>
-          <td>{{ item.credits }}</td>
-          <td class="action-cell">
-            <MyButton
-              btn-type="button"
-              color="deep-blue"
-              size="small"
-              :content="enrollingLectureId === item.lectureId ? '신청 중' : '신청'"
-              :disabled="!isEnrollmentOpen || isMutating || item.lectureStatus !== 'OPEN'"
-              @click="enrollFromCart(item)"
-            />
-            <MyButton
-              btn-type="button"
-              color="white"
-              size="small"
-              :content="removingCartItemId === item.cartItemId ? '삭제 중' : '삭제'"
-              :disabled="!isEnrollmentOpen || isMutating"
-              @click="removeFromCart(item)"
-            />
-          </td>
-        </tr>
-      </MyTable>
     </section>
 
     <section class="enrollment-section">
@@ -445,7 +297,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.semester-section,
 .add-section {
   padding: 18px 20px;
   margin-bottom: 24px;
@@ -454,24 +305,14 @@ onMounted(async () => {
   background: var(--personal-color-white);
 }
 
-.semester-filter,
 .add-row {
   display: flex;
   align-items: flex-end;
   gap: 12px;
 }
 
-.filter-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.semester-filter {
   width: 260px;
-}
-
-.filter-field label {
-  color: var(--personal-color-text-secondary-steel);
-  font-size: 0.85rem;
-  font-weight: 600;
 }
 
 .period-card {
@@ -479,11 +320,12 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 16px;
-  margin-top: 16px;
-  border-radius: 6px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
   color: var(--personal-color-primary-text-navy);
-  background: var(--personal-color-bg-subtle-snow);
+  background: var(--personal-color-white);
 }
 
 .period-card > div {
@@ -497,22 +339,22 @@ onMounted(async () => {
   font-size: 0.78rem;
 }
 
-.period-badge {
+.period-status {
   flex-shrink: 0;
   font-size: 0.78rem;
   font-weight: 700;
 }
 
-.period-open .period-badge {
+.period-open .period-status {
   color: var(--personal-color-status-success-text-forest);
 }
 
-.period-upcoming .period-badge {
+.period-upcoming .period-status {
   color: var(--personal-color-status-processing-text-navy);
 }
 
-.period-closed .period-badge,
-.period-unavailable .period-badge {
+.period-closed .period-status,
+.period-unavailable .period-status {
   color: var(--personal-color-status-warning-text-amber);
 }
 
@@ -521,12 +363,6 @@ onMounted(async () => {
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-}
-
-.add-guide {
-  margin: 6px 0 0;
-  color: var(--personal-color-text-muted-slate);
-  font-size: 0.82rem;
 }
 
 .add-row :deep(input) {
@@ -539,7 +375,6 @@ onMounted(async () => {
   font-size: 0.82rem;
 }
 
-.cart-section,
 .enrollment-section {
   margin-bottom: 28px;
 }
@@ -564,7 +399,7 @@ h3 {
 }
 
 .summary-text strong {
-  color: var(--personal-color-student-primary-cyan);
+  color: var(--personal-color-primary-navy);
   font-size: 1rem;
 }
 
@@ -578,30 +413,18 @@ h3 {
   font-size: 0.78rem;
 }
 
-.action-cell {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-:deep(.action-cell button.white) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
-
 .cancel-action {
   color: var(--personal-color-red);
 }
 
 @media (max-width: 760px) {
-  .semester-filter,
   .add-section,
   .add-row {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .filter-field,
+  .semester-filter,
   .add-row :deep(input) {
     width: 100%;
   }

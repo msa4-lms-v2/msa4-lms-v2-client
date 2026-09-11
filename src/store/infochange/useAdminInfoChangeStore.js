@@ -40,10 +40,10 @@ export const useAdminInfoChangeStore = defineStore('adminInfoChangeStore', () =>
     }
   };
 
-  const fetchRequestDetail = async (requesterType, requestId) => {
+  const fetchRequestDetail = async (requesterType, requestId, config = {}) => {
     isLoadingDetail.value = true;
     try {
-      const response = await getInfoChangeRequestDetail(requesterType, requestId);
+      const response = await getInfoChangeRequestDetail(requesterType, requestId, config);
       currentRequesterType.value = requesterType;
       currentRequest.value = response.data.data;
       return currentRequest.value;

@@ -94,8 +94,8 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="출결 관리" subtitle="전체 강의의 출결 기록을 조건별로 조회하고 수정합니다.">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+  <MyPageContainer title="출결 관리">
+    <MySearchFilter class="admin-search" submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="attendance-class">강의 ID</label>
         <MyInput id="attendance-class" v-model="filters.classId" numeric-only placeholder="전체" />
@@ -143,7 +143,7 @@ onMounted(() => load());
         </td>
         <td>{{ record.remarks || '-' }}</td>
         <td>
-          <MyButton btn-type="button" color="white" size="small" content="수정" @click="openEdit(record)" />
+          <MyButton class="admin-secondary" btn-type="button" color="white" size="small" content="수정" @click="openEdit(record)" />
         </td>
       </tr>
     </MyTable>
@@ -181,14 +181,23 @@ onMounted(() => load());
       </template>
 
       <template #footer>
-        <MyButton color="white" size="middle" content="취소" :disabled="isSaving" @click="closeEdit" />
-        <MyButton color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="saveEdit" />
+        <MyButton class="admin-secondary" color="white" size="middle" content="취소" :disabled="isSaving" @click="closeEdit" />
+        <MyButton color="admin-indigo" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isSaving" @click="saveEdit" />
       </template>
     </MyModal>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.admin-search :deep(.deep-blue) {
+  background-color: var(--personal-color-admin-secondary-indigo);
+}
+
+:deep(.admin-secondary) {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-admin-secondary-indigo);
+}
+
 .course-name {
   font-weight: 600;
 }

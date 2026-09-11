@@ -70,7 +70,7 @@ const load = async () => {
   if (!isEdit.value) return;
   isLoading.value = true;
   try {
-    const { data } = await getNotice(noticeId.value);
+    const { data } = await getNotice(noticeId.value, { pageLoad: true });
     const notice = data.data;
     Object.assign(form, {
       title: notice.title,
@@ -80,9 +80,6 @@ const load = async () => {
       targetRole: notice.targetRole,
     });
     existingFiles.value = notice.attachments || [];
-  } catch (error) {
-    await notify(error.response?.data?.message || '공지사항을 불러오지 못했습니다.');
-    router.replace({ name: 'AdminNoticeIndex' });
   } finally {
     isLoading.value = false;
   }

@@ -80,12 +80,6 @@ const completionTypeLabels = {
 const resultLabels = { APPLIED: '반영', EXCLUDED: '제외' };
 const termLabels = { FIRST: '1학기', SECOND: '2학기' };
 
-const subtitle = computed(() => (
-  authStore.userInfo?.role === 'ADMIN'
-    ? '전체 학생의 졸업요건 충족 여부와 학점 반영 근거를 확인합니다.'
-    : '담당 강의·지도 학생·소속 학과 범위의 졸업요건 충족 여부를 확인합니다.'
-));
-
 const requirementRows = computed(() => {
   const item = selectedDiagnosis.value;
   if (!item) return [];
@@ -186,7 +180,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role'" title="졸업요건 진단 현황" :subtitle="subtitle">
+  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role'" title="졸업요건 진단 현황">
     <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" @search="loadDiagnoses(1)">
       <div class="search-group">
         <label for="diagnosis-keyword">학생 이름</label>

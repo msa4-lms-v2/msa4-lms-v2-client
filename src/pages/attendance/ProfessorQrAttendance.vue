@@ -155,8 +155,8 @@ const startLiveUpdates = () => {
   summaryTimer = setInterval(refreshSummary, 3000);
 };
 
-const loadHistory = async () => {
-  const { data } = await getAttendanceSessions();
+const loadHistory = async (config = {}) => {
+  const { data } = await getAttendanceSessions(config);
   sessions.value = data.data?.items || [];
 };
 
@@ -234,14 +234,12 @@ watch(isQrExpanded, async () => {
 onMounted(async () => {
   try {
     const [lectureResponse] = await Promise.all([
-      getProfessorLectures(),
-      loadHistory(),
+      getProfessorLectures({ pageLoad: true }),
+      loadHistory({ pageLoad: true }),
     ]);
     lectures.value = lectureResponse.data.data?.items || [];
     if (lectures.value.length)
       selectedClassId.value = String(lectures.value[0].classId);
-  } catch (error) {
-    await notify(errorMessage(error, "QR 출석 정보를 불러오지 못했습니다."));
   } finally {
     isLoading.value = false;
   }
@@ -264,6 +262,7 @@ onBeforeUnmount(stopLiveUpdates);
             :disabled="isLoading || hasOpenSession"
           />
           <MyButton
+            class="professor-primary"
             color="deep-blue"
             size="big"
             :content="isOpening ? '생성 중...' : '세션 생성'"
@@ -324,6 +323,7 @@ onBeforeUnmount(stopLiveUpdates);
               <b>{{ secondsLeft }}초</b>
             </div>
             <MyButton
+              class="professor-primary"
               color="deep-blue"
               size="middle"
               content="QR 확대"
@@ -468,6 +468,9 @@ h2 {
 }
 .section-title-row :deep(.status-badge) {
   margin-bottom: 12px;
+}
+.professor-primary {
+  background: var(--personal-color-professor-primary-navy);
 }
 .session-panel {
   display: grid;

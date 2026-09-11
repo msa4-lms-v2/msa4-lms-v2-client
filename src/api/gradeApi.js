@@ -60,5 +60,5 @@ export const getProfessorLectureEvaluations = (params = {}) =>
   myAxios.get(EVALUATIONS_URL, { params });
 
 // 역할 범위별 졸업 학점 진단 현황 조회
-export const getCreditRequirementDiagnoses = (params = {}) =>
-  myAxios.get('/api/academic/credit-requirement-diagnoses', { params });
+export const getCreditRequirementDiagnoses = (params = {}, config = {}) =>
+  myAxios.get('/api/academic/credit-requirement-diagnoses', { params, ...config });

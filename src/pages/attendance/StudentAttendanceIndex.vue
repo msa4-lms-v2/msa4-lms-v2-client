@@ -167,18 +167,14 @@ const load = async () => {
 };
 
 onMounted(async () => {
-  try {
-    await semesterStore.fetchSemesters();
-  } catch (error) {
-    await notify(error.response?.data?.message || '학기 목록을 불러오지 못했습니다.');
-  }
+  await semesterStore.fetchSemesters();
   applyDefaultSemester();
   if (selectedSemester.value) await load();
 });
 </script>
 
 <template>
-  <MyPageContainer title="출결 현황">
+  <MyPageContainer title="출결 조회">
     <MySearchFilter submit-text="조회" submit-at-end @search="load">
       <div class="search-group compact">
         <label for="attendance-year">연도</label>
@@ -205,7 +201,6 @@ onMounted(async () => {
     <section v-if="!selectedEnrollmentId" class="panel">
       <div class="section-title-row">
         <h3>과목별 출석률</h3>
-        <span>과목을 선택하면 상세 출결을 확인할 수 있습니다.</span>
       </div>
       <MyTable
         :columns="rateColumns"
