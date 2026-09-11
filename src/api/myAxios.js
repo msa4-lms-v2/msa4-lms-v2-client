@@ -80,6 +80,17 @@ myAxios.interceptors.response.use(
       }
     }
 
+    // 화면의 "1차 데이터 로드"로 표시된 요청(pageLoad: true)은 재시도까지 실패하면
+    // 모달 없이 메인 화면으로 돌려보낸다. 버튼 클릭으로 발생하는 조회·액션 요청은
+    // 이 플래그를 붙이지 않으므로 기존처럼 각 화면의 catch에서 모달로 안내한다.
+    if (config?.pageLoad) {
+      const { default: router } = await import('../routes/router');
+      if (router.currentRoute.value.path !== '/main') {
+        router.push('/main').catch(() => {});
+      }
+      return new Promise(() => {}); // 호출부의 await가 이어지지 않도록 의도적으로 미해결 상태로 둔다.
+    }
+
     useErrorStore().setError(error);
 
     return Promise.reject(error);
