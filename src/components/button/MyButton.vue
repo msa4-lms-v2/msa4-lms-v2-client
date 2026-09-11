@@ -80,6 +80,11 @@ button:hover {
   color: var(--personal-color-white);
 }
 
+.admin-indigo {
+  background-color: var(--personal-color-admin-secondary-indigo);
+  color: var(--personal-color-white);
+}
+
 .black {
   background-color: var(--personal-color-black);
   color: var(--personal-color-white);
