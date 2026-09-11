@@ -22,7 +22,6 @@ export const MENU_TITLES = {
     '/enrollments': { default: '시간표 조회' },
     '/registration': { default: '수강 신청' },
     '/grade': { default: '성적 조회' },
-    '/evaluations': { default: '강의 평가' },
     '/attendance': { default: '출결 조회' },
     '/excuses': { default: '공결 신청' },
     '/professor/lectures/create': { default: '강의 개설' },
