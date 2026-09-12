@@ -31,15 +31,21 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
     }
   };
 
-  const submitApplication = async ({ tuitionBillId, type, requestedAmount, reason }) => {
+  const submitApplication = async ({ tuitionBillId, type, requestedAmount, reason, files = [] }) => {
     isSubmittingApplication.value = true;
     try {
-      const res = await myAxios.post('/api/payment/scholarship-applications', {
-        tuitionBillId,
-        type,
-        requestedAmount,
-        reason,
-      });
+      const payload = {
+        tuitionBillId, type, requestedAmount, reason,
+      };
+      let res;
+      if (files.length) {
+        const formData = new FormData();
+        formData.append('request', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+        files.forEach((file) => formData.append('files', file));
+        res = await myAxios.post('/api/payment/scholarship-applications', formData);
+      } else {
+        res = await myAxios.post('/api/payment/scholarship-applications', payload);
+      }
       return res.data.data;
     } finally {
       isSubmittingApplication.value = false;
