@@ -24,7 +24,7 @@ export function validateDashboard(data, service) {
         academicTypes.every(({ type }) => data.academicStats.filter((item) =>
           item.type === type && countsValid(item, ['completed', 'pending'])).length === 1));
   }
-  return countsValid(data.summary, ['installmentPending', 'certificatePending']) &&
+  return countsValid(data.summary, ['installmentPending', 'scholarshipPending']) &&
     (data.currentSemester === null ? data.tuitionStats === null :
       countsValid(data.tuitionStats, ['paid', 'inProgress', 'unpaid']));
 }
@@ -49,7 +49,8 @@ export function mergePendingTasks(academic = [], payment = []) {
 }
 
 export function pendingTaskRoute(task) {
-  if (task.type === 'INSTALLMENT' && Number.isSafeInteger(task.tuitionBillId) && task.tuitionBillId > 0) {
+  if (['INSTALLMENT', 'SCHOLARSHIP'].includes(task.type) &&
+      Number.isSafeInteger(task.tuitionBillId) && task.tuitionBillId > 0) {
     return `/admin/tuition/${task.tuitionBillId}`;
   }
   return {
