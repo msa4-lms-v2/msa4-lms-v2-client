@@ -180,7 +180,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role'" title="졸업요건 진단 현황">
+  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role professor-page'" title="졸업요건 진단 현황">
     <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" @search="loadDiagnoses(1)">
       <div class="search-group">
         <label for="diagnosis-keyword">학생 이름</label>

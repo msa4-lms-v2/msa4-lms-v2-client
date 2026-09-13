@@ -236,7 +236,7 @@ onMounted(loadRequests);
 </script>
 
 <template>
-  <MyPageContainer :title="pageTitle">
+  <MyPageContainer :class="{ 'professor-page': !isAdmin }" :title="pageTitle">
     <section class="filter-card">
       <label>
         신청자
