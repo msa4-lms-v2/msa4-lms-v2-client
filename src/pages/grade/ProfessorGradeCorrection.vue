@@ -37,6 +37,7 @@ const isLoadingLectures = ref(true);
 const isLoadingGrades = ref(false);
 const isLoadingHistories = ref(false);
 const isSaving = ref(false);
+const isBusy = computed(() => isLoadingLectures.value || isLoadingGrades.value || isLoadingHistories.value || isSaving.value);
 
 const semesterKey = (lecture) => `${lecture.academicYear}-${lecture.term}`;
 const semesterLabel = (lecture) => `${lecture.academicYear}학년도 ${termLabels[lecture.term] || lecture.term}`;
@@ -219,7 +220,7 @@ const validateCorrection = () => {
 };
 
 const saveCorrections = async () => {
-  if (isSaving.value || !selectedClassId.value) return;
+  if (isBusy.value || !selectedClassId.value) return;
   if (!changedRows.value.length) {
     await notify('저장할 변경 내용이 없습니다.');
     return;
@@ -229,9 +230,7 @@ const saveCorrections = async () => {
     await notify(validationMessage);
     return;
   }
-  const confirmed = await confirmDialog(`${changedRows.value.length}명의 공개 성적을 정정하시겠습니까? 변경 내용과 사유가 이력에 남습니다.`);
-  if (!confirmed) return;
-
+  const classId = Number(selectedClassId.value);
   const reason = correctionReason.value.trim();
   const corrections = changedRows.value.map((row) => ({
     enrollmentId: row.enrollmentId,
@@ -244,7 +243,9 @@ const saveCorrections = async () => {
 
   isSaving.value = true;
   try {
-    await correctOpenedGrades(Number(selectedClassId.value), corrections, createIdempotencyKey());
+    const confirmed = await confirmDialog(`${corrections.length}명의 공개 성적을 정정하시겠습니까? 변경 내용과 사유가 이력에 남습니다.`);
+    if (!confirmed) return;
+    await correctOpenedGrades(classId, corrections, createIdempotencyKey());
     await notify('성적 정정이 완료되었습니다.');
     correctionReason.value = '';
     await Promise.all([loadGrades(), loadHistories(1)]);
@@ -271,13 +272,13 @@ onMounted(async () => {
     <MySearchFilter :show-submit="false">
       <div class="search-group">
         <label for="correction-semester">학기 선택</label>
-        <MySelect id="correction-semester" v-model="selectedSemesterKey" :disabled="isLoadingLectures" @change="changeSemester">
+        <MySelect id="correction-semester" v-model="selectedSemesterKey" :disabled="isBusy" @change="changeSemester">
           <option v-for="semester in semesterOptions" :key="semester.value" :value="semester.value">{{ semester.label }}</option>
         </MySelect>
       </div>
       <div class="search-group lecture-group">
         <label for="correction-lecture">강의 선택</label>
-        <MySelect id="correction-lecture" v-model="selectedClassId" :disabled="isLoadingLectures" @change="loadSelectedClass">
+        <MySelect id="correction-lecture" v-model="selectedClassId" :disabled="isBusy" @change="loadSelectedClass">
           <option v-for="lecture in semesterLectures" :key="lecture.classId" :value="String(lecture.classId)">
             [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.sectionNo }}분반)
           </option>
@@ -290,14 +291,14 @@ onMounted(async () => {
     </MySearchFilter>
 
     <h3 class="section-title">성적 정정</h3>
-    <MyTable :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="정정 가능한 공개 성적이 없습니다.">
+    <MyTable class="grade-table" :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="정정 가능한 공개 성적이 없습니다.">
       <tr v-for="row in rows" :key="row.enrollmentId" :class="{ 'changed-row': isRowChanged(row) }">
         <td>{{ row.studentName }}</td>
         <td>{{ row.studentNumber || '-' }}</td>
-        <td><MyInput v-model="row.midtermScore" type="number" min="0" max="100" step="0.01" class="score-input" /></td>
-        <td><MyInput v-model="row.finalScore" type="number" min="0" max="100" step="0.01" class="score-input" /></td>
-        <td><MyInput v-model="row.assignmentScore" type="number" min="0" max="100" step="0.01" class="score-input" /></td>
-        <td><MyInput v-model="row.attendanceScore" type="number" min="0" max="100" step="0.01" class="score-input" /></td>
+        <td><MyInput v-model="row.midtermScore" :aria-label="row.studentName + ' 중간고사'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
+        <td><MyInput v-model="row.finalScore" :aria-label="row.studentName + ' 기말고사'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
+        <td><MyInput v-model="row.assignmentScore" :aria-label="row.studentName + ' 과제'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
+        <td><MyInput v-model="row.attendanceScore" :aria-label="row.studentName + ' 출석'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
         <td>{{ calculateTotal(row) === null ? '-' : calculateTotal(row).toFixed(2) }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
         <td><span class="status-text status-text--success">공개됨</span></td>
@@ -307,17 +308,17 @@ onMounted(async () => {
     <div class="correction-controls">
       <div class="reason-field">
         <label for="correction-reason">정정 사유 <span>{{ correctionReason.length }}/500</span></label>
-        <textarea id="correction-reason" v-model="correctionReason" maxlength="500" rows="2" placeholder="변경 사유를 입력해 주세요. 변경된 모든 학생의 정정 이력에 기록됩니다."></textarea>
+        <textarea id="correction-reason" v-model="correctionReason" :disabled="isBusy" maxlength="500" rows="2" placeholder="변경 사유를 입력해 주세요. 변경된 모든 학생의 정정 이력에 기록됩니다."></textarea>
       </div>
       <div class="save-area">
         <span v-if="changedRows.length">{{ changedRows.length }}명 변경</span>
-        <MyButton class="professor-primary" color="deep-blue" size="big" :content="isSaving ? '저장 중...' : '변경 사항 저장'" :disabled="isSaving || isLoadingGrades || !changedRows.length" @click="saveCorrections" />
+        <MyButton class="professor-primary" color="deep-blue" size="big" :content="isSaving ? '저장 중...' : '변경 사항 저장'" :disabled="isBusy || !changedRows.length" @click="saveCorrections" />
       </div>
     </div>
 
     <section class="history-section">
       <h3 class="section-title">성적 정정 이력</h3>
-      <MyTable :columns="historyColumns" :loading="isLoadingHistories" :empty="!isLoadingHistories && histories.length === 0" empty-message="성적 정정 이력이 없습니다.">
+      <MyTable class="grade-table" :columns="historyColumns" :loading="isLoadingHistories" :empty="!isLoadingHistories && histories.length === 0" empty-message="성적 정정 이력이 없습니다.">
         <tr v-for="history in histories" :key="history.historyId">
           <td>{{ formatDateTime(history.createdAt) }}</td>
           <td>{{ history.studentName }}</td>
@@ -352,10 +353,15 @@ onMounted(async () => {
 .save-area { display: flex; align-items: center; gap: 10px; color: var(--personal-color-professor-primary-navy); font-size: 0.85rem; font-weight: 700; }
 .history-section { margin-top: 36px; }
 .history-reason { max-width: 260px; white-space: pre-wrap; text-align: left; }
-.professor-primary { background: var(--personal-color-professor-primary-navy); }
+.professor-primary { background: var(--personal-color-primary-navy); }
 @media (max-width: 900px) {
   .correction-controls { align-items: stretch; flex-direction: column; }
   .save-area { justify-content: flex-end; }
   .lecture-group :deep(select) { min-width: 220px; }
 }
+.grade-table { overflow-x: auto; }
+.grade-table :deep(table) { min-width: 900px; }
+.score-input { background: var(--personal-color-sidebar-active-bg-sky); border: 1px solid var(--personal-color-border-mist); border-radius: 4px; }
+.lecture-group { min-width: 0; }
+@media (max-width: 560px) { .lecture-group { width: 100%; } .lecture-group :deep(select) { width: 100%; min-width: 0; } }
 </style>

@@ -317,8 +317,7 @@ onMounted(() => load());
 </template>
 
 <style scoped>
-.filter-card,
-.result-card {
+.filter-card {
   border: 1px solid var(--personal-color-border-mist);
   border-radius: var(--personal-radius);
   background: var(--personal-color-white);
@@ -378,7 +377,7 @@ onMounted(() => load());
 }
 
 .result-card {
-  padding: 20px;
+  padding: 0;
 }
 
 .result-heading {

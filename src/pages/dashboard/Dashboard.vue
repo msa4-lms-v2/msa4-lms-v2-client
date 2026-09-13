@@ -70,7 +70,7 @@ onMounted(async () => {
         공지사항을 불러오지 못했습니다. <button type="button" @click="dashboardStore.loadNotices()">재시도</button>
       </MyCard>
       <template v-else>
-        <NoticeList :notices="dashboardStore.notices" />
+        <NoticeList :notices="dashboardStore.notices" :enable-detail="authStore.userInfo?.role === 'PROFESSOR'" />
       </template>
     </div>
     </div>
