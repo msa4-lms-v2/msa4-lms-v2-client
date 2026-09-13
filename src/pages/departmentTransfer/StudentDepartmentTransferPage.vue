@@ -782,8 +782,6 @@ onMounted(async () => {
 
 .modal-cancel-action {
   flex: 0 0 auto;
-  border: 1px solid var(--personal-color-border-mist);
-  background: var(--personal-color-bg-surface-frost);
 }
 
 .file-count {
