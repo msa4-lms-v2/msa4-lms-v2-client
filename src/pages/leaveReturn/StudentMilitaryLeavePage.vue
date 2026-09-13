@@ -410,7 +410,7 @@ onMounted(async () => {
 
 <style scoped>
 .military-leave-page {
-  max-width: 1120px;
+  width: 100%;
 }
 
 .request-card {

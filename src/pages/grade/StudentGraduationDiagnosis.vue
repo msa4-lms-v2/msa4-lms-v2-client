@@ -120,7 +120,7 @@ const loadDiagnosis = async () => {
   isLoading.value = true;
   try {
     const [diagnosisResponse] = await Promise.all([
-      getCreditRequirementDiagnoses({ page: 1, size: 1 }),
+      getCreditRequirementDiagnoses({ page: 1, size: 1 }, { pageLoad: true }),
       profileStore.fetchStudentProfile(),
     ]);
     diagnosis.value = diagnosisResponse.data.data.items?.[0] || null;
@@ -128,7 +128,7 @@ const loadDiagnosis = async () => {
   } catch (error) {
     diagnosis.value = null;
     creditRecords.value = [];
-    await notify(error.response?.data?.message || '졸업요건 진단을 불러오지 못했습니다.');
+    if (!error.config?.pageLoad) await notify(error.response?.data?.message || '졸업요건 진단을 불러오지 못했습니다.');
   } finally {
     isLoading.value = false;
   }
@@ -462,7 +462,7 @@ onMounted(loadDiagnosis);
 
 .course-filters {
   display: grid;
-  grid-template-columns: 150px 150px 150px minmax(220px, 1fr) 92px;
+  grid-template-columns: 150px 150px 150px minmax(220px, 1fr) 77px;
   align-items: end;
   gap: 18px;
   padding: 18px 22px;
@@ -480,11 +480,6 @@ onMounted(loadDiagnosis);
   color: var(--personal-color-text-secondary-steel);
   font-size: 0.72rem;
   font-weight: 700;
-}
-
-.course-filters :deep(button) {
-  width: 92px;
-  height: 38px;
 }
 
 .completed-course-section :deep(.table-container) {

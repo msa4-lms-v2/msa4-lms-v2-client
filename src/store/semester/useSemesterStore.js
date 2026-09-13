@@ -26,7 +26,7 @@ export const useSemesterStore = defineStore('semesterStore', () => {
     if (semesters.value.length > 0) return;
     isLoading.value = true;
     try {
-      const res = await myAxios.get('/api/academic/catalog/semesters', { params: { size: 100 } });
+      const res = await myAxios.get('/api/academic/catalog/semesters', { params: { size: 100 }, pageLoad: true });
       semesters.value = res.data.data.items;
     } finally {
       isLoading.value = false;

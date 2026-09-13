@@ -20,8 +20,8 @@ export const useCounselingStore = defineStore('counselingStore', () => {
     return professors.value;
   };
 
-  const fetchCounselings = async (params = {}) => {
-    const response = await getCounselings({ page: 1, size: 100, ...params });
+  const fetchCounselings = async (params = {}, config = {}) => {
+    const response = await getCounselings({ page: 1, size: 100, ...params }, config);
     const data = response.data.data;
     counselings.value = data.items || [];
     page.value = {
@@ -33,8 +33,8 @@ export const useCounselingStore = defineStore('counselingStore', () => {
     return counselings.value;
   };
 
-  const fetchCounseling = async (id) => {
-    const response = await getCounseling(id);
+  const fetchCounseling = async (id, config = {}) => {
+    const response = await getCounseling(id, config);
     selected.value = response.data.data;
     return selected.value;
   };

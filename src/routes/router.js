@@ -17,11 +17,21 @@ const routes = [
     { path: '/admin/professors/new', name: 'AdminProfessorCreate', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/professors/:id', name: 'AdminProfessorDetail', component: () => import('../pages/people/PeopleForm.vue'), props: { kind: 'professor' }, meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/graduation-requirements', name: 'AdminGraduationRequirementIndex', component: () => import('../pages/grade/AdminGraduationRequirementIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/grades/retake-reflection', name: 'AdminRetakeGradeReflection', component: () => import('../pages/grade/AdminRetakeGradeReflection.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/dismissals', name: 'AdminDismissalIndex', component: () => import('../pages/dismissal/AdminDismissalIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/academic-schedules', name: 'AcademicScheduleIndex', component: () => import('../pages/academicSchedule/AcademicScheduleIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
-    { path: '/admin/notices', name: 'AdminNoticeIndex', component: () => import('../pages/notice/AdminNoticeIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/academic-schedules/new', name: 'AcademicScheduleCreate', component: () => import('../pages/academicSchedule/AcademicScheduleForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/academic-schedules/:scheduleId', name: 'AcademicScheduleDetail', component: () => import('../pages/academicSchedule/AcademicScheduleForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/notices', name: 'AdminNoticeIndex', component: () => import('../pages/notice/AdminNoticeIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/notices/new', name: 'AdminNoticeCreate', component: () => import('../pages/notice/AdminNoticeForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/notices/:noticeId', name: 'AdminNoticeEdit', component: () => import('../pages/notice/AdminNoticeForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/lecture-opening-requests', name: 'AdminLectureOpeningApproval', component: () => import('../pages/lecture/AdminLectureOpeningApproval.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/application-management/leave-requests', name: 'AdminLeaveRequestIndex', component: () => import('../pages/leaveReturn/AdminLeaveRequestIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/application-management/leave-requests/:requestId(\\d+)', name: 'AdminLeaveRequestDetail', component: () => import('../pages/leaveReturn/AdminLeaveRequestDetail.vue'), props: true, meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/academic-status-histories', name: 'AdminAcademicStatusHistoryIndex', component: () => import('../pages/academicStatus/AdminAcademicStatusHistoryIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/attendance', name: 'AdminAttendanceManagement', component: () => import('../pages/attendance/AdminAttendanceManagement.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/counseling', name: 'AdminCounselingIndex', component: () => import('../pages/counseling/AdminCounselingIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
+    { path: '/admin/withdrawals', name: 'AdminWithdrawalManagement', component: () => import('../pages/withdrawal/AdminWithdrawalManagement.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'LoginIndex', component: () => import('../pages/auth/LoginIndex.vue') },
     {
@@ -174,8 +184,18 @@ const routes = [
     },
     {
         path: '/admin/info-change-requests',
+        redirect: '/admin/application-management/info-change-requests',
+    },
+    {
+        path: '/admin/application-management/info-change-requests',
         name: 'AdminInfoChangeRequestIndex',
-        component: () => import('../pages/profile/AdminInfoChangeRequestIndex.vue'),
+        component: () => import('../pages/applicationManagement/AdminInfoChangeRequestIndex.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+        path: '/admin/application-management/info-change-requests/:requesterType(STUDENT|PROFESSOR)/:requestId(\\d+)',
+        name: 'AdminInfoChangeRequestDetail',
+        component: () => import('../pages/applicationManagement/AdminInfoChangeRequestDetail.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
@@ -200,6 +220,18 @@ const routes = [
         path: '/certificates/verify',
         name: 'CertificateVerify',
         component: () => import('../pages/payment/CertificateVerify.vue'),
+    },
+    {
+        path: '/certificates/apply',
+        name: 'StudentCertificateApply',
+        component: () => import('../pages/payment/StudentCertificateApply.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'] },
+    },
+    {
+        path: '/professor/certificates/apply',
+        name: 'ProfessorCertificateApply',
+        component: () => import('../pages/payment/ProfessorCertificateApply.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
     },
     {
         path: '/admin/certificates/revoke',
@@ -282,6 +314,16 @@ const routes = [
         },
     },
     {
+        path: '/registration/cart',
+        name: 'StudentCartIndex',
+        component: () => import('../pages/enrollment/StudentCartIndex.vue'),
+        meta: {
+            requiresAuth: true,
+            roles: ['STUDENT'],
+            academicStatuses: ['ENROLLED'],
+        },
+    },
+    {
         path: '/grade',
         name: 'StudentGradeIndex',
         component: () => import('../pages/grade/StudentGradeIndex.vue'),
@@ -292,6 +334,12 @@ const routes = [
         name: 'StudentGraduationDiagnosis',
         component: () => import('../pages/grade/StudentGraduationDiagnosis.vue'),
         meta: { requiresAuth: true, roles: ['STUDENT'], academicStatuses: ['ENROLLED', 'ON_LEAVE', 'GRADUATED'] },
+    },
+    {
+        path: '/graduation-diagnoses',
+        name: 'GraduationDiagnosisManagement',
+        component: () => import('../pages/grade/GraduationDiagnosisManagement.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR', 'ADMIN'] },
     },
     {
         path: '/evaluations',
@@ -310,6 +358,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/attendance/status/:enrollmentId(\\d+)',
+        name: 'StudentAttendanceStatus',
+        component: () => import('../pages/attendance/StudentAttendanceStatus.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'], tabKey: 'student-attendance-status' },
+    },
+    {
         path: '/excuses',
         name: 'StudentExcuseIndex',
         component: () => import('../pages/attendance/StudentExcuseIndex.vue'),
@@ -323,6 +377,12 @@ const routes = [
         path: '/professor/leave-return',
         name: 'ProfessorLeaveReturnApproval',
         component: () => import('../pages/leaveReturn/ProfessorLeaveReturnApproval.vue'),
+        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+    },
+    {
+        path: '/professor/withdrawals',
+        name: 'ProfessorWithdrawalReview',
+        component: () => import('../pages/withdrawal/WithdrawalReviewIndex.vue'),
         meta: { requiresAuth: true, roles: ['PROFESSOR'] },
     },
     {

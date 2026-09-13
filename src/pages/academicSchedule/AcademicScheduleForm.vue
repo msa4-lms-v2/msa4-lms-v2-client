@@ -39,17 +39,14 @@ const payload = () => ({
   ...(isEdit.value ? { reason: form.reason.trim() } : {}),
 });
 
-const loadTemplates = async () => { templates.value = (await getAcademicScheduleTemplates()).data.data || []; };
+const loadTemplates = async () => { templates.value = (await getAcademicScheduleTemplates({ pageLoad: true })).data.data || []; };
 const loadSchedule = async () => {
   if (!isEdit.value) return;
   loading.value = true;
   try {
-    const schedule = (await getAcademicSchedule(scheduleId.value)).data.data;
+    const schedule = (await getAcademicSchedule(scheduleId.value, { pageLoad: true })).data.data;
     Object.assign(form, { category: schedule.category, title: schedule.title, content: schedule.content || '', targetRole: schedule.targetRole, startDate: toInputDate(schedule.startDate), endDate: toInputDate(schedule.endDate) });
     assignment.value = schedule;
-  } catch (error) {
-    await notify(error.response?.data?.message || '학사일정을 불러오지 못했습니다.');
-    router.replace({ name: 'AcademicScheduleIndex' });
   } finally { loading.value = false; }
 };
 
@@ -67,7 +64,7 @@ const save = async () => {
   finally { saving.value = false; }
 };
 
-onMounted(async () => { try { await loadTemplates(); await loadSchedule(); } catch (error) { await notify(error.response?.data?.message || '작성 정보를 준비하지 못했습니다.'); } });
+onMounted(async () => { await loadTemplates(); await loadSchedule(); });
 </script>
 
 <template>
@@ -75,6 +72,7 @@ onMounted(async () => { try { await loadTemplates(); await loadSchedule(); } cat
     <div v-if="loading" class="loading">학사일정을 불러오는 중입니다...</div>
     <form v-else class="schedule-form" @submit.prevent="save">
       <section class="form-card"><h3>학사일정 정보</h3>
+        <div v-if="isEdit" class="field full"><label>일정번호</label><span class="readonly-value">{{ scheduleId }}</span></div>
         <div class="field full"><label for="category">일정 분류 <em>*</em></label><MySelect id="category" v-model="form.category" :disabled="isEdit" @change="applyTemplate"><option value="">선택해 주세요</option><option v-for="template in templates" :key="template.category" :value="template.category">{{ template.label }}</option></MySelect><small v-if="isEdit">기간 제어 대상이 달라질 수 있어 일정 분류는 등록 후 변경할 수 없습니다.</small></div>
         <div class="field full"><label for="title">일정명 <em>*</em></label><MyInput id="title" v-model="form.title" placeholder="일정명을 입력해 주세요" /></div>
         <div class="field full"><label for="content">일정 내용</label><textarea id="content" v-model="form.content" maxlength="5000" placeholder="일정 내용을 입력해 주세요" /></div>
@@ -90,5 +88,5 @@ onMounted(async () => { try { await loadTemplates(); await loadSchedule(); } cat
 </template>
 
 <style scoped>
-.schedule-form { display:grid; grid-template-columns:minmax(0, 1.7fr) minmax(280px, .8fr); gap:16px; }.form-card,.summary-card { background:#fff; border:1px solid var(--personal-color-border-mist); border-radius:8px; padding:22px; }.form-card h3,.summary-card h3 { margin:0 0 20px; font-size:1rem; border-bottom:1px solid var(--personal-color-border-mist); padding-bottom:12px; }.field { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }.full { grid-column:1 / -1; }.form-card { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; align-content:start; }.form-card h3 { grid-column:1 / -1; }.field label { font-size:.86rem; font-weight:700; }.field em { color:#d33; font-style:normal; }.field small { color:var(--personal-color-text-secondary-steel); font-size:.76rem; } textarea { min-height:120px; resize:vertical; padding:10px 12px; border:1px solid var(--personal-color-border-mist); border-radius:4px; font:inherit; }.summary-card dl { display:grid; grid-template-columns:90px 1fr; gap:15px 10px; font-size:.88rem; }.summary-card dt { color:var(--personal-color-text-secondary-steel); }.summary-card dd { margin:0; font-weight:600; overflow-wrap:anywhere; }.actions { grid-column:1 / -1; display:flex; justify-content:flex-end; gap:10px; }.loading { padding:48px; text-align:center; } @media (max-width:850px) { .schedule-form { grid-template-columns:1fr; }.form-card { grid-template-columns:1fr; } }
+.schedule-form { display:grid; grid-template-columns:minmax(0, 1.7fr) minmax(280px, .8fr); gap:16px; }.form-card,.summary-card { background:#fff; border:1px solid var(--personal-color-border-mist); border-radius:8px; padding:22px; }.form-card h3,.summary-card h3 { margin:0 0 20px; font-size:1rem; border-bottom:1px solid var(--personal-color-border-mist); padding-bottom:12px; }.field { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }.full { grid-column:1 / -1; }.form-card { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; align-content:start; }.form-card h3 { grid-column:1 / -1; }.field label { font-size:.86rem; font-weight:700; }.field em { color:#d33; font-style:normal; }.field small { color:var(--personal-color-text-secondary-steel); font-size:.76rem; }.readonly-value { color:var(--personal-color-text-secondary-steel); font-size:.9rem; } textarea { min-height:120px; resize:vertical; padding:10px 12px; border:1px solid var(--personal-color-border-mist); border-radius:4px; font:inherit; }.summary-card dl { display:grid; grid-template-columns:90px 1fr; gap:15px 10px; font-size:.88rem; }.summary-card dt { color:var(--personal-color-text-secondary-steel); }.summary-card dd { margin:0; font-weight:600; overflow-wrap:anywhere; }.actions { grid-column:1 / -1; display:flex; justify-content:flex-end; gap:10px; }.loading { padding:48px; text-align:center; } @media (max-width:850px) { .schedule-form { grid-template-columns:1fr; }.form-card { grid-template-columns:1fr; } }
 </style>

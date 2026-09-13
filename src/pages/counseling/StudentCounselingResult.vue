@@ -14,14 +14,11 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const counseling = await store.fetchCounseling(route.params.counselingId);
+    const counseling = await store.fetchCounseling(route.params.counselingId, { pageLoad: true });
     if (counseling.status !== 'ANSWERED') {
       await notify('아직 교수 답변이 등록되지 않았습니다.');
       await router.replace({ name: 'StudentCounselingHistory' });
     }
-  } catch (error) {
-    await notify(error.response?.data?.message || '상담 결과를 불러오지 못했습니다.');
-    await router.replace({ name: 'StudentCounselingHistory' });
   } finally {
     loading.value = false;
   }

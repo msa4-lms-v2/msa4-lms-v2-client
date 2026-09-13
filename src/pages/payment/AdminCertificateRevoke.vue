@@ -1,12 +1,14 @@
 <script setup>
 import { ref } from 'vue';
-import { useDocumentStore } from '../../store/payment/useDocumentStore';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MyInput from '../../components/input/MyInput.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
+import { useDocumentStore } from '../../store/payment/useDocumentStore';
+
+defineOptions({ name: 'AdminCertificateRevoke' });
 
 const documentStore = useDocumentStore();
-
 const documentId = ref('');
 const reason = ref('');
 const lastRevokedId = ref(null);
@@ -21,15 +23,15 @@ const handleRevoke = async () => {
     return;
   }
 
-  const confirmed = await confirmDialog(`증명서 #${documentId.value}을(를) 폐기하시겠습니까? 이후 진위확인 조회는 폐기됨으로 응답됩니다.`);
+  const confirmed = await confirmDialog(`증명서 #${documentId.value}을(를) 폐기하시겠습니까?`);
   if (!confirmed) return;
 
   try {
     await documentStore.revokeDocument({ documentId: Number(documentId.value), reason: reason.value.trim() });
     lastRevokedId.value = documentId.value;
-    await notify('증명서를 폐기했습니다.');
     documentId.value = '';
     reason.value = '';
+    await notify('증명서를 폐기했습니다.');
   } catch (error) {
     await notify(error.response?.data?.message || '증명서 폐기 중 오류가 발생했습니다.');
   }
@@ -37,22 +39,41 @@ const handleRevoke = async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    title="증명서 폐기"
-    subtitle="학생·교수에게 발급된 증명서를 폐기합니다. 이후 진위확인 조회는 폐기됨으로 응답됩니다."
-  >
+  <MyPageContainer title="증명서 폐기">
     <section class="revoke-panel">
-      <div class="form-grid">
-        <label for="revoke-document-id">증명서 ID</label>
-        <input id="revoke-document-id" v-model="documentId" type="number" min="1" placeholder="발급 시 안내된 증명서 ID를 입력하세요" />
-
-        <label for="revoke-reason">폐기 사유</label>
-        <textarea id="revoke-reason" v-model="reason" rows="3" placeholder="예: 학생 요청에 의한 재발급, 오발급 정정 등"></textarea>
+      <div class="common-section-header">
+        <h3>폐기 대상 입력</h3>
       </div>
 
-      <MyButton color="red" size="big" :disabled="documentStore.isRevoking" @click="handleRevoke">
-        {{ documentStore.isRevoking ? '처리 중...' : '증명서 폐기' }}
-      </MyButton>
+      <div class="form-grid">
+        <label for="revoke-document-id">증명서 ID</label>
+        <MyInput
+          id="revoke-document-id"
+          v-model="documentId"
+          numeric-only
+          placeholder="증명서 ID를 입력해 주세요."
+        />
+
+        <label for="revoke-reason">폐기 사유</label>
+        <textarea
+          id="revoke-reason"
+          v-model="reason"
+          rows="4"
+          maxlength="500"
+          placeholder="폐기 사유를 입력해 주세요."
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <MyButton
+          btn-type="button"
+          color="red"
+          size="big"
+          :content="documentStore.isRevoking ? '처리 중...' : '증명서 폐기'"
+          :disabled="documentStore.isRevoking"
+          @click="handleRevoke"
+        />
+      </div>
 
       <p v-if="lastRevokedId" class="notice" role="status">
         증명서 #{{ lastRevokedId }}을(를) 폐기했습니다.
@@ -63,47 +84,69 @@ const handleRevoke = async () => {
 
 <style scoped>
 .revoke-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 480px;
-  padding: 24px;
+  padding: 22px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
   background: var(--personal-color-white);
-  border-radius: var(--personal-radius-card);
+}
+
+.common-section-header h3 {
+  margin: 0;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 1rem;
 }
 
 .form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: 150px minmax(240px, 560px);
+  align-items: start;
+  gap: 14px 20px;
+  padding: 20px 0;
 }
 
 .form-grid label {
+  padding-top: 9px;
+  color: var(--personal-color-text-secondary-steel);
   font-size: 0.85rem;
-  color: var(--personal-color-text-muted-slate);
-  margin-top: 8px;
+  font-weight: 600;
 }
 
-.form-grid label:first-child {
-  margin-top: 0;
-}
-
-.form-grid input,
 .form-grid textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
+  color: var(--personal-color-primary-text-navy);
+  font: inherit;
   font-size: 0.9rem;
-  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.form-grid textarea:focus {
+  border-color: var(--personal-color-admin-secondary-indigo);
+  outline: none;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .notice {
-  padding: 12px;
-  background: var(--personal-color-status-success-bg-mint);
+  margin: 16px 0 0;
   color: var(--personal-color-status-success-text-forest);
-  border-radius: var(--personal-radius);
-  margin: 0;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 680px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid label {
+    padding-top: 0;
+  }
 }
 </style>

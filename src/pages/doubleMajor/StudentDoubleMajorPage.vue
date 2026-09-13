@@ -189,9 +189,11 @@ const loadFormData = async () => {
     const [departmentResponse, periodResponse] = await Promise.all([
       myAxios.get('/api/academic/catalog/departments', {
         params: { page: 1, size: 100, active: true },
+        pageLoad: true,
       }),
       myAxios.get('/api/academic/catalog/double-major-periods', {
         params: { page: 1, size: 100, active: true },
+        pageLoad: true,
       }),
     ]);
 
@@ -199,10 +201,6 @@ const loadFormData = async () => {
     periods.value = periodResponse.data.data.items || [];
     selectedCollegeId.value = colleges.value[0]?.id || '';
     selectedDepartmentId.value = filteredDepartments.value[0]?.id || '';
-  } catch (error) {
-    departments.value = [];
-    periods.value = [];
-    await notify(error.response?.data?.message || '복수전공 신청 정보를 불러오지 못했습니다.');
   } finally {
     isLoadingForm.value = false;
   }
@@ -532,7 +530,7 @@ onMounted(async () => {
 
 <style scoped>
 .double-major-page {
-  max-width: 1120px;
+  width: 100%;
 }
 
 .page-actions,
@@ -624,11 +622,13 @@ onMounted(async () => {
 }
 
 .file-picker {
+  box-sizing: border-box;
+  height: 38px;
   min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 8px;
+  gap: 10px;
+  padding: 4px 5px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);
@@ -636,8 +636,11 @@ onMounted(async () => {
 
 .file-select-action {
   flex: 0 0 auto;
+  width: 64px;
+  height: 24px;
   border: 1px solid var(--personal-color-border-mist);
   background: var(--personal-color-bg-surface-frost);
+  font-size: 0.7rem;
 }
 
 .file-count {
@@ -748,6 +751,11 @@ onMounted(async () => {
   .form-grid,
   .file-chips {
     grid-template-columns: 1fr;
+  }
+
+  .file-picker {
+    height: auto;
+    min-height: 38px;
   }
 
   .file-picker,

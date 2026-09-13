@@ -16,6 +16,22 @@ const myAxios = axios.create({
   withCredentials: true,
 });
 
+// 다른 서비스(academic/payment 등) 응답이 일시적으로 늦거나 게이트웨이가 502/503/504를
+// 반환하는 경우, 화면마다 바로 "불러오지 못했습니다" 모달을 띄우는 대신 짧게 재시도한다.
+// 네트워크 자체가 끊긴 경우(응답 없음)와 502/503/504만 재시도 대상으로 하고,
+// 400/401/403/404 등 실제 업무 오류는 재시도 없이 바로 실패 처리한다.
+const RETRIABLE_STATUS = new Set([502, 503, 504]);
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 600;
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetriable = (error) => {
+  if (error.config?.skipRetry) return false;
+  if (!error.response) return true; // 타임아웃, 연결 끊김 등 응답 자체가 없는 경우
+  return RETRIABLE_STATUS.has(error.response.status);
+};
+
 let reissuePromise = null;
 
 const reissueTokenOnce = () => {
@@ -54,6 +70,26 @@ myAxios.interceptors.response.use(
       const newToken = await reissueTokenOnce();
       config.headers.Authorization = `Bearer ${newToken}`;
       return myAxios(config);
+    }
+
+    if (config && isRetriable(error)) {
+      config._retryCount = (config._retryCount || 0) + 1;
+      if (config._retryCount <= MAX_RETRIES) {
+        await wait(RETRY_DELAY_MS * config._retryCount);
+        return myAxios(config);
+      }
+    }
+
+    // 화면의 "1차 데이터 로드"로 표시된 요청(pageLoad: true)은 재시도까지 실패하면
+    // 모달 없이 메인 화면으로 돌려보낸다. 버튼 클릭으로 발생하는 조회·액션 요청은
+    // 이 플래그를 붙이지 않으므로 기존처럼 각 화면의 catch에서 모달로 안내한다.
+    // 정상적으로 reject하므로 호출부의 finally(로딩 상태 해제 등)는 그대로 실행된다 —
+    // keep-alive로 캐시된 화면에 나중에 다시 돌아왔을 때 로딩 상태가 멈춰있지 않도록.
+    if (config?.pageLoad) {
+      const { default: router } = await import('../routes/router');
+      if (router.currentRoute.value.path !== '/main') {
+        router.push('/main').catch(() => {});
+      }
     }
 
     useErrorStore().setError(error);

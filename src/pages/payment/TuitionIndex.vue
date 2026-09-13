@@ -89,13 +89,10 @@ onMounted(() => {
         :value="formatCurrency(tuitionStore.currentAllocation?.actualPaymentAmount ?? latestBill.billingAmount)"
         highlight
       />
-      <div class="stat-card">
-        <span class="stat-label">현재 납부 상태</span>
-        <MyStatusBadge
-          :label="TUITION_BILL_STATUS_LABEL[latestBill.status]"
-          :variant="TUITION_BILL_STATUS_VARIANT[latestBill.status]"
-        />
-      </div>
+      <SummaryStatCard
+        label="현재 납부 상태"
+        :value="TUITION_BILL_STATUS_LABEL[latestBill.status]"
+      />
     </section>
 
     <section class="bill-list-section">
@@ -129,21 +126,6 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 24px;
-}
-
-.stat-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px 20px;
-  background: var(--personal-color-white);
-  border-radius: var(--personal-radius);
-  border: 1px solid var(--personal-color-border-mist);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: var(--personal-color-text-muted-slate);
 }
 
 .bill-list-section h3 {

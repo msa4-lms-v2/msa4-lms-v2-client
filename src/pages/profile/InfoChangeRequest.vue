@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -56,13 +55,6 @@ const statusLabels = {
   APPROVED: '승인',
   REJECTED: '반려',
   CANCELLED: '취소',
-};
-
-const statusVariants = {
-  REQUESTED: 'processing',
-  APPROVED: 'success',
-  REJECTED: 'fail',
-  CANCELLED: 'warning',
 };
 
 const isProfessor = computed(() => props.profileType === 'PROFESSOR');
@@ -457,12 +449,8 @@ onUnmounted(revokePreview);
               <td>{{ formatChangedFields(item.changedFields) }}</td>
               <td class="reason-cell" :title="item.reason">{{ item.reason }}</td>
               <td>{{ formatFileCount(item) }}</td>
-              <td>
-                <MyStatusBadge
-                  class="status-text"
-                  :label="statusLabels[item.status] || item.status"
-                  :variant="statusVariants[item.status] || 'processing'"
-                />
+              <td :class="{ rejected: item.status === 'REJECTED' }">
+                {{ statusLabels[item.status] || item.status }}
               </td>
             </tr>
           </MyTable>
@@ -730,12 +718,8 @@ onUnmounted(revokePreview);
   white-space: nowrap;
 }
 
-.status-text.status-badge {
-  padding: 0;
-  border: 0;
-  color: var(--personal-color-primary-text-navy);
-  background: transparent;
-  font-weight: 600;
+.rejected {
+  color: var(--personal-color-danger-coral);
 }
 
 @media (max-width: 860px) {
@@ -799,9 +783,5 @@ onUnmounted(revokePreview);
   color: var(--personal-color-primary-text-navy);
   font-size: 0.75rem;
   font-weight: 400;
-}
-
-.info-change-history-table.table-container .my-table td:last-child {
-  font-weight: 600;
 }
 </style>

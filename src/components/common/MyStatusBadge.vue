@@ -14,31 +14,19 @@ const props = defineProps({
 </template>
 
 <style scoped>
-.status-badge {
-  display: inline-block;
-  padding: var(--personal-badge-padding);
-  border-radius: var(--personal-radius-badge);
-  font-size: var(--personal-badge-font-size);
-  font-weight: 500;
-}
-
 .status-badge--success {
-  background: var(--personal-color-status-success-bg-mint);
   color: var(--personal-color-status-success-text-forest);
 }
 
 .status-badge--processing {
-  background: var(--personal-color-status-processing-bg-sky);
   color: var(--personal-color-status-processing-text-navy);
 }
 
 .status-badge--warning {
-  background: var(--personal-color-status-warning-bg-butter);
   color: var(--personal-color-status-warning-text-amber);
 }
 
 .status-badge--fail {
-  background: var(--personal-color-status-fail-bg-blush);
   color: var(--personal-color-status-fail-text-maroon);
 }
 </style>

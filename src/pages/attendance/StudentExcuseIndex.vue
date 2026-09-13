@@ -1,13 +1,17 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
-import { getMyEnrollments } from '../../api/enrollmentApi';
-import { createExcuseRequest, searchExcuseRequests, uploadExcuseAttachment } from '../../api/attendanceApi';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import {
+  createExcuseRequest,
+  downloadExcuseAttachment,
+  searchAttendanceRecords,
+  searchExcuseRequests,
+  uploadExcuseAttachment,
+} from '../../api/attendanceApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
@@ -15,50 +19,85 @@ import { formatDate } from '../../util/format';
 defineOptions({ name: 'StudentExcuseIndex' });
 
 const PDF_MAX_SIZE = 10 * 1024 * 1024;
+const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const columns = [
-  { key: 'course', label: '교과목' },
-  { key: 'lectureDate', label: '결석일' },
-  { key: 'reason', label: '신청 사유' },
-  { key: 'status', label: '처리 상태' },
-  { key: 'attachment', label: '증빙' },
-  { key: 'createdAt', label: '신청일' },
+  { key: 'course', label: '과목' },
+  { key: 'lectureDate', label: '날짜' },
+  { key: 'status', label: '상태' },
+  { key: 'reason', label: '사유' },
+  { key: 'attachment', label: '첨부파일' },
 ];
 
 const statusLabels = { PENDING: '대기', APPROVED: '승인', REJECTED: '반려' };
 const statusVariants = { PENDING: 'processing', APPROVED: 'success', REJECTED: 'fail' };
 
 const form = reactive({
-  enrollmentId: '',
+  courseKey: '',
   lectureDate: '',
-  period: '',
   reason: '',
+  attachmentFile: null,
 });
 
-const enrollments = ref([]);
+const attendanceRecords = ref([]);
 const requests = ref([]);
 const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
-const isLoadingEnrollments = ref(false);
+const isLoadingCourses = ref(false);
 const isLoadingRequests = ref(false);
 const isSubmitting = ref(false);
 const uploadingRequestId = ref(null);
+const downloadingRequestId = ref(null);
+const attachmentInput = ref(null);
 const fileInputRefs = ref({});
 const formError = ref('');
 
-const activeEnrollments = computed(() => enrollments.value.filter((item) => item.enrollmentStatus === 'ACTIVE'));
-
-const loadEnrollments = async () => {
-  isLoadingEnrollments.value = true;
-  try {
-    const response = await getMyEnrollments();
-    enrollments.value = response.data.data || [];
-  } catch (error) {
-    enrollments.value = [];
-    await notify(error.response?.data?.message || '수강 내역을 불러오지 못했습니다.');
-  } finally {
-    isLoadingEnrollments.value = false;
-  }
+const toLocalDateString = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
+
+const today = new Date();
+const earliestExcuseDate = new Date(today);
+earliestExcuseDate.setDate(earliestExcuseDate.getDate() - 7);
+const minLectureDate = toLocalDateString(earliestExcuseDate);
+const maxLectureDate = toLocalDateString(today);
+
+const selectedDateLabel = computed(() => {
+  if (!form.lectureDate) return '날짜 선택';
+  const date = new Date(`${form.lectureDate}T00:00:00`);
+  return `${form.lectureDate.replaceAll('-', '.')} ${DAY_LABELS[date.getDay()]}`;
+});
+
+const existingRequestKeys = computed(() => new Set(requests.value.map(
+  (request) => `${request.lectureDate}:${request.enrollmentId}:${request.period}`,
+)));
+
+const courseOptions = computed(() => {
+  const options = new Map();
+
+  attendanceRecords.value.forEach((record) => {
+    const key = `${record.enrollmentId}:${record.period}`;
+    const requestKey = `${form.lectureDate}:${key}`;
+    if (existingRequestKeys.value.has(requestKey) || options.has(key)) return;
+    options.set(key, {
+      key,
+      enrollmentId: record.enrollmentId,
+      period: Number(record.period),
+      courseName: record.courseName,
+      courseCode: record.courseCode,
+      sectionNo: record.sectionNo,
+    });
+  });
+
+  return [...options.values()].sort((left, right) => (
+    left.courseName.localeCompare(right.courseName, 'ko')
+    || left.period - right.period
+  ));
+});
+
+const selectedCourse = computed(() => courseOptions.value.find((option) => option.key === form.courseKey));
 
 const loadRequests = async (pageNumber = 1) => {
   isLoadingRequests.value = true;
@@ -66,7 +105,12 @@ const loadRequests = async (pageNumber = 1) => {
     const response = await searchExcuseRequests({ page: pageNumber, size: 20 });
     const data = response.data.data;
     requests.value = data.items || [];
-    page.value = { page: data.page, size: data.size, totalCount: data.totalCount, hasNext: data.hasNext };
+    page.value = {
+      page: data.page,
+      size: data.size,
+      totalCount: data.totalCount,
+      hasNext: data.hasNext,
+    };
   } catch (error) {
     requests.value = [];
     await notify(error.response?.data?.message || '공결 신청 내역을 불러오지 못했습니다.');
@@ -75,26 +119,72 @@ const loadRequests = async (pageNumber = 1) => {
   }
 };
 
+const loadCourseOptions = async () => {
+  attendanceRecords.value = [];
+  if (!form.lectureDate) return;
+
+  isLoadingCourses.value = true;
+  try {
+    const response = await searchAttendanceRecords({
+      fromDate: form.lectureDate,
+      toDate: form.lectureDate,
+      page: 1,
+      size: 100,
+    });
+    attendanceRecords.value = response.data.data?.items || [];
+  } catch (error) {
+    await notify(error.response?.data?.message || '선택한 날짜의 수업을 불러오지 못했습니다.');
+  } finally {
+    isLoadingCourses.value = false;
+  }
+};
+
 const resetForm = () => {
-  form.enrollmentId = '';
+  form.courseKey = '';
   form.lectureDate = '';
-  form.period = '';
   form.reason = '';
+  form.attachmentFile = null;
+  formError.value = '';
+  if (attachmentInput.value) attachmentInput.value.value = '';
+};
+
+const selectAttachment = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) {
+    form.attachmentFile = null;
+    return;
+  }
+  if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
+    event.target.value = '';
+    form.attachmentFile = null;
+    await notify('증빙 파일은 PDF 형식만 첨부할 수 있습니다.');
+    return;
+  }
+  if (file.size > PDF_MAX_SIZE) {
+    event.target.value = '';
+    form.attachmentFile = null;
+    await notify('증빙 파일은 10MB 이하만 첨부할 수 있습니다.');
+    return;
+  }
+  form.attachmentFile = file;
+};
+
+const openNewAttachmentPicker = () => {
+  attachmentInput.value?.click();
 };
 
 const submitRequest = async () => {
   if (isSubmitting.value) return;
-  if (!form.enrollmentId) {
-    formError.value = '공결을 신청할 수업을 선택해 주세요.';
-    return;
-  }
   if (!form.lectureDate) {
     formError.value = '결석 수업일을 선택해 주세요.';
     return;
   }
-  const period = Number(form.period);
-  if (!Number.isInteger(period) || period < 1 || period > 20) {
-    formError.value = '교시는 1~20 사이의 숫자로 입력해 주세요.';
+  if (form.lectureDate < minLectureDate || form.lectureDate > maxLectureDate) {
+    formError.value = '공결은 오늘을 포함해 최근 7일 이내 수업만 신청할 수 있습니다.';
+    return;
+  }
+  if (!selectedCourse.value) {
+    formError.value = '공결을 신청할 과목을 선택해 주세요.';
     return;
   }
   if (!form.reason.trim()) {
@@ -108,16 +198,31 @@ const submitRequest = async () => {
   formError.value = '';
 
   isSubmitting.value = true;
+  let attachmentError = null;
   try {
-    await createExcuseRequest({
-      enrollmentId: Number(form.enrollmentId),
+    const response = await createExcuseRequest({
+      enrollmentId: Number(selectedCourse.value.enrollmentId),
       lectureDate: form.lectureDate,
-      period,
+      period: selectedCourse.value.period,
       reason: form.reason.trim(),
     });
+    const requestId = response.data.data?.id;
+
+    if (form.attachmentFile && requestId) {
+      try {
+        await uploadExcuseAttachment(requestId, form.attachmentFile);
+      } catch (error) {
+        attachmentError = error;
+      }
+    }
+
     resetForm();
-    await notify('공결 신청이 접수되었습니다. 필요 시 증빙 파일을 첨부해 주세요.');
     await loadRequests(1);
+    if (attachmentError) {
+      await notify(attachmentError.response?.data?.message || '공결 신청은 접수됐지만 증빙 파일은 등록하지 못했습니다. 신청 내역에서 다시 첨부해 주세요.');
+    } else {
+      await notify('공결 신청이 완료되었습니다.');
+    }
   } catch (error) {
     await notify(error.response?.data?.message || '공결 신청 중 오류가 발생했습니다.');
   } finally {
@@ -125,12 +230,30 @@ const submitRequest = async () => {
   }
 };
 
-const setFileInputRef = (requestId) => (el) => {
-  fileInputRefs.value[requestId] = el;
+const setFileInputRef = (requestId) => (element) => {
+  fileInputRefs.value[requestId] = element;
 };
 
 const openAttachmentPicker = (requestId) => {
   fileInputRefs.value[requestId]?.click();
+};
+
+const downloadAttachment = async (request) => {
+  if (!request.attachmentOriginalName || downloadingRequestId.value) return;
+  downloadingRequestId.value = request.id;
+  try {
+    const response = await downloadExcuseAttachment(request.id);
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = request.attachmentOriginalName;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  } catch (error) {
+    await notify(error.response?.data?.message || '증빙 파일을 다운로드하지 못했습니다.');
+  } finally {
+    downloadingRequestId.value = null;
+  }
 };
 
 const onAttachmentChange = async (requestId, event) => {
@@ -158,56 +281,115 @@ const onAttachmentChange = async (requestId, event) => {
   }
 };
 
-onMounted(async () => {
-  await Promise.all([loadEnrollments(), loadRequests()]);
-});
+watch(
+  () => form.lectureDate,
+  async () => {
+    form.courseKey = '';
+    formError.value = '';
+    await loadCourseOptions();
+  },
+);
+
+onMounted(() => loadRequests());
 </script>
 
 <template>
-  <MyPageContainer title="공결 신청" subtitle="결석 수업일로부터 7일 이내에 공결을 신청합니다.">
-    <form class="request-card" @submit.prevent="submitRequest">
-      <div class="form-grid">
-        <label class="form-field" for="excuse-enrollment">
-          <span>대상 수업</span>
-          <MySelect id="excuse-enrollment" v-model="form.enrollmentId" :disabled="isLoadingEnrollments">
-            <option value="" disabled>수업을 선택해 주세요</option>
-            <option v-for="item in activeEnrollments" :key="item.enrollmentId" :value="item.enrollmentId">
-              {{ item.courseName }} ({{ item.sectionNo }}분반)
+  <MyPageContainer title="공결 신청">
+    <section class="form-panel">
+      <form class="request-form" @submit.prevent="submitRequest">
+        <div class="form-field date-field">
+          <label for="excuse-date">날짜</label>
+          <div class="date-chip-wrap">
+            <span :class="{ 'placeholder-text': !form.lectureDate }">{{ selectedDateLabel }}</span>
+            <MyInput
+              id="excuse-date"
+              v-model="form.lectureDate"
+              type="date"
+              :min="minLectureDate"
+              :max="maxLectureDate"
+              aria-label="날짜 선택"
+            />
+          </div>
+        </div>
+
+        <div class="form-field subject-field">
+          <label for="excuse-course">과목</label>
+          <MySelect
+            id="excuse-course"
+            v-model="form.courseKey"
+            :disabled="!form.lectureDate || isLoadingCourses"
+          >
+            <option value="">
+              {{
+                !form.lectureDate
+                  ? '과목을 먼저 선택'
+                  : isLoadingCourses
+                    ? '수업 조회 중'
+                    : courseOptions.length === 0
+                      ? '신청 가능한 수업이 없습니다'
+                      : '선택'
+              }}
+            </option>
+            <option v-for="course in courseOptions" :key="course.key" :value="course.key">
+              {{ course.courseName }} ({{ course.sectionNo }}분반 · {{ course.period }}교시)
             </option>
           </MySelect>
-        </label>
+        </div>
 
-        <label class="form-field" for="excuse-date">
-          <span>결석 수업일</span>
-          <MyInput id="excuse-date" v-model="form.lectureDate" type="date" />
-        </label>
+        <div class="form-field reason-field">
+          <label for="excuse-reason">사유</label>
+          <MyInput
+            id="excuse-reason"
+            v-model="form.reason"
+            maxlength="400"
+            placeholder="사유 입력"
+          />
+        </div>
 
-        <label class="form-field" for="excuse-period">
-          <span>교시</span>
-          <MyInput id="excuse-period" v-model="form.period" numeric-only :max-number="20" placeholder="예: 2" />
-        </label>
-      </div>
+        <div class="form-field attachment-field">
+          <label for="excuse-attachment">첨부파일</label>
+          <input
+            id="excuse-attachment"
+            ref="attachmentInput"
+            class="visually-hidden"
+            type="file"
+            accept=".pdf,application/pdf"
+            @change="selectAttachment"
+          >
+          <div class="attachment-picker">
+            <MyButton
+              btn-type="button"
+              class="file-select-action"
+              color="white"
+              size="middle"
+              content="파일 선택"
+              @click="openNewAttachmentPicker"
+            />
+            <span :class="{ 'placeholder-text': !form.attachmentFile }">
+              {{ form.attachmentFile?.name || '선택된 파일 없음' }}
+            </span>
+          </div>
+        </div>
 
-      <label class="form-field" for="excuse-reason">
-        <span>신청 사유</span>
-        <textarea id="excuse-reason" v-model="form.reason" rows="3" maxlength="500" placeholder="공결 신청 사유를 입력해 주세요."></textarea>
-      </label>
+        <div class="button-field">
+          <span aria-hidden="true">&nbsp;</span>
+          <MyButton
+            type="submit"
+            color="deep-blue"
+            size="middle"
+            :content="isSubmitting ? '신청 중' : '신청'"
+            :disabled="isSubmitting"
+          />
+        </div>
 
-      <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
-
-      <div class="form-actions">
-        <MyButton
-          type="submit"
-          color="deep-blue"
-          size="middle"
-          :content="isSubmitting ? '신청 중...' : '공결 신청'"
-          :disabled="isSubmitting"
-        />
-      </div>
-    </form>
+        <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
+      </form>
+    </section>
 
     <section class="history-section">
-      <h3 class="section-title">나의 공결 신청 내역</h3>
+      <div class="section-title-row">
+        <h3>공결 신청 내역</h3>
+      </div>
       <MyTable
         :columns="columns"
         :loading="isLoadingRequests"
@@ -216,18 +398,33 @@ onMounted(async () => {
       >
         <tr v-for="item in requests" :key="item.id">
           <td>
-            <div class="course-name">{{ item.courseName }}</div>
-            <div class="course-code">{{ item.courseCode }} · {{ item.sectionNo }}분반</div>
+            {{ item.courseName }}
           </td>
-          <td>{{ formatDate(item.lectureDate) }} {{ item.period }}교시</td>
-          <td class="reason-cell" :title="item.reason">{{ item.reason }}</td>
+          <td>{{ formatDate(item.lectureDate) }}</td>
           <td>
-            <MyStatusBadge :label="statusLabels[item.status] || item.status" :variant="statusVariants[item.status] || 'processing'" />
-            <div v-if="item.status === 'REJECTED' && item.rejectReason" class="reject-reason">{{ item.rejectReason }}</div>
+            <span :class="`status-text--${statusVariants[item.status] || 'processing'}`">
+              {{ statusLabels[item.status] || item.status }}
+            </span>
+          </td>
+          <td class="reason-cell">
+            <span>{{ item.reason }}</span>
+            <span v-if="item.status === 'REJECTED' && item.rejectReason" class="reject-reason">
+              반려 사유: {{ item.rejectReason }}
+            </span>
           </td>
           <td>
-            <template v-if="item.status === 'PENDING'">
+            <div v-if="item.attachmentOriginalName || item.status === 'PENDING'" class="attachment-actions">
+              <button
+                v-if="item.attachmentOriginalName"
+                type="button"
+                class="attachment-button"
+                :disabled="downloadingRequestId === item.id"
+                @click="downloadAttachment(item)"
+              >
+                {{ downloadingRequestId === item.id ? '받는 중...' : item.attachmentOriginalName }}
+              </button>
               <input
+                v-if="item.status === 'PENDING'"
                 :ref="setFileInputRef(item.id)"
                 class="visually-hidden"
                 type="file"
@@ -235,18 +432,18 @@ onMounted(async () => {
                 @change="onAttachmentChange(item.id, $event)"
               >
               <MyButton
+                v-if="item.status === 'PENDING'"
                 btn-type="button"
+                class="student-secondary"
                 color="white"
                 size="small"
                 :content="uploadingRequestId === item.id ? '업로드 중' : (item.attachmentOriginalName ? '교체' : '첨부')"
                 :disabled="uploadingRequestId === item.id"
                 @click="openAttachmentPicker(item.id)"
               />
-            </template>
-            <span v-else-if="item.attachmentOriginalName">{{ item.attachmentOriginalName }}</span>
+            </div>
             <span v-else>-</span>
           </td>
-          <td>{{ formatDate(item.createdAt, 'YYYY-MM-DD HH:mm') }}</td>
         </tr>
       </MyTable>
 
@@ -261,63 +458,159 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.request-card {
-  padding: 20px;
-  margin-bottom: 28px;
+.form-panel {
+  margin-bottom: 24px;
+  overflow: hidden;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
   background: var(--personal-color-white);
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 14px;
+:deep(.page-container) {
+  max-width: 1100px;
+  padding: 18px 18px 40px;
 }
 
-.form-field {
+:deep(.page-heading h2) {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+}
+
+:deep(.my-table th) {
+  padding: 11px 10px;
+  font-size: 0.76rem;
+}
+
+:deep(.my-table td) {
+  padding: 12px 10px;
+  font-size: 0.78rem;
+}
+
+.request-form {
+  display: grid;
+  grid-template-columns: 160px minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(210px, 1.1fr) 77px;
+  align-items: end;
+  gap: 12px;
+  padding: 15px;
+}
+
+.form-field,
+.button-field {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 6px;
-  color: var(--personal-color-primary-text-navy);
+}
+
+.form-field label,
+.button-field > span {
+  color: var(--personal-color-text-secondary-steel);
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-.form-field textarea {
-  width: 100%;
+.form-field :deep(input),
+.form-field :deep(select) {
   box-sizing: border-box;
-  padding: 10px 12px;
+  width: 100%;
+  height: 38px;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.attachment-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 40px;
+  padding: 0 4px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
-  font-size: 0.88rem;
-  font-family: inherit;
-  font-weight: 400;
-  resize: vertical;
+  background: var(--personal-color-white);
+}
+
+.file-select-action {
+  flex: 0 0 auto;
+  border: 1px solid var(--personal-color-border-mist);
+  background: var(--personal-color-table-header-smoke);
+}
+
+.attachment-picker > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-picker > .placeholder-text,
+.date-chip-wrap > .placeholder-text {
+  color: var(--personal-color-text-faint-fog);
+}
+
+.date-chip-wrap {
+  display: grid;
+  grid-template-columns: 1fr 44px;
+  align-items: center;
+  height: 38px;
+  overflow: hidden;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 4px;
+  background: var(--personal-color-white);
+}
+
+.date-chip-wrap > span {
+  padding: 0 8px;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.date-chip-wrap :deep(input[type='date']) {
+  justify-self: center;
+  width: 24px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.date-chip-wrap :deep(input[type='date']::-webkit-datetime-edit) {
+  color: transparent;
+}
+
+.date-chip-wrap :deep(input[type='date']::-webkit-calendar-picker-indicator) {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
 }
 
 .form-error {
-  margin: 10px 0 0;
+  grid-column: 1 / -1;
+  margin: 0;
   color: var(--personal-color-red);
   font-size: 0.82rem;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
 }
 
 .history-section {
   margin-top: 8px;
 }
 
-.section-title {
-  margin: 0 0 12px;
+.section-title-row {
+  margin-bottom: 12px;
+}
+
+.section-title-row h3 {
+  margin: 0;
   color: var(--personal-color-primary-text-navy);
   font-size: 1rem;
-  font-weight: 700;
 }
 
 .course-name {
@@ -331,16 +624,63 @@ onMounted(async () => {
 }
 
 .reason-cell {
-  max-width: 240px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 180px;
+  max-width: 320px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.reason-cell > span {
+  display: block;
 }
 
 .reject-reason {
   margin-top: 4px;
-  color: var(--personal-color-red);
-  font-size: 0.74rem;
+  color: var(--personal-color-status-fail-text-maroon);
+  font-size: 0.76rem;
+}
+
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text--processing {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text--fail {
+  color: var(--personal-color-status-fail-text-maroon);
+}
+
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.attachment-button {
+  max-width: 180px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  color: var(--personal-color-link-blue);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-button:disabled {
+  color: var(--personal-color-text-faint-fog);
+  cursor: wait;
+}
+
+.student-secondary {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-primary-navy);
 }
 
 .visually-hidden {
@@ -355,9 +695,23 @@ onMounted(async () => {
   border: 0;
 }
 
+@media (max-width: 1150px) {
+  .request-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .button-field {
+    align-items: flex-end;
+  }
+}
+
 @media (max-width: 760px) {
-  .form-grid {
+  .request-form {
     grid-template-columns: 1fr;
+  }
+
+  .button-field {
+    align-items: stretch;
   }
 }
 </style>

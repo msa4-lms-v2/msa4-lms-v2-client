@@ -1,41 +1,240 @@
-.people-page { color: #25283e; font-size: 13px; }
-.people-page .people-card { background: #fff; border: 1px solid #d9e0ed; border-radius: 9px; padding: 22px; }
-.people-page h3 { margin: 0; font-size: 15px; font-weight: 700; }
-.people-page label { display: block; font-size: 12px; font-weight: 600; }
-.people-page input, .people-page select { display: block; width: 100%; min-width: 0; height: 40px; border: 1px solid #d7dfec; border-radius: 6px; padding: 0 12px; margin-top: 8px; background: #fff; color: #25283e; box-sizing: border-box; font: inherit; font-weight: 400; }
-.people-page input:focus, .people-page select:focus { outline: 2px solid #a69af6; outline-offset: 1px; }
-.people-page button, .people-page .people-button { border: 1px solid #d7dfec; border-radius: 6px; background: #fff; color: #25283e; min-height: 40px; padding: 10px 24px; cursor: pointer; font: inherit; font-weight: 600; text-decoration: none; text-align: center; box-sizing: border-box; }
-.people-page .primary { background: #5d43e5; border-color: #5d43e5; color: white; }
-.people-page button:disabled { opacity: .5; cursor: not-allowed; }
-.people-filters { display: flex; gap: 20px; align-items: end; margin: 22px 0; flex-wrap: wrap; }
-.people-filters label { flex: 1; min-width: 140px; }
-.people-filters label.wide { flex: 1.6; }
-.people-results { min-height: 430px; }
-.people-results-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
-.people-results-heading h3 span { font-size: 12px; color: #5d43e5; margin-left: 20px; }
-.people-table-scroll { overflow-x: auto; }
-.people-page table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-.people-page th { background: #f7f8fa; color: #75819b; font-size: 12px; padding: 16px; }
-.people-page td { text-align: center; padding: 16px; border-bottom: 1px solid #edf0f6; }
-.people-page .small { min-height: 32px; padding: 6px 18px; font-size: 12px; }
-.people-pagination { display: flex; gap: 6px; justify-content: center; margin-top: 36px; }
-.people-pagination button { border: 0; color: #5d43e5; padding: 8px 12px; }
-.people-pagination .selected { background: #eeeaff; }
-.people-registration { display: grid; grid-template-columns: 1.47fr 1fr; gap: 22px; margin-top: 14px; }
-.people-registration h3 { padding-bottom: 14px; border-bottom: 1px solid #d9e0ed; }
-.people-help { font-size: 12px; color: #7b87a0; margin: 8px 0 28px; }
-.people-basic fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 16px; }
-.people-basic input:disabled { color: #4c556a; background: #fafbfc; }
-.people-two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.people-page em, .people-page .people-error { color: #d33a39; font-style: normal; }
-.people-aside { display: flex; flex-direction: column; gap: 22px; }
-.people-aside dl { display: grid; gap: 22px; padding: 0 4px 18px; }
-.people-aside dl div { display: flex; justify-content: space-between; gap: 20px; }
-.people-aside dt { color: #73809b; flex-shrink: 0; }
-.people-aside dd { margin: 0; text-align: right; font-weight: 600; overflow-wrap: anywhere; }
-.people-guide { min-height: 160px; }
-.people-guide p { color: #7b87a0; font-size: 12px; line-height: 1.8; }
-.people-actions { display: flex; justify-content: flex-end; gap: 18px; margin-top: auto; }
-.people-actions button { min-width: 130px; }
-@media (max-width: 1050px) { .people-registration { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .people-two-fields { grid-template-columns: 1fr; } .people-page .people-card { padding: 16px; } .people-results-heading { align-items: flex-start; flex-direction: column; } }
+.people-card {
+  padding: 22px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
+  background: var(--personal-color-white);
+}
+
+.people-card h3 {
+  margin: 0;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.people-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  color: var(--personal-color-status-fail-text-maroon);
+  font-size: 0.85rem;
+}
+
+.people-registration {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
+  gap: 22px;
+}
+
+.people-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--personal-color-border-mist);
+}
+
+.people-basic fieldset {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.people-basic label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--personal-color-text-secondary-steel);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.people-basic input,
+.people-basic select,
+.people-basic textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 4px;
+  color: var(--personal-color-primary-text-navy);
+  background: var(--personal-color-white);
+  font: inherit;
+  font-weight: 400;
+}
+
+.people-basic input,
+.people-basic select {
+  height: 38px;
+}
+
+.people-basic textarea {
+  min-height: 86px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.people-basic input:focus,
+.people-basic select:focus,
+.people-basic textarea:focus {
+  border-color: var(--personal-color-admin-secondary-indigo);
+  outline: none;
+}
+
+.people-basic input:disabled,
+.people-basic select:disabled,
+.people-basic textarea:disabled {
+  color: var(--personal-color-text-muted-slate);
+  background: var(--personal-color-bg-subtle-snow);
+  cursor: not-allowed;
+}
+
+.people-two-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.people-basic em {
+  color: var(--personal-color-red);
+  font-style: normal;
+}
+
+.people-help {
+  margin: 10px 0 0;
+  color: var(--personal-color-text-muted-slate);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.people-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.people-aside dl {
+  display: grid;
+  gap: 0;
+  margin: 18px 0 0;
+}
+
+.people-aside dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--personal-color-table-border-frost);
+}
+
+.people-aside dt {
+  flex-shrink: 0;
+  color: var(--personal-color-text-muted-slate);
+  font-size: 0.82rem;
+}
+
+.people-aside dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--personal-color-primary-text-navy);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.people-guide p {
+  margin: 12px 0 0;
+  color: var(--personal-color-text-muted-slate);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.people-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.people-actions button {
+  flex-shrink: 0;
+}
+
+.page-actions {
+  margin-top: auto;
+}
+
+.registration-result {
+  max-width: 720px;
+}
+
+.registration-result p {
+  margin: 16px 0;
+  color: var(--personal-color-text-secondary-steel);
+  font-size: 0.9rem;
+}
+
+.cancel-confirmation {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--personal-color-border-mist);
+}
+
+.cancel-confirmation p {
+  margin: 0 0 14px;
+  color: var(--personal-color-status-fail-text-maroon);
+  font-size: 0.85rem;
+}
+
+.success-text,
+.status-text.registered,
+.status-text.provisioned,
+.status-text.active {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text.provisioning,
+.status-text.confirmed,
+.status-text.pending {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text.inactive {
+  color: var(--personal-color-status-warning-text-amber);
+}
+
+.status-text.cancelled,
+.status-text.locked {
+  color: var(--personal-color-status-fail-text-maroon);
+}
+
+.status-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.secondary-button {
+  border: 1px solid var(--personal-color-border-mist);
+  color: var(--personal-color-primary-text-navy);
+}
+
+@media (max-width: 1050px) {
+  .people-registration {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .people-card {
+    padding: 16px;
+  }
+
+  .people-two-fields {
+    grid-template-columns: 1fr;
+  }
+}

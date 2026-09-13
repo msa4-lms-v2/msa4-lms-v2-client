@@ -77,12 +77,13 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="학사일정 목록" subtitle="일정 분류와 기간을 관리하고, 실제 접수 기간을 함께 설정합니다.">
-    <MySearchFilter submit-text="조회" @search="load(1)">
+    <MySearchFilter :show-submit="false">
       <div class="search-group"><label for="schedule-keyword">통합 검색</label><MyInput id="schedule-keyword" v-model="filters.keyword" placeholder="일정명 검색" @keyup-enter="load(1)" /></div>
       <div class="search-group"><label for="schedule-target">대상</label><MySelect id="schedule-target" v-model="filters.targetRole"><option value="">전체</option><option value="ALL">전체 공지</option><option value="STUDENT">학생</option><option value="PROFESSOR">교수</option></MySelect></div>
       <div class="search-group"><label for="schedule-category">일정 분류</label><MySelect id="schedule-category" v-model="filters.category"><option value="">전체</option><option v-for="template in templates" :key="template.category" :value="template.category">{{ template.label }}</option></MySelect></div>
       <div class="search-group"><label for="schedule-year">연도</label><MyInput id="schedule-year" v-model="filters.academicYear" numeric-only placeholder="예: 2026" /></div>
       <div class="search-group"><label for="schedule-term">학기</label><MySelect id="schedule-term" v-model="filters.term"><option value="">전체</option><option value="FIRST">1학기</option><option value="SECOND">2학기</option></MySelect></div>
+      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
       <MyButton btn-type="button" color="white" size="middle" content="초기화" @click="resetFilters" />
     </MySearchFilter>
 

@@ -485,7 +485,7 @@ onMounted(async () => {
 
 <style scoped>
 .leave-return-page {
-  max-width: 1120px;
+  width: 100%;
 }
 
 .request-section {
