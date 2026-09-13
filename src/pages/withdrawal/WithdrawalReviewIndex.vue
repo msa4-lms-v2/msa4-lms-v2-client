@@ -236,10 +236,7 @@ onMounted(loadRequests);
 </script>
 
 <template>
-  <MyPageContainer
-    :title="pageTitle"
-    :subtitle="isAdmin ? pageSubtitle : undefined"
-  >
+  <MyPageContainer :title="pageTitle">
     <section class="filter-card">
       <label>
         신청자
@@ -478,7 +475,7 @@ onMounted(loadRequests);
 .filter-actions { display: flex; gap: 8px; }
 .reset-action { border: 1px solid var(--personal-color-border-mist); }
 .admin-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
-.professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
+.professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-primary-navy); }
 .professor-primary { background: var(--personal-color-primary-navy); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .professor-text { color: var(--personal-color-professor-primary-navy); }

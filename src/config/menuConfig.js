@@ -32,7 +32,7 @@ export const MENU_TITLES = {
     '/admin/tuition': { default: '등록금 관리' },
     '/admin/certificates/revoke': { default: '증명서 폐기' },
     '/payment/health': { default: '결제 상태' },
-    '/enrollments': { default: '시간표 조회' },
+    '/enrollments': { default: '내 수강 내역 및 시간표' },
     '/registration': { default: '수강 신청' },
     '/registration/cart': { default: '수강 장바구니' },
     '/certificates/apply': { default: '증명서 발급' },
