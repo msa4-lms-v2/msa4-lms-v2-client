@@ -145,7 +145,7 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="출결 승인">
+  <MyPageContainer class="professor-page" title="출결 승인">
     <section class="attendance-section">
       <div class="common-section-header">
         <h3>{{ activeTab === 'PENDING' ? '확인 대기 공결 신청' : '처리 완료 내역' }}</h3>

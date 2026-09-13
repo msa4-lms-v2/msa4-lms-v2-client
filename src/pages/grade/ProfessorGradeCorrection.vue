@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { correctOpenedGrades, getGradeCorrectionHistories, getManagedGrades } from '../../api/gradeApi';
 import { getMyLectures } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -268,7 +268,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="성적 정정">
+  <MyPageContainer class="professor-page" title="성적 정정">
     <MySearchFilter :show-submit="false">
       <div class="search-group">
         <label for="correction-semester">학기 선택</label>
