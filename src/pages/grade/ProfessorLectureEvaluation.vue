@@ -9,6 +9,7 @@ import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
+import MyCard from '../../components/common/MyCard.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
 
@@ -177,7 +178,7 @@ onMounted(async () => {
 <template>
   <MyPageContainer :title="isDetail ? '강의평가 결과(상세)' : '강의평가 결과'">
     <template v-if="!isDetail">
-      <MySearchFilter class="professor-search" submit-text="조회" @search="load(1)">
+      <MySearchFilter submit-text="조회" submit-at-end @search="load(1)">
         <div class="search-group semester-filter">
           <label for="evaluation-semester">학기 선택</label>
           <MySelect id="evaluation-semester" v-model="selectedSemesterKey" :disabled="isLoadingLectures">
@@ -198,7 +199,7 @@ onMounted(async () => {
           <td>{{ formatAverage(item.responseRate) }}%</td>
           <td>{{ overallAverageLabel(item.overallAverage) }}</td>
           <td>{{ item.capacity ?? item.activeEnrollmentCount }}명</td>
-          <td><MyButton class="professor-primary" color="deep-blue" size="middle" content="상세보기" @click="openDetail(item.lectureId)" /></td>
+          <td><MyButton color="deep-blue" size="middle" content="상세보기" @click="openDetail(item.lectureId)" /></td>
         </tr>
       </MyTable>
 
@@ -206,20 +207,16 @@ onMounted(async () => {
     </template>
 
     <template v-else>
-      <div class="detail-top-actions">
-        <MyButton class="secondary-button" color="white" size="middle" content="목록" @click="closeDetail" />
-      </div>
-
-      <section v-if="detail" class="lecture-info-card">
+      <MyCard v-if="detail" class="lecture-info-card">
         <h3>강의 정보</h3>
         <div class="lecture-info-grid">
           <div><span>학기</span><strong>{{ semesterLabel(detail) }}</strong></div>
           <div><span>강의명</span><strong>{{ detail.courseName }}</strong></div>
           <div><span>담당 교수</span><strong>{{ detail.professorName || '-' }}</strong></div>
         </div>
-      </section>
+      </MyCard>
 
-      <section v-if="detail" class="evaluation-result-card">
+      <MyCard v-if="detail" class="evaluation-result-card">
         <h3>문항별 평가 결과</h3>
         <div class="question-results">
           <div v-for="(question, index) in questions" :key="question.key" class="question-result">
@@ -230,14 +227,17 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-      </section>
-
-      <div v-if="detail" class="detail-actions">
-        <MyButton class="professor-primary" color="deep-blue" size="big" content="결과 다운로드" @click="downloadResults" />
-        <MyButton class="professor-primary" color="deep-blue" size="big" content="서술형 의견보기" @click="commentsOpen = true" />
-      </div>
+      </MyCard>
 
       <div v-if="!isLoading && !detail" class="empty-detail">해당 강의평가 결과를 찾을 수 없습니다.</div>
+
+      <div class="detail-actions">
+        <MyButton class="secondary-button" color="white" size="middle" content="목록" @click="closeDetail" />
+        <div v-if="detail" class="detail-primary-actions">
+          <MyButton color="deep-blue" size="big" content="결과 다운로드" @click="downloadResults" />
+          <MyButton color="deep-blue" size="big" content="서술형 의견보기" @click="commentsOpen = true" />
+        </div>
+      </div>
     </template>
 
     <MyModal :is-open="commentsOpen" title="서술형 의견" max-width="680px" @close="commentsOpen = false">
@@ -253,10 +253,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.semester-filter :deep(select) { min-width: 360px; }
-.detail-top-actions { display: flex; justify-content: flex-end; margin: -46px 0 18px; }
+.semester-filter { flex: 1; max-width: 360px; min-width: 0; }
+.semester-filter :deep(select) { width: 100%; min-width: 0; }
 .lecture-info-card,
-.evaluation-result-card { padding: 22px 24px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
+.evaluation-result-card { padding: 22px 24px; }
 .lecture-info-card h3,
 .evaluation-result-card h3 { margin: 0 0 20px; font-size: 1rem; }
 .lecture-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -271,10 +271,11 @@ onMounted(async () => {
 .score-track { flex: 1; height: 14px; overflow: hidden; border-radius: 999px; background: var(--personal-color-table-header-smoke); }
 .score-track span { display: block; height: 100%; border-radius: inherit; background: var(--personal-color-professor-primary-navy); }
 .score-row strong { width: 28px; color: var(--personal-color-professor-primary-navy); font-size: 0.92rem; }
-.detail-actions { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
-.professor-primary { background: var(--personal-color-professor-primary-navy); }
-.professor-search :deep(button.deep-blue) { background: var(--personal-color-professor-primary-navy); }
-:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
+.detail-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.detail-primary-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-left: auto; }
+
+
+:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-primary-navy); }
 .empty-detail { padding: 60px 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: white; color: var(--personal-color-text-muted-slate); text-align: center; }
 .comment-list { max-height: 440px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
 .comment-list li { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--personal-color-border-mist); }
@@ -282,8 +283,6 @@ onMounted(async () => {
 .comment-list p { margin: 3px 0 0; white-space: pre-wrap; line-height: 1.55; }
 .empty-comments { margin: 20px 0; color: var(--personal-color-text-muted-slate); text-align: center; }
 @media (max-width: 800px) {
-  .semester-filter :deep(select) { min-width: 220px; }
   .lecture-info-grid { grid-template-columns: 1fr; }
-  .detail-top-actions { margin-top: 0; }
 }
 </style>
