@@ -22,11 +22,11 @@ const STATUS_LABELS = {
 
 const columns = [
   { key: 'studentName', label: '학생 이름' },
-  { key: 'studentNumber', label: '수강 ID' },
+  { key: 'enrollmentId', label: '수강 ID' },
   { key: 'courseName', label: '강의명' },
   { key: 'currentStatus', label: '출결 상태' },
   { key: 'status', label: '출결 수정' },
-  { key: 'remarks', label: '비고' },
+  { key: 'remarks', label: '사유' },
 ];
 
 const toLocalDate = (date = new Date()) => {
@@ -73,6 +73,7 @@ const clearRecords = () => {
 };
 
 const load = async (pageNumber = 1) => {
+  if (isSaving.value || isLoading.value) return;
   if (!filters.classId || !filters.lectureDate) {
     clearRecords();
     return;
@@ -108,7 +109,7 @@ const load = async (pageNumber = 1) => {
 };
 
 const requestSave = async () => {
-  if (isSaving.value) return;
+  if (isSaving.value || isLoading.value) return;
   if (changedRecords.value.length === 0) {
     await notify('변경된 출결 내용이 없습니다.');
     return;
@@ -121,21 +122,24 @@ const requestSave = async () => {
   }
 
   isSaving.value = true;
+  const pendingRecords = [...changedRecords.value];
   let savedCount = 0;
   try {
-    for (const record of changedRecords.value) {
+    for (const record of pendingRecords) {
       const reason = record.remarks.trim();
       await updateAttendanceRecord(record.id, record.status, reason, reason);
+      record.initialStatus = record.status;
+      record.remarks = reason;
+      record.initialRemarks = reason;
       savedCount += 1;
     }
     await notify(`${savedCount}건의 출결 기록을 저장했습니다.`);
-    await load(page.value.page);
   } catch (error) {
     await notify(
-      error.response?.data?.message
-      || `${savedCount}건 저장 후 출결 기록 수정 중 오류가 발생했습니다.`,
+      `${savedCount}건 저장 완료, ${pendingRecords.length - savedCount}건 미저장. `
+      + (error.response?.data?.message || '출결 기록 수정 중 오류가 발생했습니다.')
+      + ' 미저장 입력은 유지됩니다. 다시 저장해 주세요.',
     );
-    await load(page.value.page);
   } finally {
     isSaving.value = false;
   }
@@ -146,10 +150,10 @@ onMounted(loadLectures);
 
 <template>
   <MyPageContainer title="출결 확인">
-    <MySearchFilter :show-submit="false">
-      <div class="search-group">
+    <MySearchFilter :show-submit="false" class="attendance-filter">
+      <div class="search-group class-field">
         <label for="attendance-class">강의 선택</label>
-        <MySelect id="attendance-class" v-model="filters.classId" @change="load(1)">
+        <MySelect id="attendance-class" v-model="filters.classId" :disabled="isLoading || isSaving" @change="load(1)">
           <option value="" disabled>강의를 선택하세요</option>
           <option v-for="lecture in lectures" :key="lecture.classId" :value="String(lecture.classId)">
             [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.classroom || `${lecture.sectionNo}분반` }})
@@ -157,9 +161,9 @@ onMounted(loadLectures);
         </MySelect>
       </div>
 
-      <div v-if="filters.classId" class="search-group">
+      <div class="search-group date-field">
         <label for="attendance-date">출결 일자</label>
-        <MyInput id="attendance-date" v-model="filters.lectureDate" type="date" @change="load(1)" />
+        <MyInput id="attendance-date" v-model="filters.lectureDate" type="date" :disabled="!filters.classId || isLoading || isSaving" @change="load(1)" />
       </div>
 
       <div v-if="selectedLecture" class="lecture-info">
@@ -179,9 +183,8 @@ onMounted(loadLectures);
         </div>
         <MyButton
           btn-type="button"
-          class="professor-primary"
           color="deep-blue"
-          size="middle"
+          size="big"
           :content="isSaving ? '저장 중...' : '출결 일괄 저장'"
           :disabled="isLoading || isSaving || changedRecords.length === 0"
           @click="requestSave"
@@ -196,7 +199,7 @@ onMounted(loadLectures);
       >
         <tr v-for="record in records" :key="record.id">
           <td>{{ record.studentName }}</td>
-          <td>{{ record.studentNumber || record.enrollmentId }}</td>
+          <td>{{ record.enrollmentId }}</td>
           <td>
             <div class="course-name">{{ record.courseName }}</div>
             <div class="course-detail">{{ record.courseCode }} · {{ record.period }}교시</div>
@@ -205,7 +208,7 @@ onMounted(loadLectures);
             {{ STATUS_LABELS[record.initialStatus] || record.initialStatus }}
           </td>
           <td>
-            <MySelect v-model="record.status" class="row-select" aria-label="출결 상태 수정">
+            <MySelect v-model="record.status" class="row-select" :aria-label="`${record.studentName} 출결 상태 수정`" :disabled="isSaving || isLoading">
               <option value="PRESENT">출석</option>
               <option value="LATE">지각</option>
               <option value="ABSENT">결석</option>
@@ -218,8 +221,8 @@ onMounted(loadLectures);
               class="remarks-input"
               maxlength="255"
               placeholder="비고 입력"
-              aria-label="출결 변경 사유"
-              :disabled="isReasonDisabled(record)"
+              :aria-label="`${record.studentName} 출결 변경 사유`"
+              :disabled="isSaving || isLoading || isReasonDisabled(record)"
             />
           </td>
         </tr>
@@ -236,6 +239,9 @@ onMounted(loadLectures);
 </template>
 
 <style scoped>
+.class-field { flex: 1 1 300px; min-width: 0; }
+.date-field { flex: 0 1 190px; min-width: 0; }
+.attendance-filter :deep(.search-row) { gap: 24px; }
 .lecture-info {
   display: flex;
   align-items: center;
@@ -243,7 +249,7 @@ onMounted(loadLectures);
   margin-left: auto;
   padding: 8px 12px;
   border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
+  border-radius: 20px;
   background: var(--personal-color-bg-subtle-snow);
 }
 
@@ -259,12 +265,21 @@ onMounted(loadLectures);
 }
 
 .attendance-section {
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 .common-section-header {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
 }
+
+.common-section-header h3 { margin: 0; font-size: 1rem; }
+.common-section-header :deep(button) { flex-shrink: 0; }
+.attendance-section :deep(.table-container) { overflow-x: auto; }
+.attendance-section :deep(.my-table) { min-width: 720px; }
 
 .common-section-header p {
   margin: 4px 0 0;
@@ -274,7 +289,7 @@ onMounted(loadLectures);
 
 .course-name {
   color: var(--personal-color-primary-text-navy);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .course-detail {
@@ -288,14 +303,17 @@ onMounted(loadLectures);
   min-width: 106px;
 }
 
-:deep(.row-select select),
-:deep(.remarks-input input) {
+:deep(select.row-select),
+:deep(input.remarks-input) {
   height: 32px;
   padding: 0 8px;
   font-size: 0.82rem;
 }
 
-.attendance-status.present,
+.attendance-status.present {
+  color: var(--personal-color-primary-text-navy);
+}
+
 .attendance-status.excused {
   color: var(--personal-color-status-success-text-forest);
 }
@@ -306,10 +324,6 @@ onMounted(loadLectures);
 
 .attendance-status.late {
   color: var(--personal-color-status-warning-text-amber);
-}
-
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
 }
 
 @media (max-width: 760px) {
