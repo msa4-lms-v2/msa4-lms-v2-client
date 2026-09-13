@@ -5,9 +5,12 @@ import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import { useCounselingStore } from '../../store/counseling/useCounselingStore';
+import { getCounselings } from '../../api/counselingApi';
+import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 
-const store = useCounselingStore();
+const counselings = ref([]);
+const page = ref(1);
+const visibleCounselings = computed(() => counselings.value.slice((page.value - 1) * 10, page.value * 10));
 const router = useRouter();
 const loading = ref(false);
 const columns = [
@@ -19,16 +22,27 @@ const columns = [
   { key: 'detail', label: '상세보기' },
 ];
 
-const todayCount = computed(() => store.counselings.filter(
+const todayCount = computed(() => counselings.value.filter(
   (item) => dayjs(item.createdAt).isSame(dayjs(), 'day'),
 ).length);
-const waitingCount = computed(() => store.counselings.filter((item) => item.status === 'WAITING').length);
-const answeredCount = computed(() => store.counselings.filter((item) => item.status === 'ANSWERED').length);
+const waitingCount = computed(() => counselings.value.filter((item) => item.status === 'WAITING').length);
+const answeredCount = computed(() => counselings.value.filter((item) => item.status === 'ANSWERED').length);
 
 const load = async () => {
   loading.value = true;
   try {
-    await store.fetchCounselings({ page: 1, size: 100 }, { pageLoad: true });
+    const items = [];
+    let nextPage = 1;
+    let hasNext = true;
+    while (hasNext) {
+      const response = await getCounselings({ page: nextPage, size: 100 }, { pageLoad: true });
+      const result = response.data.data;
+      items.push(...(result.items || []));
+      hasNext = Boolean(result.hasNext) && Boolean(result.items?.length);
+      nextPage += 1;
+    }
+    counselings.value = items;
+    page.value = 1;
   } finally {
     loading.value = false;
   }
@@ -46,8 +60,8 @@ onMounted(load);
 
     <section class="records">
       <h3>상담 기록</h3>
-      <MyTable :columns="columns" :loading="loading" :empty="!store.counselings.length" empty-message="신청된 상담이 없습니다.">
-        <tr v-for="item in store.counselings" :key="item.id">
+      <MyTable :columns="columns" :loading="loading" :empty="!counselings.length" empty-message="신청된 상담이 없습니다.">
+        <tr v-for="item in visibleCounselings" :key="item.id">
           <td>{{ item.studentName }}</td>
           <td>{{ item.studentDepartmentName }}</td>
           <td>{{ dayjs(item.createdAt).format('MM-DD HH:mm') }}</td>
@@ -63,6 +77,7 @@ onMounted(load);
           </td>
         </tr>
       </MyTable>
+      <PrevNextPagination :page="page" :has-next="page * 10 < counselings.length" :inert="loading" @page-change="page = $event" />
     </section>
   </MyPageContainer>
 </template>

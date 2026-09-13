@@ -86,8 +86,8 @@ const employmentRows = computed(() => [
           </div>
         </div>
         <div class="profile-actions">
-          <MyButton color="deep-blue" size="big" content="정보 변경 신청" @click="router.push('/professor/profile/info-change')" />
           <div class="password-action"><PasswordChange /></div>
+          <MyButton color="white" size="big" content="정보 변경 신청" @click="router.push('/professor/profile/info-change')" />
         </div>
       </MyCard>
       <div class="info-grid">
@@ -137,7 +137,6 @@ const employmentRows = computed(() => [
 .info-row:last-child { border-bottom: 0; }
 .info-row dt { color: var(--personal-color-text-muted-slate); }
 .info-row dd { min-width: 0; margin: 0; color: var(--personal-color-primary-text-navy); overflow-wrap: anywhere; }
-.password-action :deep(> button) { background: var(--personal-color-white); color: var(--personal-color-primary-navy); border: 1px solid var(--personal-color-border-mist); }
 @media (max-width: 960px) {
   .profile-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
   .profile-actions { flex-wrap: wrap; align-self: flex-end; }
@@ -145,4 +144,9 @@ const employmentRows = computed(() => [
 @media (max-width: 720px) {
   .info-grid { grid-template-columns: 1fr; }
 }
+
+.info-row { padding: 12px 0; font-size: 13px; }
+.quick-list li { font-size: 13px; color: var(--personal-color-text-muted-slate); }
+.info-card h3 { font-size: 16px; }
+
 </style>

@@ -1,11 +1,13 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useProfessorRequestDetail } from '../../composables/useProfessorRequestDetail';
 import {
   downloadAcademicChangeFile,
   getAcademicChangeRequest,
   reviewAcademicChangeByAdvisor,
   searchAcademicChangeRequests,
 } from '../../api/academicChangeApi';
+import ProfessorApplicationDetail from '../../components/academic/ProfessorApplicationDetail.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -36,11 +38,9 @@ const columns = [
 ];
 
 const requests = ref([]);
-const selectedRequest = ref(null);
 const rejectReason = ref('');
 const formError = ref('');
 const isLoading = ref(false);
-const isLoadingDetail = ref(false);
 const isReviewing = ref(false);
 const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 const filters = ref({ keyword: '', status: 'PENDING' });
@@ -71,19 +71,28 @@ const resetFilters = () => {
   load(1);
 };
 
-const selectRequest = async (requestId) => {
-  isLoadingDetail.value = true;
-  rejectReason.value = '';
-  formError.value = '';
-  try {
-    const response = await getAcademicChangeRequest(TYPE, requestId);
-    selectedRequest.value = response.data.data;
-  } catch (error) {
-    await notify(error.response?.data?.message || '전과 신청 상세를 불러오지 못했습니다.');
-  } finally {
-    isLoadingDetail.value = false;
-  }
-};
+const { detailId, selectedRequest, isLoadingDetail, detailError, openDetail: selectRequest, closeDetail } = useProfessorRequestDetail({
+  fetchRequest: (id) => getAcademicChangeRequest(TYPE, id),
+  resetForm: () => { rejectReason.value = ''; formError.value = ''; },
+});
+
+const studentFields = computed(() => {
+  const item = selectedRequest.value || {};
+  return [
+    { label: '이름', value: item.studentName }, { label: '학번', value: item.studentNumber },
+    { label: '소속 단과대학', value: item.sourceCollegeName || item.collegeName },
+    { label: '소속 학과', value: item.sourceDepartmentName }, { label: '학년', value: item.gradeLevel ? item.gradeLevel + '학년' : undefined },
+    { label: '학적 상태', value: item.academicStatusName },
+  ];
+});
+const applicationFields = computed(() => {
+  const item = selectedRequest.value || {};
+  return [
+    { label: '신청 유형', value: '전과' }, { label: '신청번호', value: item.id }, { label: '신청일', value: formatDate(item.createdAt) },
+    { label: '적용 학기', value: formatAcademicChangeSemester(item, TYPE) }, { label: '희망 학과', value: item.targetDepartmentName },
+    { label: '처리 상태', value: formatAcademicChangeStatus(item.status) },
+  ];
+});
 
 const downloadFile = async (file) => {
   try {
@@ -100,6 +109,8 @@ const downloadFile = async (file) => {
 };
 
 const review = async (approved) => {
+  if (!selectedRequest.value || isReviewing.value) return;
+  const requestId = selectedRequest.value.id;
   const reason = rejectReason.value.trim();
   if (!approved && !reason) {
     formError.value = '반려 사유를 입력해 주세요.';
@@ -111,17 +122,17 @@ const review = async (approved) => {
       ? '전과 신청을 승인하시겠습니까? 승인 후 두 문서를 학장에게 전달해 주세요.'
       : '이 전과 신청을 반려하시겠습니까?',
   );
-  if (!confirmed) return;
+  if (!confirmed || isReviewing.value || selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') return;
 
   isReviewing.value = true;
   try {
     const response = await reviewAcademicChangeByAdvisor(
       TYPE,
-      selectedRequest.value.id,
+      requestId,
       { approved, rejectReason: approved ? null : reason },
       createAcademicChangeKey(`transfer-advisor-${approved ? 'approve' : 'reject'}`),
     );
-    selectedRequest.value = response.data.data;
+    if (String(detailId.value) === String(requestId)) selectedRequest.value = response.data.data;
     rejectReason.value = '';
     formError.value = '';
     await notify(`전과 신청을 ${action}했습니다.`);
@@ -137,11 +148,10 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer
-    class="professor-page"
-    title="전과 신청 검토"
+  <MyPageContainer class="professor-page"
+    :title="detailId ? '전과 지도교수 검토 · 상세' : '전과 지도교수 검토'"
   >
-    <section class="filter-card">
+    <section v-if="!detailId" class="filter-card">
       <label>신청자<input
         v-model="filters.keyword"
         type="search"
@@ -171,7 +181,7 @@ onMounted(() => load());
     </section>
 
     <div class="review-grid">
-      <section class="list-card">
+      <section v-if="!detailId" class="list-card">
         <div class="section-title">
           <h3>담당 학생 전과 신청</h3><span>총 {{ page.totalCount }}건</span>
         </div>
@@ -201,7 +211,7 @@ onMounted(() => load());
                   class="professor-primary"
                   color="deep-blue"
                   size="small"
-                  content="선택"
+                  content="상세"
                   :disabled="isLoadingDetail"
                   @click="selectRequest(item.id)"
                 />
@@ -217,96 +227,33 @@ onMounted(() => load());
         />
       </section>
 
-      <aside class="detail-column">
-        <section class="detail-card professor-border">
-          <h3>선택한 신청 정보</h3>
-          <p
-            v-if="!selectedRequest"
-            class="empty-detail"
-          >
-            목록에서 신청을 선택해 주세요.
-          </p>
-          <dl
-            v-else
-            class="detail-list"
-          >
-            <div><dt>신청자</dt><dd>{{ selectedRequest.studentName }} ({{ selectedRequest.studentNumber || '-' }})</dd></div>
-            <div><dt>현재 학과</dt><dd>{{ selectedRequest.sourceDepartmentName }}</dd></div>
-            <div><dt>희망 학과</dt><dd>{{ selectedRequest.targetDepartmentName }}</dd></div>
-            <div><dt>적용 학기</dt><dd>{{ formatAcademicChangeSemester(selectedRequest, TYPE) }}</dd></div>
-            <div><dt>신청일</dt><dd>{{ formatDate(selectedRequest.createdAt) }}</dd></div>
-            <div>
-              <dt>현재 상태</dt>
-              <dd :class="{ rejected: selectedRequest.status === 'ADVISOR_REJECTED' }">
-                {{ formatAcademicChangeStatus(selectedRequest.status) }}
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <section
-          v-if="selectedRequest"
-          class="detail-card professor-border"
-        >
-          <h3>제출 문서</h3>
-          <p class="guide">
-            파일명과 순서가 아닌 문서 내용을 직접 확인해 주세요.
-          </p>
-          <button
-            v-for="file in selectedRequest.files"
-            :key="file.id"
-            type="button"
-            class="file-row"
-            @click="downloadFile(file)"
-          >
-            <span>{{ file.originalName }}</span><small>{{ formatFileSize(file.size) }}</small><strong>다운로드</strong>
-          </button>
-        </section>
-
-        <section
-          v-if="selectedRequest?.status === 'PENDING'"
-          class="detail-card review-card professor-border"
-        >
-          <h3>교수 검토</h3>
-          <textarea
-            v-model="rejectReason"
-            maxlength="500"
-            rows="3"
-            placeholder="반려 시 사유를 입력하세요."
-          />
-          <p
-            v-if="formError"
-            class="form-error"
-          >
-            {{ formError }}
-          </p>
-          <div class="decision-actions">
-            <MyButton
-              color="red"
-              size="big"
-              content="반려"
-              :disabled="isReviewing"
-              @click="review(false)"
-            />
-            <MyButton
-              class="professor-primary"
-              color="deep-blue"
-              size="big"
-              content="승인"
-              :disabled="isReviewing"
-              @click="review(true)"
-            />
-          </div>
-        </section>
-      </aside>
+      <div v-if="detailId" :aria-busy="isLoadingDetail">
+        <p v-if="isLoadingDetail" role="status">신청 정보를 불러오는 중입니다.</p>
+        <template v-else-if="detailError">
+          <p class="form-error" role="alert">{{ detailError }}</p>
+          <MyButton color="white" size="middle" content="목록" @click="closeDetail" />
+        </template>
+        <ProfessorApplicationDetail v-else-if="selectedRequest" v-model:review-reason="rejectReason" :student-fields="studentFields" :application-fields="applicationFields" :reason="selectedRequest.reason" :reviewable="selectedRequest.status === 'PENDING'" :busy="isReviewing" :error="formError" @back="closeDetail" @approve="review(true)" @reject="review(false)">
+          <template #files>
+            <p v-if="!selectedRequest.files?.length">첨부된 증빙 서류가 없습니다.</p>
+            <button v-for="file in selectedRequest.files" :key="file.id" type="button" class="file-row" @click="downloadFile(file)">
+              <span>{{ file.originalName }}</span><small>{{ formatFileSize(file.size) }}</small><strong>다운로드</strong>
+            </button>
+          </template>
+          <template v-if="selectedRequest.advisorRejectReason" #history><p class="form-error">반려 사유: {{ selectedRequest.advisorRejectReason }}</p></template>
+        </ProfessorApplicationDetail>
+      </div>
     </div>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.detail-toolbar { display: flex; justify-content: flex-end; }
+.detail-column .detail-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; }
+@media (max-width: 760px) { .detail-column .detail-list { grid-template-columns: 1fr; } }
 .filter-card {
   display: grid;
-  grid-template-columns: 1.2fr 1fr auto;
+  grid-template-columns: minmax(140px, 220px) minmax(140px, 220px) 1fr;
   align-items: end;
   gap: 16px;
   padding: 20px;
@@ -338,14 +285,14 @@ onMounted(() => load());
 }
 
 .reset-action {
-  border: 1px solid var(--personal-color-black);
+  border: 1px solid var(--personal-color-border-mist);
 }
 
 .professor-primary { background: var(--personal-color-primary-navy); }
 
 .review-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(300px, 0.85fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   margin-top: 20px;
 }
@@ -498,4 +445,5 @@ onMounted(() => load());
     justify-content: flex-end;
   }
 }
+.list-card { padding: 0; border: 0; border-radius: 0; background: transparent; }
 </style>
