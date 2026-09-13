@@ -126,8 +126,8 @@ onMounted(() => {
     <div class="list-heading">
       <h3>나의 납부 내역</h3>
       <div class="document-actions">
-        <MyButton btn-type="button" color="white" size="middle" content="고지서 출력" @click="handlePrintNotice" />
-        <MyButton btn-type="button" color="white" size="middle" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
+        <MyButton btn-type="button" color="white" size="big" content="고지서 출력" @click="handlePrintNotice" />
+        <MyButton btn-type="button" color="white" size="big" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
       </div>
     </div>
     <MyTable

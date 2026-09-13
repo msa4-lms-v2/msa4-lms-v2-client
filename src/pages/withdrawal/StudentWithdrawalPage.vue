@@ -688,20 +688,24 @@ onMounted(async () => {
 .file-field,
 .reason-field { margin-top: 16px; }
 .file-picker {
-  min-height: 44px;
+  box-sizing: border-box;
+  height: 38px;
+  min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
+  gap: 10px;
+  padding: 4px 5px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);
 }
 .file-select-action {
   flex: 0 0 auto;
+  width: 64px;
+  height: 24px;
   border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
   background: var(--personal-color-bg-surface-frost);
+  font-size: 0.7rem;
 }
 .file-placeholder {
   color: var(--personal-color-text-faint-fog);
@@ -854,6 +858,11 @@ onMounted(async () => {
 }
 @media (max-width: 640px) {
   .application-card { padding: 22px 18px; }
+  .file-picker {
+    height: auto;
+    min-height: 38px;
+    flex-wrap: wrap;
+  }
   .form-actions > * { width: 100%; }
   .detail-grid { grid-template-columns: 1fr; }
   .detail-wide { grid-column: auto; }

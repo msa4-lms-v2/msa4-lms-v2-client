@@ -358,6 +358,12 @@ const routes = [
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
+        path: '/attendance/status/:enrollmentId(\\d+)',
+        name: 'StudentAttendanceStatus',
+        component: () => import('../pages/attendance/StudentAttendanceStatus.vue'),
+        meta: { requiresAuth: true, roles: ['STUDENT'], tabKey: 'student-attendance-status' },
+    },
+    {
         path: '/excuses',
         name: 'StudentExcuseIndex',
         component: () => import('../pages/attendance/StudentExcuseIndex.vue'),

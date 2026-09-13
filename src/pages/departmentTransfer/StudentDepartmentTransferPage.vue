@@ -502,7 +502,7 @@ onMounted(async () => {
 
             <div class="form-field file-field">
               <div class="file-label-row">
-                <span>증빙파일 (hwp, hwpx만 가능 / 정확히 2개)</span>
+                <span>증빙파일 (hwp, hwpx 가능)</span>
               </div>
               <div class="file-picker">
                 <input
@@ -782,11 +782,13 @@ onMounted(async () => {
 }
 
 .file-picker {
-  min-height: 44px;
+  box-sizing: border-box;
+  height: 38px;
+  min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
+  gap: 10px;
+  padding: 4px 5px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);
@@ -797,6 +799,12 @@ onMounted(async () => {
   flex: 0 0 auto;
   border: 1px solid var(--personal-color-border-mist);
   background: var(--personal-color-bg-surface-frost);
+}
+
+.file-select-action {
+  width: 64px;
+  height: 24px;
+  font-size: 0.7rem;
 }
 
 .file-count {
@@ -930,6 +938,8 @@ onMounted(async () => {
   }
 
   .file-picker {
+    height: auto;
+    min-height: 38px;
     align-items: flex-start;
     flex-direction: column;
   }

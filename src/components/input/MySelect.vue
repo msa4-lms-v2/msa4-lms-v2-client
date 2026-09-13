@@ -79,4 +79,5 @@ select:disabled {
   background-color: var(--personal-color-bg-subtle-snow);
   cursor: not-allowed;
 }
+
 </style>
