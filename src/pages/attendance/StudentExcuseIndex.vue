@@ -678,10 +678,6 @@ onMounted(() => loadRequests());
   cursor: wait;
 }
 
-.student-secondary {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
 
 .visually-hidden {
   position: absolute;

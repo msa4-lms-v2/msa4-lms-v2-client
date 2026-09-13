@@ -668,15 +668,7 @@ onUnmounted(revokePreview);
   gap: 12px;
 }
 
-.outlined-action {
-  border: 1px solid var(--personal-color-border-mist);
-}
-
 .profile-photo-action {
-  color: var(--personal-color-login-primary-navy);
-}
-
-.cancel-action {
   color: var(--personal-color-login-primary-navy);
 }
 

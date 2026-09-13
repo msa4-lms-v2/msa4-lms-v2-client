@@ -440,10 +440,6 @@ textarea {
   padding-top: 18px;
 }
 
-.cancel-button {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
 
 @media (max-width: 640px) {
   .available-scholarships {

@@ -248,11 +248,6 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-:deep(.secondary-button) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-text-navy);
-}
-
 @media (max-width: 640px) {
   .people-filter-actions {
     margin-left: 0;

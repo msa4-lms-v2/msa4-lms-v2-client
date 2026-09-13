@@ -426,7 +426,6 @@ onMounted(async () => {
 .filter-card label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; font-weight: 600; }
 .filter-card input { height: 38px; padding: 0 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: white; }
 .filter-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.reset-action { border: 1px solid var(--personal-color-black); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .management-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, .85fr); gap: 18px; margin-top: 20px; }
 .list-card, .detail-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; background: white; }
@@ -452,7 +451,6 @@ onMounted(async () => {
 .action-card textarea { width: 100%; padding: 9px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; resize: vertical; }
 .form-error { color: var(--personal-color-danger-coral); font-size: .78rem; }
 .decision-actions { display: flex; gap: 10px; margin-top: 12px; justify-content: flex-end; }
-.decision-actions :deep(button) { width: auto; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 1100px) { .filter-card { grid-template-columns: repeat(2, 1fr); } .management-grid { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .filter-card { grid-template-columns: 1fr; } .filter-actions { justify-content: flex-end; } }

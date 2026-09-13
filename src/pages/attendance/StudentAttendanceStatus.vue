@@ -221,7 +221,6 @@ onMounted(async () => {
 
 .back-button {
   flex: 0 0 auto;
-  color: var(--personal-color-primary-navy);
 }
 
 .summary-grid {

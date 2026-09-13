@@ -799,10 +799,6 @@ onMounted(async () => {
 .status-text--ADVISOR_REJECTED,
 .status-text--REJECTED { color: var(--personal-color-status-fail-text-maroon); }
 .status-text--CANCELLED { color: var(--personal-color-text-tertiary-slate); }
-.student-secondary {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
 .detail-loading { padding: 36px 0; text-align: center; }
 .detail-content { color: var(--personal-color-primary-text-navy); }
 .detail-grid {

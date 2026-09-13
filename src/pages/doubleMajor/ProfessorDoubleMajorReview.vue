@@ -302,10 +302,6 @@ onMounted(() => load());
   justify-content: flex-end;
 }
 
-.reset-action {
-  border: 1px solid var(--personal-color-border-mist);
-}
-
 .professor-primary { background: var(--personal-color-primary-navy); }
 
 .review-grid {
@@ -447,9 +443,6 @@ onMounted(() => load());
   margin-top: 12px;
 }
 
-.decision-actions :deep(button) {
-  width: auto;
-}
 
 @media (max-width: 1000px) {
   .review-grid {

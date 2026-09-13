@@ -551,7 +551,6 @@ onMounted(async () => {
 .filter-card { display: grid; grid-template-columns: 100px 180px auto; align-items: center; gap: 12px; padding: 18px 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .filter-card > label { font-size: .82rem; font-weight: 700; }
 .filter-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.reset-button { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
 .management-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(390px, .75fr); align-items: start; gap: 18px; margin-top: 20px; }
 .list-card, .review-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .review-card { position: sticky; top: 84px; }

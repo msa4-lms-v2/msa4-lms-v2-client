@@ -456,10 +456,6 @@ onMounted(async () => {
   gap: 8px;
 }
 
-.reset-action {
-  border: 1px solid var(--personal-color-black);
-}
-
 .admin-primary {
   background: var(--personal-color-admin-secondary-indigo);
 }
@@ -617,9 +613,6 @@ onMounted(async () => {
   margin-top: 12px;
 }
 
-.decision-actions :deep(button) {
-  width: auto;
-}
 
 .visually-hidden {
   position: absolute;
