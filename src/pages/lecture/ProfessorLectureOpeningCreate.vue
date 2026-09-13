@@ -12,6 +12,8 @@ import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyCard from '../../components/common/MyCard.vue';
+import ProfessorWeeklySyllabus from './ProfessorWeeklySyllabus.vue';
+import { useAuthStore } from '../../store/auth/useAuthStore';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -45,6 +47,8 @@ const historyColumns = [
 ];
 
 const semesterStore = useSemesterStore();
+const authStore = useAuthStore();
+const syllabusEditorKey = ref(0);
 
 const form = reactive({
   courseId: '',
@@ -126,6 +130,7 @@ const resetForm = () => {
   scheduleDraft.endPeriod = '2';
   formError.value = '';
   editingRequestId.value = null;
+  syllabusEditorKey.value += 1;
 };
 
 const validate = () => {
@@ -203,6 +208,7 @@ const editRequest = async (item) => {
     form.assignmentRatio = String(detail.assignmentRatio ?? 0);
     form.attendanceRatio = String(detail.attendanceRatio ?? 0);
     form.syllabus = detail.syllabus || '';
+    syllabusEditorKey.value += 1;
     schedules.value = (detail.schedules || []).map((schedule) => ({
       dayOfWeek: schedule.dayOfWeek,
       startPeriod: String(schedule.startPeriod),
@@ -296,15 +302,6 @@ onMounted(async () => {
                 <MyInput id="opening-course-id" v-model="form.courseId" numeric-only placeholder="교과목 번호를 입력해 주세요." />
               </div>
               <div class="form-group">
-                <label for="opening-semester">개설 학기</label>
-                <MySelect id="opening-semester" v-model="form.semesterId">
-                  <option value="" disabled>학기를 선택해 주세요.</option>
-                  <option v-for="semester in semesterStore.semesters" :key="semester.id" :value="semester.id">
-                    {{ semester.academicYear }}학년도 {{ semester.term === 'FIRST' ? 1 : 2 }}학기
-                  </option>
-                </MySelect>
-              </div>
-              <div class="form-group">
                 <label for="opening-section">분반</label>
                 <MyInput id="opening-section" v-model="form.sectionNo" maxlength="10" placeholder="예: 01" />
               </div>
@@ -312,7 +309,7 @@ onMounted(async () => {
                 <label for="opening-capacity">수강 정원 (명)</label>
                 <MyInput id="opening-capacity" v-model="form.requestedCapacity" numeric-only :max-number="1000" placeholder="예: 40" />
               </div>
-              <div class="form-group">
+              <div class="form-group full-width">
                 <label for="opening-classroom">강의실</label>
                 <MyInput id="opening-classroom" v-model="form.classroom" maxlength="50" placeholder="강의실을 입력해 주세요." />
               </div>
@@ -390,13 +387,23 @@ onMounted(async () => {
             <div class="common-section-header">
               <h3>강의계획서</h3>
             </div>
-            <textarea
-              id="opening-syllabus"
-              aria-label="강의계획서 내용"
-              v-model="form.syllabus"
-              maxlength="65535"
-              placeholder="강의 목표, 교재, 평가 방법, 주차별 계획 등을 상세히 입력해 주세요."
-            ></textarea>
+            <div class="info-grid syllabus-meta">
+              <div class="form-group">
+                <label for="opening-semester">개설 학기 (필수)</label>
+                <MySelect id="opening-semester" v-model="form.semesterId">
+                  <option value="" disabled>학기를 선택해 주세요.</option>
+                  <option v-for="semester in semesterStore.semesters" :key="semester.id" :value="semester.id">
+                    {{ semester.academicYear }}학년도 {{ semester.term === 'FIRST' ? 1 : 2 }}학기
+                  </option>
+                </MySelect>
+              </div>
+              <div class="form-group">
+                <label for="opening-professor">담당 교수</label>
+                <MyInput id="opening-professor" :model-value="authStore.userInfo?.name || ''" placeholder="로그인한 교수" readonly />
+              </div>
+            </div>
+            <h4 class="syllabus-label">강의 내용 (필수)</h4>
+            <ProfessorWeeklySyllabus :key="syllabusEditorKey" v-model="form.syllabus" />
           </MyCard>
         </div>
 
@@ -516,6 +523,9 @@ onMounted(async () => {
 .syllabus-section {
   padding: 20px;
 }
+
+.syllabus-meta { margin-bottom: 20px; }
+.syllabus-label { margin: 0 0 10px; font-size: 0.88rem; }
 
 .common-section-header {
   margin-bottom: 20px;
