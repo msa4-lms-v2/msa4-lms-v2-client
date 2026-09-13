@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { getMyLectures } from '../../api/lectureApi';
-import MyButton from '../../components/button/MyButton.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -89,7 +89,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="강의 조회">
-    <section class="filter-card" aria-label="강의 조회 조건">
+    <MySearchFilter class="lecture-filter" submit-at-end aria-label="강의 조회 조건" @search="load(1)">
       <label class="filter-field" for="lecture-year">
         <span>연도</span>
         <MySelect id="lecture-year" v-model="filters.academicYear">
@@ -118,8 +118,7 @@ onMounted(async () => {
         </MySelect>
       </label>
 
-      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
-    </section>
+    </MySearchFilter>
 
     <section class="lecture-section">
       <MyTable
@@ -155,18 +154,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.filter-card {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(160px, 1fr)) 60px;
-  align-items: end;
-  gap: 22px;
-  padding: 20px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  background: var(--personal-color-white);
-}
-
 .filter-field {
+  flex: 1 1 160px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -177,26 +167,6 @@ onMounted(async () => {
 
 .lecture-section {
   margin-top: 22px;
-}
-
-:deep(.page-container) {
-  max-width: 980px;
-  padding: 18px 16px 40px;
-}
-
-:deep(.page-heading h2) {
-  margin: 0 0 16px;
-  font-size: 1.4rem;
-}
-
-:deep(.my-table th) {
-  padding: 11px 8px;
-  font-size: 0.75rem;
-}
-
-:deep(.my-table td) {
-  padding: 12px 8px;
-  font-size: 0.76rem;
 }
 
 .course-name {
@@ -210,15 +180,9 @@ onMounted(async () => {
   font-size: 0.76rem;
 }
 
-@media (max-width: 840px) {
-  .filter-card {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 560px) {
-  .filter-card {
-    grid-template-columns: 1fr;
+  .filter-field {
+    flex-basis: 100%;
   }
 }
 </style>
