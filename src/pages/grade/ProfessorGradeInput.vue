@@ -25,6 +25,7 @@ const isLoadingLectures = ref(true);
 const isLoadingGrades = ref(false);
 const isSaving = ref(false);
 const isFinalizing = ref(false);
+const isBusy = computed(() => isLoadingLectures.value || isLoadingGrades.value || isSaving.value || isFinalizing.value);
 
 const semesterKey = (lecture) => `${lecture.academicYear}-${lecture.term}`;
 const semesterLabel = (lecture) => `${lecture.academicYear}학년도 ${termLabels[lecture.term] || lecture.term}`;
@@ -135,6 +136,7 @@ const displayedTotal = (row) => {
 
 const statusInfo = (row) => {
   if (row.gradeStatus === 'OPENED') return { label: '공개됨', variant: 'success' };
+  if (isRowChanged(row)) return { label: '저장 안 됨', variant: 'warning' };
   if (!hasAnyScore(row)) return { label: '미입력', variant: 'warning' };
   return { label: '임시저장', variant: 'processing' };
 };
@@ -204,7 +206,7 @@ const validateScores = () => {
 };
 
 const saveGrades = async () => {
-  if (isSaving.value || !classInfo.value) return;
+  if (isBusy.value || !classInfo.value) return;
   const editableRows = rows.value.filter((row) => row.gradeStatus !== 'OPENED' && isRowChanged(row));
   if (!editableRows.length) {
     await notify('저장할 변경 내용이 없습니다.');
@@ -236,7 +238,7 @@ const saveGrades = async () => {
 };
 
 const finalizeClassGrades = async () => {
-  if (!classInfo.value || isFinalizing.value) return;
+  if (!classInfo.value || isBusy.value) return;
   if (hasUnsavedChanges.value) {
     await notify('변경된 점수를 먼저 임시저장해 주세요.');
     return;
@@ -245,12 +247,15 @@ const finalizeClassGrades = async () => {
     await notify('모든 수강생의 네 가지 점수를 입력해야 성적을 공개할 수 있습니다.');
     return;
   }
+  if (!canFinalize.value) return;
+  const classId = Number(selectedClassId.value);
   const confirmed = await confirmDialog('이 강의의 성적을 공개하시겠습니까? 공개 후에는 성적 정정 화면에서만 변경할 수 있습니다.');
   if (!confirmed) return;
+  if (classId !== Number(selectedClassId.value) || isBusy.value || !canFinalize.value) return;
 
   isFinalizing.value = true;
   try {
-    await finalizeGrades(Number(selectedClassId.value), createIdempotencyKey('grade-finalize'));
+      await finalizeGrades(classId, createIdempotencyKey('grade-finalize'));
     await notify('성적이 공개되었습니다.');
     await loadGrades();
   } catch (error) {
@@ -271,13 +276,13 @@ onMounted(async () => {
     <MySearchFilter :show-submit="false">
       <div class="search-group">
         <label for="grade-semester">학기 선택</label>
-        <MySelect id="grade-semester" v-model="selectedSemesterKey" :disabled="isLoadingLectures" @change="changeSemester">
+        <MySelect id="grade-semester" v-model="selectedSemesterKey" :disabled="isBusy" @change="changeSemester">
           <option v-for="semester in semesterOptions" :key="semester.value" :value="semester.value">{{ semester.label }}</option>
         </MySelect>
       </div>
       <div class="search-group lecture-group">
         <label for="grade-lecture">강의 선택</label>
-        <MySelect id="grade-lecture" v-model="selectedClassId" :disabled="isLoadingLectures" @change="loadGrades">
+        <MySelect id="grade-lecture" v-model="selectedClassId" :disabled="isBusy" @change="loadGrades">
           <option v-for="lecture in semesterLectures" :key="lecture.classId" :value="String(lecture.classId)">
             [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.sectionNo }}분반)
           </option>
@@ -305,10 +310,10 @@ onMounted(async () => {
       <tr v-for="row in rows" :key="row.enrollmentId">
         <td>{{ row.studentName }}</td>
         <td>{{ row.studentNumber || '-' }}</td>
-        <td><MyInput v-model="row.midtermScore" type="number" min="0" max="100" step="0.01" :disabled="row.gradeStatus === 'OPENED'" class="score-input" /></td>
-        <td><MyInput v-model="row.finalScore" type="number" min="0" max="100" step="0.01" :disabled="row.gradeStatus === 'OPENED'" class="score-input" /></td>
-        <td><MyInput v-model="row.assignmentScore" type="number" min="0" max="100" step="0.01" :disabled="row.gradeStatus === 'OPENED'" class="score-input" /></td>
-        <td><MyInput v-model="row.attendanceScore" type="number" min="0" max="100" step="0.01" :disabled="row.gradeStatus === 'OPENED'" class="score-input" /></td>
+        <td><MyInput v-model="row.midtermScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 중간고사`" class="score-input" /></td>
+        <td><MyInput v-model="row.finalScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 기말고사`" class="score-input" /></td>
+        <td><MyInput v-model="row.assignmentScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 과제`" class="score-input" /></td>
+        <td><MyInput v-model="row.attendanceScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 출석`" class="score-input" /></td>
         <td>{{ displayedTotal(row) }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
         <td>
@@ -320,8 +325,8 @@ onMounted(async () => {
     </MyTable>
 
     <div class="form-actions">
-      <MyButton class="secondary-button" color="white" size="middle" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isSaving || isLoadingGrades || !hasUnsavedChanges" @click="saveGrades" />
-      <MyButton class="professor-primary" color="deep-blue" size="big" :content="isFinalizing ? '처리 중...' : '성적 일괄 제출'" :disabled="isFinalizing || isLoadingGrades || !canFinalize" @click="finalizeClassGrades" />
+      <MyButton :color="canFinalize ? 'white' : 'deep-blue'" :size="canFinalize ? 'middle' : 'big'" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isBusy || !hasUnsavedChanges" @click="saveGrades" />
+      <MyButton v-if="canFinalize" color="deep-blue" size="big" :content="isFinalizing ? '처리 중...' : '성적 일괄 제출'" :disabled="isBusy" @click="finalizeClassGrades" />
     </div>
   </MyPageContainer>
 </template>
@@ -351,8 +356,6 @@ onMounted(async () => {
 .score-input { width: 64px; text-align: center; }
 .score-input:disabled { background: var(--personal-color-table-header-smoke); color: var(--personal-color-text-muted-slate); }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.professor-primary { background: var(--personal-color-professor-primary-navy); }
-:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
 @media (max-width: 900px) {
   .lecture-group :deep(select) { min-width: 220px; }
 }
