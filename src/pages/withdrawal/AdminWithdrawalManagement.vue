@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import {
   downloadWithdrawalAttachment,
   getWithdrawal,
@@ -9,13 +9,16 @@ import {
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { ACADEMIC_CHANGE_STATUS_LABEL } from '../../util/academic/academicChangeLabels';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'AdminWithdrawalManagement' });
+
+const PAGE_SIZE = 20;
+const FETCH_SIZE = 100;
 
 const STATUS_OPTIONS = [
   { value: '', label: '전체' },
@@ -33,7 +36,7 @@ const columns = [
 ];
 
 const allRequests = ref([]);
-const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
+const page = ref(1);
 const statusFilter = ref('');
 const selectedRequest = ref(null);
 const rejectReason = ref('');
@@ -51,14 +54,26 @@ const createIdempotencyKey = (prefix) => {
 const filteredRequests = computed(() => (
   statusFilter.value ? allRequests.value.filter((item) => item.status === statusFilter.value) : allRequests.value
 ));
+const visibleRequests = computed(() => {
+  const start = (page.value - 1) * PAGE_SIZE;
+  return filteredRequests.value.slice(start, start + PAGE_SIZE);
+});
 
 const load = async () => {
   isLoading.value = true;
   try {
-    const response = await searchWithdrawals({ page: 1, size: 100 });
-    const data = response.data.data;
-    allRequests.value = data.items || [];
-    page.value = { page: 1, size: data.size, totalCount: data.totalCount, hasNext: false };
+    const firstResponse = await searchWithdrawals({ page: 1, size: FETCH_SIZE });
+    const firstPage = firstResponse.data.data;
+    const totalPages = Math.ceil(firstPage.totalCount / FETCH_SIZE);
+    const remainingResponses = totalPages > 1
+      ? await Promise.all(Array.from({ length: totalPages - 1 }, (_, index) =>
+        searchWithdrawals({ page: index + 2, size: FETCH_SIZE })))
+      : [];
+    allRequests.value = [
+      ...(firstPage.items || []),
+      ...remainingResponses.flatMap((response) => response.data.data.items || []),
+    ];
+    page.value = 1;
   } catch (error) {
     allRequests.value = [];
     await notify(error.response?.data?.message || '자퇴 신청 목록을 불러오지 못했습니다.');
@@ -66,6 +81,10 @@ const load = async () => {
     isLoading.value = false;
   }
 };
+
+watch(statusFilter, () => {
+  page.value = 1;
+});
 
 const selectRequest = async (withdrawalId) => {
   isLoadingDetail.value = true;
@@ -151,7 +170,7 @@ onMounted(load);
             empty-message="자퇴 신청이 없습니다."
           >
             <tr
-              v-for="item in filteredRequests"
+              v-for="item in visibleRequests"
               :key="item.id"
               :class="{ selected: selectedRequest?.id === item.id }"
             >
@@ -168,6 +187,13 @@ onMounted(load);
             </tr>
           </MyTable>
         </div>
+        <NumberedPagination
+          v-if="filteredRequests.length > PAGE_SIZE"
+          :page="page"
+          :total-count="filteredRequests.length"
+          :size="PAGE_SIZE"
+          @page-change="(value) => { page = value; }"
+        />
       </section>
 
       <aside class="detail-column">

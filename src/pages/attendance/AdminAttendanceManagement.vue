@@ -8,7 +8,7 @@ import MyInput from '../../components/input/MyInput.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
@@ -148,10 +148,11 @@ onMounted(() => load());
       </tr>
     </MyTable>
 
-    <PrevNextPagination
-      v-if="page.page > 1 || page.hasNext"
+    <NumberedPagination
+      v-if="page.totalCount > page.size"
       :page="page.page"
-      :has-next="page.hasNext"
+      :total-count="page.totalCount"
+      :size="page.size"
       @page-change="load"
     />
 

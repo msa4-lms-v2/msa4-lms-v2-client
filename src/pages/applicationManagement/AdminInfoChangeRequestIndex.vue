@@ -6,7 +6,7 @@ import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { useAdminInfoChangeStore } from '../../store/infochange/useAdminInfoChangeStore';
@@ -163,10 +163,11 @@ onMounted(() => load());
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="infoChangeStore.pageInfo.page > 1 || infoChangeStore.pageInfo.hasNext"
+      <NumberedPagination
+        v-if="infoChangeStore.pageInfo.totalCount > infoChangeStore.pageInfo.size"
         :page="infoChangeStore.pageInfo.page"
-        :has-next="infoChangeStore.pageInfo.hasNext"
+        :total-count="infoChangeStore.pageInfo.totalCount"
+        :size="infoChangeStore.pageInfo.size"
         @page-change="load"
       />
     </section>

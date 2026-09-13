@@ -5,7 +5,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -207,7 +207,7 @@ onMounted(() => load());
             </td>
           </tr>
         </MyTable>
-        <PrevNextPagination v-if="page.page > 1 || page.hasNext" :page="page.page" :has-next="page.hasNext" @page-change="load" />
+        <NumberedPagination v-if="page.totalCount > page.size" :page="page.page" :total-count="page.totalCount" :size="page.size" @page-change="load" />
       </div>
 
       <form class="dismissal-form" @submit.prevent="save">
