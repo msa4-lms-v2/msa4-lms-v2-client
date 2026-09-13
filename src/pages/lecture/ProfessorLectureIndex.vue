@@ -89,7 +89,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="강의 조회">
-    <MySearchFilter class="lecture-filter" submit-at-end aria-label="강의 조회 조건" @search="load(1)">
+    <MySearchFilter class="lecture-filter" aria-label="강의 조회 조건" @search="load(1)">
       <label class="filter-field" for="lecture-year">
         <span>연도</span>
         <MySelect id="lecture-year" v-model="filters.academicYear">
@@ -155,7 +155,7 @@ onMounted(async () => {
 
 <style scoped>
 .filter-field {
-  flex: 1 1 160px;
+  flex: 0 1 200px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -171,7 +171,7 @@ onMounted(async () => {
 
 .course-name {
   color: var(--personal-color-primary-text-navy);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .section-number {
