@@ -6,7 +6,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
@@ -180,8 +180,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role professor-page'" title="졸업요건 진단 현황">
-    <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" @search="loadDiagnoses(1)">
+  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role professor-page'" :title="isAdmin ? '졸업요건 진단 현황' : '학생 졸업요건 현황'">
+    <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" submit-at-end @search="loadDiagnoses(1)">
       <div class="search-group">
         <label for="diagnosis-keyword">학생 이름</label>
         <MyInput id="diagnosis-keyword" v-model="filters.keyword" placeholder="학생 이름" @keyup-enter="loadDiagnoses(1)" />
@@ -277,14 +277,21 @@ onMounted(async () => {
       </tr>
     </MyTable>
 
-    <PrevNextPagination
-      v-if="page.page > 1 || page.hasNext"
+    <NumberedPagination
+      v-if="page.totalCount > page.size"
       :page="page.page"
-      :has-next="page.hasNext"
+      :total-count="page.totalCount"
+      :size="page.size"
       @page-change="loadDiagnoses"
     />
 
-    <section v-if="selectedDiagnosis" class="detail-section">
+    <section v-if="!isAdmin && selectedDiagnosis" class="professor-credit-summary">
+      <h3>선택 학생 · {{ selectedDiagnosis.studentName }}</h3>
+      <dl><div v-for="row in requirementRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ creditRatio(row.earned, row.required) }}학점</dd></div></dl>
+      <h3>조회 범위</h3><p>지도학생의 전공·교양·총 학점 충족 현황입니다. {{ selectedDiagnosis.reason }}</p>
+    </section>
+    <component :is="isAdmin ? 'section' : 'details'" v-if="selectedDiagnosis" class="detail-section">
+      <summary v-if="!isAdmin">학점 반영 상세 내역</summary>
       <div class="detail-heading">
         <div>
           <span class="section-eyebrow">학생별 상세</span>
@@ -375,17 +382,28 @@ onMounted(async () => {
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="recordPage.page > 1 || recordPage.hasNext"
+      <NumberedPagination
+        v-if="recordPage.totalCount > recordPage.size"
         :page="recordPage.page"
-        :has-next="recordPage.hasNext"
+        :total-count="recordPage.totalCount"
+        :size="recordPage.size"
         @page-change="loadCreditRecords"
       />
-    </section>
+    </component>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.professor-credit-summary { margin-top: 32px; }
+.professor-credit-summary h3 { font-size: 16px; margin: 0 0 10px; }
+.professor-credit-summary dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 18px; margin: 0 0 24px; background: white; }
+.professor-credit-summary dt { color: var(--personal-color-text-muted-slate); font-size: 12px; margin-bottom: 8px; }
+.professor-credit-summary dd { font-size: 14px; margin: 0; }
+.professor-credit-summary p { background: white; padding: 18px; margin: 0; font-size: 13px; color: var(--personal-color-text-muted-slate); }
+.professor-role .detail-section > summary { cursor: pointer; font-size: 14px; color: var(--personal-color-primary-navy); margin-bottom: 16px; }
+.professor-role :deep(.status-badge) { background: transparent; padding: 0; border: 0; font-weight: 400; }
+.professor-role :deep(.my-table strong) { font-weight: 400; }
+
 .admin-role {
   --role-accent: var(--personal-color-admin-secondary-indigo);
   --role-selection: var(--personal-color-indigo-soft-lavender);
@@ -408,6 +426,15 @@ onMounted(async () => {
 .result-summary strong {
   color: var(--role-accent);
   font-size: 1rem;
+}
+
+:deep(.numbered-pagination .page-btn.active) {
+  background: var(--role-accent);
+}
+
+:deep(.numbered-pagination .nav-btn:hover:not(:disabled)),
+:deep(.numbered-pagination .page-btn:hover:not(.active)) {
+  color: var(--role-accent);
 }
 
 :deep(.compact-filter input),

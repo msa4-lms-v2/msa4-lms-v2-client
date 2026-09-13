@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { useCounselingStore } from '../../store/counseling/useCounselingStore';
@@ -31,16 +32,18 @@ const columns = [
   { key: 'management', label: '관리' },
 ];
 
-const load = async () => {
+const load = async (pageNumber = 1) => {
   isLoading.value = true;
   try {
-    await store.fetchCounselings({ page: 1, size: 100, status: statusFilter.value || undefined });
+    await store.fetchCounselings({ page: pageNumber, size: 10, status: statusFilter.value || undefined });
   } catch (error) {
     await notify(error.response?.data?.message || '상담 목록을 불러오지 못했습니다.');
   } finally {
     isLoading.value = false;
   }
 };
+
+const applyFilters = () => load(1);
 
 const selectItem = async (id) => {
   isLoadingDetail.value = true;
@@ -61,7 +64,7 @@ onMounted(load);
     <section class="filter-card">
       <label>답변 상태<MySelect v-model="statusFilter" :options="STATUS_OPTIONS" /></label>
       <div class="filter-actions">
-        <MyButton class="admin-primary" color="deep-blue" size="middle" content="조회" @click="load" />
+        <MyButton class="admin-primary" color="deep-blue" size="middle" content="조회" @click="applyFilters" />
       </div>
     </section>
 
@@ -93,6 +96,13 @@ onMounted(load);
             </tr>
           </MyTable>
         </div>
+        <NumberedPagination
+          v-if="store.page.totalCount > store.page.size"
+          :page="store.page.page"
+          :total-count="store.page.totalCount"
+          :size="store.page.size"
+          @page-change="load"
+        />
       </section>
 
       <aside class="detail-card">

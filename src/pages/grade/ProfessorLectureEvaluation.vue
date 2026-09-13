@@ -8,7 +8,6 @@ import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyModal from '../../components/common/MyModal.vue';
 import MyCard from '../../components/common/MyCard.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { notify } from '../../composables/useDialog';
@@ -46,7 +45,13 @@ const selectedEvaluation = ref(null);
 const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 const isLoading = ref(false);
 const isLoadingLectures = ref(false);
-const commentsOpen = ref(false);
+const commentsOpen = computed({
+  get: () => Boolean(route.query.lectureId) && route.query.view === 'comments',
+  set: (open) => { const query = { ...route.query }; if (open) query.view = 'comments'; else delete query.view; router.push({ path: route.path, query }); },
+});
+const commentPage = ref(1);
+const visibleComments = computed(() => (detail.value?.comments || []).slice((commentPage.value - 1) * 10, commentPage.value * 10));
+watch(() => route.query.lectureId, () => { commentPage.value = 1; });
 
 const isDetail = computed(() => Boolean(route.query.lectureId));
 const semesterKey = (lecture) => `${lecture.academicYear}-${lecture.term}`;
@@ -106,13 +111,18 @@ const loadLectures = async () => {
   }
 };
 
+let loadRevision = 0;
 const load = async (pageNumber = 1) => {
+  const revision = ++loadRevision;
+  const requestedLectureId = route.query.lectureId;
+  const isCurrent = () => revision === loadRevision && route.query.lectureId === requestedLectureId;
   isLoading.value = true;
   try {
     const params = isDetail.value
       ? { page: 1, size: 1, lectureId: Number(route.query.lectureId) }
       : { page: pageNumber, size: 20, ...parseSelectedSemester() };
     const response = await getProfessorLectureEvaluations(params);
+    if (!isCurrent()) return;
     const data = response.data.data;
     if (isDetail.value) {
       selectedEvaluation.value = data.items?.[0] || null;
@@ -127,11 +137,12 @@ const load = async (pageNumber = 1) => {
       };
     }
   } catch (error) {
+    if (!isCurrent()) return;
     if (isDetail.value) selectedEvaluation.value = null;
     else evaluations.value = [];
     await notify(error.response?.data?.message || '강의평가 결과를 불러오지 못했습니다.');
   } finally {
-    isLoading.value = false;
+    if (revision === loadRevision) isLoading.value = false;
   }
 };
 
@@ -176,8 +187,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer class="professor-page" :title="isDetail ? '강의평가 결과(상세)' : '강의평가 결과'">
-    <template v-if="!isDetail">
+  <MyPageContainer class="professor-page" :title="commentsOpen ? '서술형 의견 상세' : isDetail ? '강의평가 결과(상세)' : '강의평가 결과'">
+    <template v-if="commentsOpen && detail">
+      <MyCard class="lecture-info-card">
+        <h3>강의 정보</h3>
+        <div class="lecture-info-grid comments-info-grid"><div><span>학기</span><strong>{{ semesterLabel(detail) }}</strong></div><div><span>강의명</span><strong>{{ detail.courseName }}</strong></div><div><span>담당 교수</span><strong>{{ detail.professorName || '-' }}</strong></div><div><span>서술형 의견</span><strong>총 {{ detail.comments?.length || 0 }}건</strong></div></div>
+      </MyCard>
+      <section class="comments-section"><h3>전체 의견</h3>
+        <MyTable :columns="[{ key: 'comment', label: '서술형 의견' }]" :empty="!detail.comments?.length" empty-message="등록된 서술형 의견이 없습니다.">
+          <tr v-for="(comment, index) in visibleComments" :key="index"><td class="comment-text">{{ comment }}</td></tr>
+        </MyTable>
+        <PrevNextPagination v-if="(detail.comments?.length || 0) > 10" :page="commentPage" :has-next="commentPage * 10 < detail.comments.length" @page-change="commentPage = $event" />
+      </section>
+      <div class="detail-actions comments-actions"><MyButton color="white" size="big" content="목록으로" @click="commentsOpen = false" /><MyButton color="deep-blue" size="big" content="결과 다운로드" @click="downloadResults" /></div>
+    </template>
+    <template v-else-if="!isDetail">
       <MySearchFilter submit-text="조회" submit-at-end @search="load(1)">
         <div class="search-group semester-filter">
           <label for="evaluation-semester">학기 선택</label>
@@ -240,19 +264,17 @@ onMounted(async () => {
       </div>
     </template>
 
-    <MyModal :is-open="commentsOpen" title="서술형 의견" max-width="680px" @close="commentsOpen = false">
-      <ul v-if="detail?.comments?.length" class="comment-list">
-        <li v-for="(comment, index) in detail.comments" :key="index"><span>{{ index + 1 }}</span><p>{{ comment }}</p></li>
-      </ul>
-      <p v-else class="empty-comments">등록된 서술형 의견이 없습니다.</p>
-      <template #footer>
-        <MyButton class="secondary-button" color="white" size="middle" content="닫기" @click="commentsOpen = false" />
-      </template>
-    </MyModal>
+
   </MyPageContainer>
 </template>
 
 <style scoped>
+.lecture-info-grid.comments-info-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.comments-section { margin-top: 24px; }
+.comments-section h3 { font-size: 16px; margin: 0 0 12px; }
+.comments-section .comment-text { text-align: left; padding: 22px 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comments-actions { justify-content: flex-end; }
+
 .semester-filter { flex: 1; max-width: 360px; min-width: 0; }
 .semester-filter :deep(select) { width: 100%; min-width: 0; }
 .lecture-info-card,
@@ -283,6 +305,6 @@ onMounted(async () => {
 .comment-list p { margin: 3px 0 0; white-space: pre-wrap; line-height: 1.55; }
 .empty-comments { margin: 20px 0; color: var(--personal-color-text-muted-slate); text-align: center; }
 @media (max-width: 800px) {
-  .lecture-info-grid { grid-template-columns: 1fr; }
+  .lecture-info-grid, .lecture-info-grid.comments-info-grid { grid-template-columns: 1fr; }
 }
 </style>

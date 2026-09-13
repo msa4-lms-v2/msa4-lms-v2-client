@@ -347,4 +347,11 @@ onMounted(async () => {
 .score-input { background: var(--personal-color-sidebar-active-bg-sky); border: 1px solid var(--personal-color-border-mist); border-radius: 4px; }
 .lecture-group { min-width: 0; }
 @media (max-width: 560px) { .lecture-group { width: 100%; } .lecture-group :deep(select) { width: 100%; min-width: 0; } }
+
+.section-title { margin-top: 38px; font-size: 20px; }
+.lecture-summary strong { color: var(--personal-color-primary-text-navy); font-size: 18px; }
+.grade-table :deep(.my-table th) { height: 48px; padding: 10px 12px; font-size: 13px; border-right: 1px solid var(--personal-color-table-border-frost); }
+.grade-table :deep(.my-table td) { height: 90px; padding: 18px 12px; font-size: 14px; border-right: 1px solid var(--personal-color-table-border-frost); }
+.score-input { width: 78px; height: 36px; font-size: 13px; }
+
 </style>

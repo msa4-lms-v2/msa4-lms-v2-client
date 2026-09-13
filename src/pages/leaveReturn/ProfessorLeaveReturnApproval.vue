@@ -1,11 +1,13 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyModal from '../../components/common/MyModal.vue';
+import MyInput from '../../components/input/MyInput.vue';
+import ProfessorApplicationDetail from '../../components/academic/ProfessorApplicationDetail.vue';
+import { useProfessorRequestDetail } from '../../composables/useProfessorRequestDetail';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import { downloadLeaveRequestFile } from '../../api/leaveApi';
+import { downloadLeaveRequestFile, getLeaveRequest } from '../../api/leaveApi';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { useLeaveRequestStore } from '../../store/leaveReturn/useLeaveRequestStore';
 import {
@@ -17,13 +19,12 @@ import { formatDate } from '../../util/format';
 defineOptions({ name: 'ProfessorLeaveReturnApproval' });
 
 const leaveRequestStore = useLeaveRequestStore();
-const filters = reactive({ requestType: '', status: 'PENDING', size: 20 });
+const filters = reactive({ requestType: '', status: 'PENDING', keyword: '', size: 20 });
 const appliedFilters = ref({ ...filters });
-const selectedRequestId = ref(null);
 const rejectReason = ref('');
 
 const columns = [
-  { key: 'requestType', label: '신청 유형' },
+  { key: 'id', label: '신청번호' },
   { key: 'studentNumber', label: '학번' },
   { key: 'studentName', label: '이름' },
   { key: 'departmentName', label: '소속 학과' },
@@ -63,31 +64,37 @@ const search = async () => {
 };
 
 const reset = async () => {
-  Object.assign(filters, { requestType: '', status: 'PENDING', size: 20 });
+  Object.assign(filters, { requestType: '', status: 'PENDING', keyword: '', size: 20 });
   appliedFilters.value = { ...filters };
   await load();
 };
 
-const openDetail = async (item) => {
-  selectedRequestId.value = item.id;
-  rejectReason.value = '';
-  try {
-    await leaveRequestStore.fetchRequest(item.id);
-  } catch (error) {
-    await notify(error.response?.data?.message || '휴·복학 신청 상세를 불러오지 못했습니다.');
-    selectedRequestId.value = null;
-  }
-};
-
-const closeDetail = () => {
-  if (leaveRequestStore.isReviewing) return;
-  selectedRequestId.value = null;
-  rejectReason.value = '';
-};
+const { detailId, selectedRequest, isLoadingDetail, detailError, openDetail, closeDetail } = useProfessorRequestDetail({
+  fetchRequest: getLeaveRequest,
+  resetForm: () => { rejectReason.value = ''; },
+});
+const studentFields = computed(() => {
+  const item = selectedRequest.value || {};
+  return [
+    { label: '이름', value: item.studentName }, { label: '학번', value: item.studentNumber }, { label: '소속 단과대학', value: item.collegeName },
+    { label: '소속 학과', value: item.departmentName }, { label: '학년', value: item.gradeLevel ? item.gradeLevel + '학년' : undefined },
+    { label: '학적 상태', value: ACADEMIC_STATUS_LABEL[item.academicStatus] },
+  ];
+});
+const applicationFields = computed(() => {
+  const item = selectedRequest.value || {};
+  const fields = [
+    { label: '신청 유형', value: requestTypeLabel[item.requestType] }, { label: '신청번호', value: item.id }, { label: '신청일', value: formatDate(item.createdAt) },
+    { label: '적용 학기', value: item.targetYear ? item.targetYear + '학년도 ' + item.targetSemester + '학기' : undefined },
+    { label: '희망 학과', value: '해당 없음' }, { label: '처리 상태', value: LEAVE_REQUEST_STATUS_LABEL[item.status] },
+  ];
+  if (item.returnYear) fields.push({ label: '복학 예정 학기', value: item.returnYear + '학년도 ' + item.returnSemester + '학기' });
+  return fields;
+});
 
 const downloadFile = async (file) => {
   try {
-    const response = await downloadLeaveRequestFile(leaveRequestStore.currentRequest.id, file.id);
+    const response = await downloadLeaveRequestFile(selectedRequest.value.id, file.id);
     const url = URL.createObjectURL(response.data);
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -102,12 +109,14 @@ const downloadFile = async (file) => {
 };
 
 const approve = async () => {
+  if (!selectedRequest.value || leaveRequestStore.isReviewing) return;
+  const requestId = selectedRequest.value.id;
   const confirmed = await confirmDialog('이 신청을 승인하여 관리자 최종 승인 단계로 넘기겠습니까?');
-  if (!confirmed) return;
+  if (!confirmed || leaveRequestStore.isReviewing || selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') return;
 
   try {
     await leaveRequestStore.reviewRequest(
-      leaveRequestStore.currentRequest.id,
+      requestId,
       'APPROVED',
       null,
       createIdempotencyKey('approve'),
@@ -121,17 +130,19 @@ const approve = async () => {
 };
 
 const reject = async () => {
+  if (!selectedRequest.value || leaveRequestStore.isReviewing) return;
+  const requestId = selectedRequest.value.id;
   if (!rejectReason.value.trim()) {
     await notify('반려 사유를 입력해 주세요.');
     return;
   }
 
   const confirmed = await confirmDialog('이 신청을 반려하시겠습니까?');
-  if (!confirmed) return;
+  if (!confirmed || leaveRequestStore.isReviewing || selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') return;
 
   try {
     await leaveRequestStore.reviewRequest(
-      leaveRequestStore.currentRequest.id,
+      requestId,
       'REJECTED',
       rejectReason.value.trim(),
       createIdempotencyKey('reject'),
@@ -148,8 +159,8 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="휴·복학 신청 확인">
-    <section class="filter-card" aria-label="휴·복학 신청 검색 조건">
+  <MyPageContainer :title="detailId ? '휴·복학 신청 확인 · 상세' : '휴·복학 신청 확인'">
+    <section v-if="!detailId" class="filter-card" aria-label="휴·복학 신청 검색 조건">
       <div class="filter-fields">
         <label class="filter-field" for="professor-leave-request-type">
           <span>신청 유형</span>
@@ -173,6 +184,10 @@ onMounted(() => load());
             <option value="CANCELLED">취소</option>
           </select>
         </label>
+        <label class="filter-field" for="professor-leave-keyword">
+          <span>학번 / 이름</span>
+          <MyInput id="professor-leave-keyword" v-model="filters.keyword" maxlength="50" placeholder="학번 / 이름 검색" @keyup-enter="search" />
+        </label>
       </div>
 
       <div class="filter-actions">
@@ -181,7 +196,7 @@ onMounted(() => load());
       </div>
     </section>
 
-    <section class="result-card">
+    <section v-if="!detailId" class="result-card">
       <div class="result-heading">
         <h3>담당 학생 휴·복학 신청</h3>
         <p>총 {{ leaveRequestStore.pageInfo.totalCount }}건</p>
@@ -194,7 +209,7 @@ onMounted(() => load());
         empty-message="담당 학생의 휴·복학 신청이 없습니다."
       >
         <tr v-for="item in leaveRequestStore.requests" :key="item.id">
-          <td>{{ requestTypeLabel[item.requestType] || item.requestType }}</td>
+          <td>{{ item.id }}</td>
           <td>{{ item.studentNumber || '-' }}</td>
           <td>{{ item.studentName }}</td>
           <td>{{ item.departmentName }}</td>
@@ -204,7 +219,7 @@ onMounted(() => load());
             {{ LEAVE_REQUEST_STATUS_LABEL[item.status] || item.status }}
           </td>
           <td>
-            <MyButton color="deep-blue" size="small" content="확인" @click="openDetail(item)" />
+            <MyButton color="deep-blue" size="small" content="확인" @click="openDetail(item.id)" />
           </td>
         </tr>
       </MyTable>
@@ -217,102 +232,17 @@ onMounted(() => load());
       />
     </section>
 
-    <MyModal :is-open="Boolean(selectedRequestId)" title="휴·복학 신청 확인" max-width="760px" @close="closeDetail">
-      <p v-if="leaveRequestStore.isLoadingDetail" class="state-text">신청 정보를 불러오는 중입니다.</p>
-      <template v-else-if="leaveRequestStore.currentRequest">
-        <div class="modal-summary">
-          <div>
-            <span>신청 유형</span>
-            <strong>{{ requestTypeLabel[leaveRequestStore.currentRequest.requestType] }}</strong>
-          </div>
-
-          <div :class="{ rejected: leaveRequestStore.currentRequest.status === 'REJECTED' }">
-            <span>처리 상태</span>
-            <strong>{{ LEAVE_REQUEST_STATUS_LABEL[leaveRequestStore.currentRequest.status] }}</strong>
-          </div>
-        </div>
-
-        <section class="detail-section">
-          <h3>학생 정보</h3>
-          <dl class="info-list">
-            <div>
-              <dt>학번</dt>
-              <dd>{{ leaveRequestStore.currentRequest.studentNumber || '-' }}</dd>
-            </div>
-
-            <div>
-              <dt>이름</dt>
-              <dd>{{ leaveRequestStore.currentRequest.studentName }}</dd>
-            </div>
-
-            <div>
-              <dt>소속 학과</dt>
-              <dd>{{ leaveRequestStore.currentRequest.departmentName }}</dd>
-            </div>
-
-            <div>
-              <dt>학년</dt>
-              <dd>{{ leaveRequestStore.currentRequest.gradeLevel }}학년</dd>
-            </div>
-
-            <div>
-              <dt>학적 상태</dt>
-              <dd>{{ ACADEMIC_STATUS_LABEL[leaveRequestStore.currentRequest.academicStatus] }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="detail-section">
-          <h3>신청 정보</h3>
-          <dl class="info-list single-column">
-            <div>
-              <dt>신청 학기</dt>
-              <dd>{{ leaveRequestStore.currentRequest.targetYear }}학년도 {{ leaveRequestStore.currentRequest.targetSemester }}학기</dd>
-            </div>
-
-            <div v-if="leaveRequestStore.currentRequest.returnYear">
-              <dt>복학 예정 학기</dt>
-              <dd>{{ leaveRequestStore.currentRequest.returnYear }}학년도 {{ leaveRequestStore.currentRequest.returnSemester }}학기</dd>
-            </div>
-
-            <div>
-              <dt>신청 사유</dt>
-              <dd class="preserve-line">{{ leaveRequestStore.currentRequest.reason }}</dd>
-            </div>
-
-            <div v-if="leaveRequestStore.currentRequest.rejectReason">
-              <dt>반려 사유</dt>
-              <dd class="preserve-line">{{ leaveRequestStore.currentRequest.rejectReason }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="detail-section">
-          <h3>증빙 서류</h3>
-          <p v-if="leaveRequestStore.currentRequest.files.length === 0" class="state-text">첨부된 증빙 서류가 없습니다.</p>
-          <ul v-else class="file-list">
-            <li v-for="file in leaveRequestStore.currentRequest.files" :key="file.id">
-              <span>{{ file.originalName }}</span>
-              <MyButton color="white" size="small" content="다운로드" @click="downloadFile(file)" />
-            </li>
-          </ul>
-        </section>
-
-        <template v-if="leaveRequestStore.currentRequest.status === 'PENDING'">
-          <label class="reject-label" for="professor-leave-reject-reason">반려 사유</label>
-          <textarea id="professor-leave-reject-reason" v-model="rejectReason" maxlength="500" rows="4" placeholder="반려 시 사유를 입력해 주세요." />
-          <p class="character-count">{{ rejectReason.length }} / 500</p>
+    <div v-if="detailId" :aria-busy="isLoadingDetail">
+      <p v-if="isLoadingDetail" role="status">신청 정보를 불러오는 중입니다.</p>
+      <template v-else-if="detailError"><p role="alert">{{ detailError }}</p><MyButton color="white" size="middle" content="목록" @click="closeDetail" /></template>
+      <ProfessorApplicationDetail v-else-if="selectedRequest" v-model:review-reason="rejectReason" :student-fields="studentFields" :application-fields="applicationFields" :reason="selectedRequest.reason" :reviewable="selectedRequest.status === 'PENDING'" :busy="leaveRequestStore.isReviewing" @back="closeDetail" @approve="approve" @reject="reject">
+        <template #files>
+          <p v-if="!selectedRequest.files?.length">첨부된 증빙 서류가 없습니다.</p>
+          <ul v-else class="file-list"><li v-for="file in selectedRequest.files" :key="file.id"><span>{{ file.originalName }}</span><MyButton color="white" size="small" content="다운로드" @click="downloadFile(file)" /></li></ul>
         </template>
-      </template>
-
-      <template #footer>
-        <MyButton color="white" size="middle" content="닫기" :disabled="leaveRequestStore.isReviewing" @click="closeDetail" />
-        <template v-if="leaveRequestStore.currentRequest?.status === 'PENDING'">
-          <MyButton color="red" size="middle" content="반려" :disabled="leaveRequestStore.isReviewing" @click="reject" />
-          <MyButton color="deep-blue" size="middle" content="승인" :disabled="leaveRequestStore.isReviewing" @click="approve" />
-        </template>
-      </template>
-    </MyModal>
+        <template v-if="selectedRequest.advisorRejectReason || selectedRequest.rejectReason" #history><p class="rejected preserve-line">반려 사유: {{ selectedRequest.advisorRejectReason || selectedRequest.rejectReason }}</p></template>
+      </ProfessorApplicationDetail>
+    </div>
   </MyPageContainer>
 </template>
 
@@ -334,7 +264,7 @@ onMounted(() => load());
 
 .filter-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 240px));
+  grid-template-columns: repeat(3, minmax(140px, 220px));
   gap: 16px;
 }
 

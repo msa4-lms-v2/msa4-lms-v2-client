@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { useLeaveRequestStore } from '../../store/leaveReturn/useLeaveRequestStore';
@@ -199,10 +199,11 @@ onMounted(async () => {
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="leaveRequestStore.pageInfo.page > 1 || leaveRequestStore.pageInfo.hasNext"
+      <NumberedPagination
+        v-if="leaveRequestStore.pageInfo.totalCount > leaveRequestStore.pageInfo.size"
         :page="leaveRequestStore.pageInfo.page"
-        :has-next="leaveRequestStore.pageInfo.hasNext"
+        :total-count="leaveRequestStore.pageInfo.totalCount"
+        :size="leaveRequestStore.pageInfo.size"
         @page-change="load"
       />
     </section>

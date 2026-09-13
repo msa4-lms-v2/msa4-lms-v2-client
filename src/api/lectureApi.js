@@ -51,3 +51,5 @@ export const uploadSyllabusFile = (classId, file) => {
 // 담당 강의 강의계획서 PDF 다운로드
 export const downloadSyllabusFile = (fileId) =>
   myAxios.get(`${SYLLABUS_FILES_URL}/${fileId}`, { responseType: 'blob' });
+
+export const searchProfessorCourseCatalog = (params) => myAxios.get('/api/academic/professors/me/course-catalog', { params });

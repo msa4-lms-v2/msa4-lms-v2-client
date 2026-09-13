@@ -17,3 +17,5 @@ export const downloadCertificate = (documentId) =>
 
 export const issueCareerCertificate = () => myAxios.post("/api/payment/career-certificates");
 export const issueLectureCareerCertificate = () => myAxios.post("/api/payment/lecture-career-certificates");
+
+export const getProfessorCertificateHistory = (params) => myAxios.get('/api/payment/professors/me/certificates', { params });
