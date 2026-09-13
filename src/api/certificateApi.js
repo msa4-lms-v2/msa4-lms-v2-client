@@ -14,3 +14,6 @@ export const issueEmploymentCertificate = () =>
 // 발급된 증명서 PDF 다운로드 (서버가 MinIO 다운로드 URL로 302 리다이렉트한다)
 export const downloadCertificate = (documentId) =>
   myAxios.get(`${CERTIFICATES_URL}/${documentId}/download`, { responseType: 'blob' });
+
+export const issueCareerCertificate = () => myAxios.post("/api/payment/career-certificates");
+export const issueLectureCareerCertificate = () => myAxios.post("/api/payment/lecture-career-certificates");

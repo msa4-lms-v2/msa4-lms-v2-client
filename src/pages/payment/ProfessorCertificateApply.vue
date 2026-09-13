@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { downloadCertificate, issueEmploymentCertificate } from '../../api/certificateApi';
+import { downloadCertificate, issueEmploymentCertificate, issueCareerCertificate, issueLectureCareerCertificate } from '../../api/certificateApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyCard from '../../components/common/MyCard.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -36,15 +36,13 @@ const savePdf = (issuedDocument, response) => {
 
 const issueAndDownload = async (certificate) => {
   if (issuingType.value) return;
-  if (certificate.value !== 'EMPLOYMENT') {
-    await notify(`${certificate.label}는 현재 발급을 지원하지 않습니다.`);
-    return;
-  }
+
 
   issuingType.value = certificate.value;
   let issued = null;
   try {
-    const issueResponse = await issueEmploymentCertificate();
+    const issuers = { EMPLOYMENT: issueEmploymentCertificate, CAREER: issueCareerCertificate, LECTURE_CAREER: issueLectureCareerCertificate };
+    const issueResponse = await issuers[certificate.value]();
     issued = issueResponse.data.data;
     const historyItem = {
       ...issued,
