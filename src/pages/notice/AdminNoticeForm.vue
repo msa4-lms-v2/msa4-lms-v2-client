@@ -289,7 +289,8 @@ onMounted(load);
 }
 
 .choice-field .field-label {
-  flex: 0 0 40px;
+  flex: 0 0 76px;
+  white-space: nowrap;
 }
 
 .title-field {

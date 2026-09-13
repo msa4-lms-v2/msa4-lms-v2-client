@@ -77,7 +77,7 @@ const allMenuItems = [
     icon: 'ME',
     path: '/profile',
     color: '#f3f0ff',
-    roles: ['STUDENT', 'PROFESSOR', 'ADMIN'],
+    roles: ['STUDENT', 'PROFESSOR'],
   },
 ];
 

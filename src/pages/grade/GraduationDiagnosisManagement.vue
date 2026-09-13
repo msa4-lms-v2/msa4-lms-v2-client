@@ -6,7 +6,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
@@ -277,10 +277,11 @@ onMounted(async () => {
       </tr>
     </MyTable>
 
-    <PrevNextPagination
-      v-if="page.page > 1 || page.hasNext"
+    <NumberedPagination
+      v-if="page.totalCount > page.size"
       :page="page.page"
-      :has-next="page.hasNext"
+      :total-count="page.totalCount"
+      :size="page.size"
       @page-change="loadDiagnoses"
     />
 
@@ -375,10 +376,11 @@ onMounted(async () => {
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="recordPage.page > 1 || recordPage.hasNext"
+      <NumberedPagination
+        v-if="recordPage.totalCount > recordPage.size"
         :page="recordPage.page"
-        :has-next="recordPage.hasNext"
+        :total-count="recordPage.totalCount"
+        :size="recordPage.size"
         @page-change="loadCreditRecords"
       />
     </section>
@@ -408,6 +410,15 @@ onMounted(async () => {
 .result-summary strong {
   color: var(--role-accent);
   font-size: 1rem;
+}
+
+:deep(.numbered-pagination .page-btn.active) {
+  background: var(--role-accent);
+}
+
+:deep(.numbered-pagination .nav-btn:hover:not(:disabled)),
+:deep(.numbered-pagination .page-btn:hover:not(.active)) {
+  color: var(--role-accent);
 }
 
 :deep(.compact-filter input),

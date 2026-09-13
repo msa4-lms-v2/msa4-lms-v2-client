@@ -5,7 +5,7 @@ import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MySelect from '../../components/input/MySelect.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { formatCurrency, formatDate } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
@@ -66,9 +66,10 @@ onMounted(() => load());
       </tr>
     </MyTable>
 
-    <PrevNextPagination
+    <NumberedPagination
       :page="tuitionStore.adminBillsPage.page"
-      :has-next="tuitionStore.adminBillsPage.hasNext"
+      :total-count="tuitionStore.adminBillsPage.totalCount"
+      :size="tuitionStore.adminBillsPage.size"
       @page-change="load"
     />
   </MyPageContainer>
