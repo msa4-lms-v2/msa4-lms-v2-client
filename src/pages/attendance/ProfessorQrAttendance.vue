@@ -22,7 +22,7 @@ import MyModal from "../../components/common/MyModal.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MySelect from "../../components/input/MySelect.vue";
-import MyPageContainer from "../../components/layout/MyPageContainer.vue";
+import MyPageContainer from "../../components/layout/ProfessorPageContainer.vue";
 import MyStatusBadge from "../../components/common/MyStatusBadge.vue";
 
 const lectures = ref([]);
@@ -264,7 +264,7 @@ onBeforeUnmount(stopLiveUpdates);
           <MyButton
             class="professor-primary"
             color="deep-blue"
-            size="big"
+            size="middle"
             :content="isOpening ? '생성 중...' : '세션 생성'"
             :disabled="!selectedClassId || hasOpenSession || isOpening"
             @click="createSession"
@@ -278,11 +278,6 @@ onBeforeUnmount(stopLiveUpdates);
       <section class="current-section">
         <div class="section-title-row">
           <h2>현재 출석 세션</h2>
-          <MyStatusBadge
-            v-if="hasOpenSession"
-            label="진행 중"
-            variant="success"
-          />
         </div>
 
         <div v-if="hasOpenSession" class="session-panel panel">
@@ -301,10 +296,6 @@ onBeforeUnmount(stopLiveUpdates);
                 }}명</span
               >
             </div>
-            <p class="session-name">
-              {{ currentSession.courseName }} ·
-              {{ currentSession.sectionNo }}분반
-            </p>
           </div>
 
           <div class="qr-card">
@@ -370,7 +361,7 @@ onBeforeUnmount(stopLiveUpdates);
         </MyTable>
       </section>
 
-      <MyModal :is-open="isQrExpanded" max-width="790px" @close="toggleQr">
+      <MyModal :is-open="isQrExpanded" max-width="820px" @close="toggleQr">
         <div v-if="currentSession" class="expanded-qr">
           <header class="expanded-header">
             <div>
@@ -472,18 +463,18 @@ h2 {
 .professor-primary { background: var(--personal-color-primary-navy); }
 .session-panel {
   display: grid;
-  grid-template-columns: minmax(260px, 0.8fr) minmax(480px, 1.2fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 20px;
   padding: 18px;
 }
 .summary-card,
 .qr-card {
-  min-height: 230px;
+  min-height: 210px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: var(--personal-radius);
 }
 .summary-card {
-  padding: 28px;
+  padding: 24px;
 }
 .muted-label {
   margin: 0 0 12px;
@@ -500,7 +491,7 @@ h2 {
 }
 .count strong {
   color: var(--personal-color-professor-primary-navy);
-  font-size: 2.35rem;
+  font-size: 2rem;
   line-height: 1;
 }
 .count span,
@@ -513,12 +504,13 @@ h2 {
 }
 .qr-card {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 160px minmax(0, 1fr);
   align-items: center;
-  gap: 22px;
-  padding: 18px 20px;
+  gap: 12px;
+  padding: 18px;
 }
 .qr-preview {
+  grid-row: 1 / 3;
   padding: 0;
   background: var(--personal-color-white);
   border: 1px solid var(--personal-color-border-mist);
@@ -527,14 +519,14 @@ h2 {
 }
 .qr-preview canvas {
   display: block;
-  width: 150px !important;
-  height: 150px !important;
+  width: 156px !important;
+  height: 156px !important;
 }
 .qr-copy strong {
   font-size: 0.98rem;
 }
 .qr-copy p {
-  margin: 12px 0 24px;
+  margin: 10px 0 18px;
   color: var(--personal-color-text-faint-fog);
   font-size: 0.8rem;
   line-height: 1.5;
@@ -551,6 +543,8 @@ h2 {
   font-size: 1.5rem;
 }
 .qr-card > :last-child {
+  grid-column: 2;
+  justify-self: end;
   align-self: end;
 }
 .end-row {
@@ -621,7 +615,7 @@ h2 {
   color: var(--personal-color-text-muted-slate);
   font-size: 0.82rem;
 }
-.modal-close {
+.modal-close { width: 32px; height: 32px; min-width: 32px; padding: 0; border-radius: 50%; background: var(--personal-color-bg-surface-frost);
   border: 1px solid var(--personal-color-border-mist);
   font-size: 1.25rem;
 }
@@ -636,7 +630,7 @@ h2 {
 .expanded-summary > div {
   display: flex;
   align-items: baseline;
-  gap: 22px;
+  gap: 12px;
 }
 .expanded-summary > div span {
   color: var(--personal-color-text-faint-fog);
@@ -653,13 +647,15 @@ h2 {
 }
 .expanded-code canvas {
   display: block;
-  width: min(48vw, 420px) !important;
-  height: min(48vw, 420px) !important;
+  width: min(48vw, 420px, calc(100dvh - 340px)) !important;
+  height: min(48vw, 420px, calc(100dvh - 340px)) !important;
   padding: 10px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: var(--personal-radius);
 }
 .expanded-footer {
+  flex-direction: column;
+  gap: 12px;
   position: relative;
   display: flex;
   align-items: center;
@@ -686,8 +682,8 @@ h2 {
   font-size: 1.08rem;
 }
 .expanded-footer > :last-child {
-  position: absolute;
-  right: 0;
+  position: static;
+  align-self: flex-end;
 }
 :deep(.modal-card) {
   max-height: calc(100vh - 36px);
@@ -716,6 +712,7 @@ h2 {
     text-align: center;
   }
   .qr-preview {
+    grid-row: auto;
     justify-self: center;
   }
   .expanded-summary {
@@ -728,8 +725,8 @@ h2 {
     text-align: right;
   }
   .expanded-code canvas {
-    width: min(76vw, 420px) !important;
-    height: min(76vw, 420px) !important;
+    width: min(76vw, 420px, calc(100dvh - 340px)) !important;
+    height: min(76vw, 420px, calc(100dvh - 340px)) !important;
   }
   .expanded-footer {
     flex-direction: column;
@@ -744,4 +741,10 @@ h2 {
     width: 100%;
   }
 }
+.summary-card :deep(.status-badge)::before,
+.expanded-summary :deep(.status-badge)::before {
+  content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px;
+  border-radius: 50%; background: var(--personal-color-status-success-text-forest);
+}
+:deep(.modal-overlay) { backdrop-filter: none; }
 </style>

@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { useCounselingStore } from '../../store/counseling/useCounselingStore';
 
@@ -68,8 +68,8 @@ onMounted(load);
 </template>
 
 <style scoped>
-.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 56px; }
-.summary-grid article { min-height: 120px; padding: 28px; border: 1px solid var(--personal-color-border-mist); border-radius: 12px; background: white; display: flex; flex-direction: column; justify-content: space-between; }
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 32px; }
+.summary-grid article { min-height: 108px; padding: 24px; border: 1px solid var(--personal-color-border-mist); border-radius: 12px; background: white; display: flex; flex-direction: column; justify-content: space-between; }
 .summary-grid span { color: var(--personal-color-text-secondary-steel); }
 .summary-grid strong { color: var(--personal-color-black); font-size: 2rem; }
 .records { margin-top: 56px; }

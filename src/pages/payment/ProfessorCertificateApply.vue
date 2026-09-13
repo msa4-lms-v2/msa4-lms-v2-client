@@ -1,82 +1,120 @@
 <script setup>
 import { ref } from 'vue';
 import { downloadCertificate, issueEmploymentCertificate } from '../../api/certificateApi';
-import MyCard from '../../components/common/MyCard.vue';
-import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MyCard from '../../components/common/MyCard.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
 defineOptions({ name: 'ProfessorCertificateApply' });
 
-const isIssuing = ref(false);
-const issuedDocument = ref(null);
-const isDownloading = ref(false);
-const formError = ref('');
+const certificateTypes = [
+  { value: 'EMPLOYMENT', label: '재직증명서' },
+  { value: 'CAREER', label: '경력증명서' },
+  { value: 'LECTURE_CAREER', label: '강의경력증명서' },
+];
 
-const issue = async () => {
-  if (isIssuing.value || isDownloading.value) return;
-  formError.value = '';
+const historyColumns = [
+  { key: 'documentType', label: '증명서' },
+  { key: 'issuedAt', label: '요청일' },
+  { key: 'status', label: '처리 상태' },
+];
 
-  isIssuing.value = true;
-  try {
-    const response = await issueEmploymentCertificate();
-    issuedDocument.value = response.data.data;
-    await notify('재직증명서가 발급되었습니다.');
-  } catch (error) {
-    formError.value = error.response?.data?.message || '증명서 발급에 실패했습니다.';
-  } finally {
-    isIssuing.value = false;
-  }
+const issuingType = ref(null);
+const issuedDocuments = ref([]);
+
+const savePdf = (issuedDocument, response) => {
+  const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${issuedDocument.documentTypeLabel}.pdf`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 };
 
-const download = async () => {
-  if (!issuedDocument.value || isDownloading.value || isIssuing.value) return;
-  isDownloading.value = true;
+const issueAndDownload = async (certificate) => {
+  if (issuingType.value) return;
+  if (certificate.value !== 'EMPLOYMENT') {
+    await notify(`${certificate.label}는 현재 발급을 지원하지 않습니다.`);
+    return;
+  }
+
+  issuingType.value = certificate.value;
+  let issued = null;
   try {
-    const response = await downloadCertificate(issuedDocument.value.id);
-    const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = '재직증명서.pdf';
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
+    const issueResponse = await issueEmploymentCertificate();
+    issued = issueResponse.data.data;
+    const historyItem = {
+      ...issued,
+      documentTypeLabel: certificate.label.replaceAll(' ', ''),
+      status: '발급 완료',
+    };
+
+    issuedDocuments.value.unshift(historyItem);
+    const downloadResponse = await downloadCertificate(issued.id);
+    savePdf(historyItem, downloadResponse);
+    await notify(`${certificate.label}가 발급되었습니다.`);
   } catch (error) {
-    await notify(error.response?.data?.message || '증명서 다운로드에 실패했습니다.');
+    await notify(issued ? '증명서는 발급되었지만 PDF 다운로드에 실패했습니다. 발급 내역의 발급 완료를 눌러 다시 다운로드해 주세요.' : (error.response?.data?.message || '증명서 발급에 실패했습니다.'));
   } finally {
-    isDownloading.value = false;
+    issuingType.value = null;
+  }
+};
+const downloadAgain = async (item) => {
+  if (issuingType.value) return;
+  issuingType.value = 'DOWNLOAD';
+  try {
+    savePdf(item, await downloadCertificate(item.id));
+  } catch (error) {
+    await notify(error.response?.data?.message || 'PDF 다운로드에 실패했습니다. 발급 내역에서 다시 시도해 주세요.');
+  } finally {
+    issuingType.value = null;
   }
 };
 </script>
 
 <template>
   <MyPageContainer title="증명서 발급">
-    <div class="certificate-grid">
-      <MyCard class="certificate-card">
-        <h3>재직증명서</h3>
-        <div class="form-actions">
-          <MyButton btn-type="button" color="deep-blue" size="big"
-            :content="isIssuing ? '발급 중...' : 'PDF 발급'"
-            :disabled="isIssuing || isDownloading" @click="issue" />
+    <section class="certificate-grid" aria-label="증명서 발급 목록">
+      <MyCard v-for="certificate in certificateTypes" :key="certificate.value" class="certificate-card">
+        <div class="certificate-heading">
+          <span class="certificate-icon" aria-hidden="true">
+            <span class="document-icon">
+              <i></i>
+              <i></i>
+              <i></i>
+            </span>
+          </span>
+          <h3>{{ certificate.label }}</h3>
         </div>
-      </MyCard>
-    </div>
-    <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
 
-    <section class="result-section" aria-live="polite">
-      <h3>이번 발급 내역</h3>
-      <MyTable class="result-table"
-        :columns="[{ key: 'type', label: '증명서' }, { key: 'id', label: '문서 번호' }, { key: 'date', label: '발급 일시' }, { key: 'download', label: '다운로드' }]"
-        :empty="!issuedDocument" empty-message="이 화면에서 발급한 증명서가 없습니다.">
-        <tr v-if="issuedDocument">
-          <td>재직증명서</td>
-          <td>{{ issuedDocument.id }}</td>
-          <td>{{ formatDate(issuedDocument.issuedAt, 'YYYY-MM-DD HH:mm') }}</td>
-          <td class="download-cell">
-            <MyButton btn-type="button" color="deep-blue" size="middle"
-              :content="isDownloading ? '받는 중...' : '다운로드'"
-              :disabled="isDownloading || isIssuing" @click="download" />
+        <MyButton
+          btn-type="button"
+          class="issue-button"
+          color="deep-blue"
+          size="middle"
+          :content="issuingType === certificate.value ? '발급 중...' : 'PDF 발급'"
+          :disabled="Boolean(issuingType)"
+          @click="issueAndDownload(certificate)"
+        />
+      </MyCard>
+    </section>
+
+    <section class="history-section" aria-labelledby="certificate-history-title">
+      <h3 id="certificate-history-title">발급 내역</h3>
+      <MyTable
+        :columns="historyColumns"
+        :empty="issuedDocuments.length === 0"
+        empty-message="발급한 증명서가 없습니다."
+      >
+        <tr v-for="item in issuedDocuments" :key="item.id">
+          <td>{{ item.documentTypeLabel }}</td>
+          <td>{{ formatDate(item.issuedAt) }}</td>
+                    <td class="status-cell">
+            <button class="download-again" type="button" :disabled="Boolean(issuingType)"
+              :aria-label="`${item.documentTypeLabel} 다시 다운로드`" @click="downloadAgain(item)">{{ item.status }}</button>
           </td>
         </tr>
       </MyTable>
@@ -88,49 +126,113 @@ const download = async () => {
 .certificate-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 16px;
 }
+
 .certificate-card {
-  min-height: 180px;
-  box-sizing: border-box;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 24px;
+  position: relative;
+  min-height: 176px;
+  padding: 18px 16px;
 }
-h3 {
+
+.certificate-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.certificate-icon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #7ca6ff;
+  border-radius: 50%;
+  color: var(--personal-color-primary-navy);
+}
+
+.document-icon {
+  display: grid;
+  width: 18px;
+  height: 24px;
+  grid-template-rows: repeat(3, 1px);
+  align-content: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid currentcolor;
+  border-radius: 1px;
+}
+
+.document-icon i {
+  display: block;
+  width: 100%;
+  background: currentcolor;
+}
+
+.certificate-heading h3,
+.history-section h3 {
   margin: 0;
   color: var(--personal-color-primary-text-navy);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
+
+.issue-button {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  width: 132px;
+  height: 38px;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
-.form-error {
-  margin: 16px 0 0;
-  color: var(--personal-color-status-fail-text-maroon);
-  font-size: 0.85rem;
-}
-.result-section {
+
+.history-section {
   margin-top: 24px;
 }
-.result-section h3 {
-  margin-bottom: 12px;
+
+.history-section h3 {
+  margin-bottom: 10px;
 }
-.result-table {
-  overflow-x: auto;
+
+.history-section :deep(.table-container) {
+  border-color: var(--personal-color-border-mist);
+  border-radius: 6px;
 }
-.result-table :deep(table) {
-  min-width: 600px;
+
+.history-section :deep(.my-table th) {
+  padding: 11px 30px; text-align: left;
+  border-bottom-width: 1px;
+  font-size: 0.69rem;
+  font-weight: 600;
 }
-.result-table :deep(td.download-cell) {
-  text-align: right;
+
+.history-section :deep(.my-table td) {
+  padding: 12px 30px; text-align: left;
+  border-bottom: 1px solid var(--personal-color-table-border-frost);
+  font-size: 0.72rem;
 }
-@media (max-width: 760px) {
+
+.history-section :deep(.my-table tbody tr:last-child td) {
+  border-bottom: 0;
+}
+
+.history-section :deep(.empty-text) {
+  padding: 26px !important;
+  font-size: 0.78rem;
+}
+
+.status-cell {
+  font-weight: 500;
+}
+
+@media (max-width: 860px) {
   .certificate-grid {
     grid-template-columns: 1fr;
   }
 }
+.download-again { border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.download-again:hover { text-decoration: underline; }
+.download-again:disabled { cursor: wait; }
 </style>

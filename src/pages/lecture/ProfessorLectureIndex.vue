@@ -2,7 +2,7 @@
 import { onMounted, reactive, ref } from 'vue';
 import { getMyLectures } from '../../api/lectureApi';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
