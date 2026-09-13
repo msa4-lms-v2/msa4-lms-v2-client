@@ -253,6 +253,5 @@ textarea:focus { outline:none; border-color:var(--personal-color-admin-secondary
 .detail-box p { margin:4px 0; color:var(--personal-color-text-secondary-steel); }
 .button-row { display:flex; justify-content:flex-end; }
 .admin-search :deep(.deep-blue) { background:var(--personal-color-admin-secondary-indigo); }
-:deep(.secondary-button) { border:1px solid var(--personal-color-border-mist); color:var(--personal-color-admin-secondary-indigo); }
 @media (max-width: 1180px) { .dismissal-layout { grid-template-columns:1fr; } }
 </style>

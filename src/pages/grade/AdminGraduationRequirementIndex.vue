@@ -174,6 +174,5 @@ onMounted(async () => {
 .department-name { font-weight: 700; }
 .department-code { margin-top: 3px; color: var(--personal-color-text-muted-slate); font-size: 0.8rem; }
 .admin-search :deep(.deep-blue) { background: var(--personal-color-admin-secondary-indigo); }
-:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
 @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } }
 </style>

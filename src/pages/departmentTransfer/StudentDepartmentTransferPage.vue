@@ -5,6 +5,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import AcademicChangeGuidelineModal from '../../components/common/AcademicChangeGuidelineModal.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -74,7 +75,7 @@ const statusLabels = {
 };
 
 const profileStore = useProfileStore();
-const fileInput = ref(null);
+const fileSelect = ref(null);
 const attachments = ref([]);
 const departments = ref([]);
 const periods = ref([]);
@@ -155,17 +156,14 @@ const validateHwp = (file) => {
 
 const resetAttachment = () => {
   attachments.value = [];
-  if (fileInput.value) fileInput.value.value = '';
+  fileSelect.value?.reset();
 };
 
-const openFilePicker = () => fileInput.value?.click();
-
-const onFileChange = (event) => {
-  const selected = Array.from(event.target.files || []);
+const onFileChange = (files) => {
+  const selected = Array.from(files || []);
   const validationMessage = selected.map(validateHwp).find(Boolean) || '';
   if (validationMessage) {
     formError.value = validationMessage;
-    event.target.value = '';
     return;
   }
   const combined = [...attachments.value, ...selected].filter(
@@ -177,11 +175,9 @@ const onFileChange = (event) => {
   );
   if (combined.length > ATTACHMENTS_REQUIRED_COUNT) {
     formError.value = '전과 첨부파일은 정확히 2개만 선택할 수 있습니다.';
-    event.target.value = '';
     return;
   }
   attachments.value = combined;
-  event.target.value = '';
   formError.value = '';
 };
 
@@ -505,21 +501,11 @@ onMounted(async () => {
                 <span>증빙파일 (hwp, hwpx 가능)</span>
               </div>
               <div class="file-picker">
-                <input
-                  ref="fileInput"
-                  class="visually-hidden"
-                  type="file"
+                <MyFileSelectButton
+                  ref="fileSelect"
                   accept=".hwp,.hwpx,application/x-hwp,application/vnd.hancom.hwpx"
                   multiple
                   @change="onFileChange"
-                >
-                <MyButton
-                  btn-type="button"
-                  class="file-select-action"
-                  color="white"
-                  size="middle"
-                  content="파일 선택"
-                  @click="openFilePicker"
                 />
                 <span
                   class="file-count"
@@ -794,17 +780,10 @@ onMounted(async () => {
   background: var(--personal-color-white);
 }
 
-.file-select-action,
 .modal-cancel-action {
   flex: 0 0 auto;
   border: 1px solid var(--personal-color-border-mist);
   background: var(--personal-color-bg-surface-frost);
-}
-
-.file-select-action {
-  width: 64px;
-  height: 24px;
-  font-size: 0.7rem;
 }
 
 .file-count {
@@ -907,18 +886,6 @@ onMounted(async () => {
 
 .cancel-field {
   font-size: 0.9rem;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 @media (max-width: 900px) {

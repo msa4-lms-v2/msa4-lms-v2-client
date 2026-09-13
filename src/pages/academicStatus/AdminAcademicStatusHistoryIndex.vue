@@ -146,7 +146,6 @@ onMounted(async () => {
 .filter-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: end; padding: 20px; margin-bottom: 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; background: white; }
 .filter-card label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; font-weight: 600; }
 .filter-actions { display: flex; gap: 8px; justify-content: flex-end; grid-column: span 3; }
-.reset-action { border: 1px solid var(--personal-color-black); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .list-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 10px; background: white; }
 .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }

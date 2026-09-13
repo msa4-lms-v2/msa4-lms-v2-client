@@ -618,12 +618,6 @@ onMounted(async () => {
   margin-top: 18px;
 }
 
-.list-button {
-  border: 1px solid var(--personal-color-border-mist) !important;
-  color: var(--personal-color-primary-navy) !important;
-  font-weight: 700;
-}
-
 .anonymous-notice {
   margin-top: 32px;
   padding: 18px 20px;

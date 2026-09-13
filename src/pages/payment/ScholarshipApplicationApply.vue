@@ -71,21 +71,11 @@
             <div class="form-group attachment-group">
               <span>증빙파일 (pdf 가능)</span>
               <div class="file-picker">
-                <input
-                  ref="fileInput"
-                  class="visually-hidden"
-                  type="file"
+                <MyFileSelectButton
+                  ref="fileSelect"
                   accept=".pdf"
                   multiple
                   @change="onFilesSelected"
-                >
-                <MyButton
-                  btn-type="button"
-                  class="file-select-action"
-                  color="white"
-                  size="middle"
-                  content="파일 선택"
-                  @click="openFilePicker"
                 />
                 <span
                   class="file-count"
@@ -143,6 +133,7 @@ import { useScholarshipApplicationStore } from '../../store/payment/useScholarsh
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import { notify } from '../../composables/useDialog';
 import { formatCurrency } from '../../util/format';
@@ -162,7 +153,7 @@ const form = ref({
   reason: '',
   files: [],
 });
-const fileInput = ref(null);
+const fileSelect = ref(null);
 const submitSuccess = ref(false);
 const submitConflict = ref(false);
 
@@ -192,8 +183,6 @@ const fetchPeriod = async () => {
   }
 };
 
-const openFilePicker = () => fileInput.value?.click();
-
 const resetApplication = () => {
   form.value = {
     type: 'MERIT',
@@ -202,12 +191,11 @@ const resetApplication = () => {
     files: [],
   };
   submitConflict.value = false;
-  if (fileInput.value) fileInput.value.value = '';
+  fileSelect.value?.reset();
 };
 
-const onFilesSelected = async (event) => {
-  const selected = Array.from(event.target.files || []);
-  event.target.value = '';
+const onFilesSelected = async (files) => {
+  const selected = Array.from(files || []);
   const combined = [...form.value.files, ...selected].filter((file, index, all) => all.findIndex((item) => (
     item.name === file.name && item.size === file.size && item.lastModified === file.lastModified
   )) === index);
@@ -325,18 +313,6 @@ textarea {
   resize: vertical;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 .file-picker {
   display: flex;
   align-items: center;
@@ -358,10 +334,6 @@ textarea {
 .file-count--attached {
   color: var(--personal-color-primary-navy);
   font-weight: 500;
-}
-
-.file-select-action {
-  border: 1px solid var(--personal-color-border-mist);
 }
 
 .file-chips {
@@ -440,10 +412,6 @@ textarea {
   padding-top: 18px;
 }
 
-.cancel-button {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
 
 @media (max-width: 640px) {
   .available-scholarships {

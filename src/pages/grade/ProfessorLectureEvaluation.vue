@@ -297,7 +297,6 @@ onMounted(async () => {
 .detail-primary-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-left: auto; }
 
 
-:deep(.secondary-button) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-primary-navy); }
 .empty-detail { padding: 60px 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: white; color: var(--personal-color-text-muted-slate); text-align: center; }
 .comment-list { max-height: 440px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
 .comment-list li { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--personal-color-border-mist); }

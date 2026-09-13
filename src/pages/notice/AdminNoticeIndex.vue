@@ -281,9 +281,4 @@ onMounted(() => load());
 .admin-search :deep(.deep-blue) {
   background: var(--personal-color-admin-secondary-indigo);
 }
-
-:deep(.secondary-button) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-admin-secondary-indigo);
-}
 </style>
