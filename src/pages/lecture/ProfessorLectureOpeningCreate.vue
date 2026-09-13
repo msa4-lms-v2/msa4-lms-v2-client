@@ -11,6 +11,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
+import MyCard from '../../components/common/MyCard.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -285,7 +286,7 @@ onMounted(async () => {
         </div>
 
         <div class="form-column">
-          <section class="section-box">
+          <MyCard class="section-box">
             <div class="common-section-header">
               <h3>기본 정보 설정</h3>
             </div>
@@ -316,9 +317,9 @@ onMounted(async () => {
                 <MyInput id="opening-classroom" v-model="form.classroom" maxlength="50" placeholder="강의실을 입력해 주세요." />
               </div>
             </div>
-          </section>
+          </MyCard>
 
-          <section class="schedule-section">
+          <MyCard class="schedule-section">
             <div class="common-section-header">
               <h3>강의 시간표 설정</h3>
             </div>
@@ -337,7 +338,7 @@ onMounted(async () => {
               </div>
               <MyButton
                 btn-type="button"
-                class="add-button professor-primary"
+                class="add-button"
                 color="deep-blue"
                 size="small"
                 content="추가"
@@ -353,9 +354,9 @@ onMounted(async () => {
               </div>
             </div>
             <p v-else class="empty-schedule-text">등록된 강의 시간이 없습니다. 최소 1개 이상 추가해 주세요.</p>
-          </section>
+          </MyCard>
 
-          <section class="ratio-section">
+          <MyCard class="ratio-section">
             <div class="common-section-header">
               <h3>성적 평가 비율 설정 (합계 100%)</h3>
             </div>
@@ -381,21 +382,22 @@ onMounted(async () => {
               현재 평가 비율 합계: <strong>{{ ratioTotal }}%</strong>
               <span v-if="ratioTotal !== 100"> (100%가 되어야 신청할 수 있습니다)</span>
             </div>
-          </section>
+          </MyCard>
         </div>
 
         <div class="form-column">
-          <section class="syllabus-section">
+          <MyCard class="syllabus-section">
             <div class="common-section-header">
               <h3>강의계획서</h3>
             </div>
             <textarea
               id="opening-syllabus"
+              aria-label="강의계획서 내용"
               v-model="form.syllabus"
               maxlength="65535"
               placeholder="강의 목표, 교재, 평가 방법, 주차별 계획 등을 상세히 입력해 주세요."
             ></textarea>
-          </section>
+          </MyCard>
         </div>
 
         <p v-if="formError" class="form-error full-width" role="alert">{{ formError }}</p>
@@ -413,7 +415,6 @@ onMounted(async () => {
           />
           <MyButton
             btn-type="submit"
-            class="professor-primary"
             color="deep-blue"
             size="big"
             :content="isSubmitting
@@ -477,17 +478,13 @@ onMounted(async () => {
 
 <style scoped>
 .content-card {
-  padding: 24px;
   margin-bottom: 28px;
-  border: 1px solid var(--personal-color-table-border-frost);
-  border-radius: var(--personal-radius);
-  background: var(--personal-color-white);
 }
 
 .create-form-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 40px;
+  gap: 20px;
 }
 
 .full-width {
@@ -497,7 +494,7 @@ onMounted(async () => {
 .form-column {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .edit-notice {
@@ -517,10 +514,7 @@ onMounted(async () => {
 .schedule-section,
 .ratio-section,
 .syllabus-section {
-  padding: 24px;
-  border: 1px solid var(--personal-color-table-border-frost);
-  border-radius: var(--personal-radius);
-  background: var(--personal-color-bg-surface-frost);
+  padding: 20px;
 }
 
 .common-section-header {
@@ -726,13 +720,9 @@ onMounted(async () => {
   color: var(--personal-color-status-fail-text-maroon);
 }
 
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
-}
-
 :deep(.secondary-button) {
   border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-professor-primary-navy);
+  color: var(--personal-color-primary-navy);
 }
 
 @media (max-width: 1000px) {
