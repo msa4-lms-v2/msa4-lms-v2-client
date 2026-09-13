@@ -97,7 +97,6 @@ watch(() => route.path, path => {
     || path.startsWith('/admin/counseling')
     || path.startsWith('/admin/withdrawals')
     || path.startsWith('/admin/dismissals')
-    || path.startsWith('/admin/grades/retake-reflection')
   ) {
     activeMenus.value.adminAcademicOps = true;
   }
@@ -577,9 +576,6 @@ const toggleMenu = (menuKey) => {
             </router-link>
             <router-link to="/admin/withdrawals" class="submenu-item">
               {{ getMenuTitle("/admin/withdrawals") }}
-            </router-link>
-            <router-link to="/admin/grades/retake-reflection" class="submenu-item">
-              {{ getMenuTitle("/admin/grades/retake-reflection") }}
             </router-link>
             <router-link to="/admin/dismissals" class="submenu-item">
               {{ getMenuTitle("/admin/dismissals") }}

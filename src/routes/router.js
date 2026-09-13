@@ -20,7 +20,6 @@ const routes = [
     { path: '/admin/departments/new', name: 'AdminDepartmentCreate', component: () => import('../pages/department/AdminDepartmentForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/departments/:departmentId', name: 'AdminDepartmentDetail', component: () => import('../pages/department/AdminDepartmentForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/graduation-requirements', name: 'AdminGraduationRequirementIndex', component: () => import('../pages/grade/AdminGraduationRequirementIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
-    { path: '/admin/grades/retake-reflection', name: 'AdminRetakeGradeReflection', component: () => import('../pages/grade/AdminRetakeGradeReflection.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/dismissals', name: 'AdminDismissalIndex', component: () => import('../pages/dismissal/AdminDismissalIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/academic-schedules', name: 'AcademicScheduleIndex', component: () => import('../pages/academicSchedule/AcademicScheduleIndex.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
     { path: '/admin/academic-schedules/new', name: 'AcademicScheduleCreate', component: () => import('../pages/academicSchedule/AcademicScheduleForm.vue'), meta: { requiresAuth: true, roles: ['ADMIN'] } },
