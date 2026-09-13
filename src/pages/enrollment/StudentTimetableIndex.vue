@@ -424,7 +424,7 @@ h3 {
 }
 
 .course-name {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 @media (max-width: 640px) {
