@@ -581,7 +581,7 @@ onMounted(async () => {
 }
 
 .professor-search :deep(button.deep-blue) {
-  background: var(--personal-color-professor-primary-navy);
+  background: var(--personal-color-primary-navy);
 }
 
 .admin-secondary,
@@ -595,7 +595,7 @@ onMounted(async () => {
 }
 
 .professor-secondary {
-  color: var(--personal-color-professor-primary-navy);
+  color: var(--personal-color-primary-navy);
 }
 
 @media (max-width: 1100px) {

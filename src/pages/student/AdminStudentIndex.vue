@@ -79,7 +79,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="학생 관리" subtitle="전체 학생을 이름·학과·학년·입학년도·학적 상태로 검색합니다.">
+  <MyPageContainer title="학생 관리">
     <MySearchFilter submit-text="조회" @search="applyFilters">
       <div class="search-group">
         <label for="student-keyword">이름</label>

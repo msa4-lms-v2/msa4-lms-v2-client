@@ -1,9 +1,12 @@
 <template>
   <MyPageContainer title="장학금 수혜 내역">
     <div v-if="isLoading" class="notice">불러오는 중...</div>
-    <div v-else-if="filteredScholarships.length === 0" class="notice">
-      장학금 수혜 내역이 없습니다.
-    </div>
+    <section v-else-if="filteredScholarships.length === 0" class="summary-card empty-summary" aria-label="장학금 수혜 요약">
+      <div class="summary-item emphasis">
+        <span>총 수혜 금액</span>
+        <strong>{{ formatCurrency(0) }}</strong>
+      </div>
+    </section>
     <div v-else>
       <section class="summary-card" aria-label="장학금 수혜 요약">
         <div class="summary-item">
@@ -191,6 +194,12 @@ onMounted(async () => {
 
 .summary-item.emphasis strong {
   color: var(--personal-color-primary-navy);
+}
+
+.summary-card.empty-summary {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
 }
 
 .history-section,

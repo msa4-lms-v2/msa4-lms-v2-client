@@ -180,13 +180,14 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="제적 처리" subtitle="관리자가 제적 후보를 등록하고 대기 건을 확정 또는 취소합니다.">
-    <MySearchFilter class="admin-search" submit-text="조회" @search="load(1)">
+  <MyPageContainer title="제적 처리">
+    <MySearchFilter class="admin-search" :show-submit="false">
       <div class="search-group"><label for="dismissal-student-id">학생 ID</label><MyInput id="dismissal-student-id" v-model="filters.studentId" numeric-only placeholder="예: 1" /></div>
       <div class="search-group"><label for="dismissal-student-name">학생명</label><MyInput id="dismissal-student-name" v-model="filters.studentName" placeholder="학생명" @keyup-enter="load(1)" /></div>
       <div class="search-group"><label for="dismissal-department-id">학과 ID</label><MyInput id="dismissal-department-id" v-model="filters.departmentId" numeric-only placeholder="예: 130" /></div>
       <div class="search-group"><label for="dismissal-reason-type">제적 종류</label><MySelect id="dismissal-reason-type" v-model="filters.reasonType"><option value="">전체</option><option v-for="(label, value) in reasonTypeLabel" :key="value" :value="value">{{ label }}</option></MySelect></div>
       <div class="search-group"><label for="dismissal-status">상태</label><MySelect id="dismissal-status" v-model="filters.status"><option value="">전체</option><option value="PENDING">대기</option><option value="CONFIRMED">확정</option><option value="CANCELLED">취소</option></MySelect></div>
+      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
       <MyButton btn-type="button" class="secondary-button" color="white" size="middle" content="초기화" @click="resetFilters" />
     </MySearchFilter>
 

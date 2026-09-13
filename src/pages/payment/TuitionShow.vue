@@ -8,7 +8,6 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MySelect from '../../components/input/MySelect.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { notify } from '../../composables/useDialog';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
@@ -253,10 +252,7 @@ onMounted(async () => {
           <div v-for="item in sortedPlanItems" :key="item.id" class="round-card">
             <div class="round-header">
               <span class="round-no">{{ item.roundNo }}회</span>
-              <MyStatusBadge
-                :label="INSTALLMENT_ITEM_STATUS_LABEL[item.status]"
-                :variant="INSTALLMENT_ITEM_STATUS_VARIANT[item.status]"
-              />
+              <span :class="['status-text', `status-text--${INSTALLMENT_ITEM_STATUS_VARIANT[item.status]}`]">{{ INSTALLMENT_ITEM_STATUS_LABEL[item.status] }}</span>
             </div>
             <span class="round-amount">{{ formatCurrency(item.amount) }}</span>
             <span class="round-due">{{ formatDate(item.dueDate, 'MM.DD') }}</span>
@@ -268,6 +264,22 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text--processing {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text--warning {
+  color: var(--personal-color-status-warning-text-amber);
+}
+
+.status-text--fail {
+  color: var(--personal-color-status-fail-text-maroon);
+}
+
 .panels {
   display: flex;
   flex-direction: column;
