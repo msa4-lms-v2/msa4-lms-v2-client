@@ -68,25 +68,213 @@ onMounted(async () => { await loadTemplates(); await loadSchedule(); });
 </script>
 
 <template>
-  <MyPageContainer :title="isEdit ? '학사일정 상세 · 수정' : '학사일정 작성'" subtitle="시작·종료일을 기준으로 서버가 학년도와 학기를 자동 지정합니다.">
+  <MyPageContainer :title="isEdit ? '학사일정 상세 · 수정' : '학사일정 작성'">
     <div v-if="loading" class="loading">학사일정을 불러오는 중입니다...</div>
     <form v-else class="schedule-form" @submit.prevent="save">
-      <section class="form-card"><h3>학사일정 정보</h3>
-        <div v-if="isEdit" class="field full"><label>일정번호</label><span class="readonly-value">{{ scheduleId }}</span></div>
-        <div class="field full"><label for="category">일정 분류 <em>*</em></label><MySelect id="category" v-model="form.category" :disabled="isEdit" @change="applyTemplate"><option value="">선택해 주세요</option><option v-for="template in templates" :key="template.category" :value="template.category">{{ template.label }}</option></MySelect><small v-if="isEdit">기간 제어 대상이 달라질 수 있어 일정 분류는 등록 후 변경할 수 없습니다.</small></div>
-        <div class="field full"><label for="title">일정명 <em>*</em></label><MyInput id="title" v-model="form.title" placeholder="일정명을 입력해 주세요" /></div>
-        <div class="field full"><label for="content">일정 내용</label><textarea id="content" v-model="form.content" maxlength="5000" placeholder="일정 내용을 입력해 주세요" /></div>
-        <div class="field"><label for="target">공지 대상 <em>*</em></label><MySelect id="target" v-model="form.targetRole"><option value="ALL">전체</option><option value="STUDENT">학생</option><option value="PROFESSOR">교수</option></MySelect></div>
-        <div class="field"><label for="start-date">시작일 <em>*</em></label><MyInput id="start-date" v-model="form.startDate" type="date" /></div>
-        <div class="field"><label for="end-date">종료일</label><MyInput id="end-date" v-model="form.endDate" type="date" /></div>
-        <div v-if="isEdit" class="field full"><label for="reason">수정 사유 <em>*</em></label><MyInput id="reason" v-model="form.reason" placeholder="예: 신청 기간 연장" /></div>
+      <section class="form-card">
+        <h3>학사일정 정보</h3>
+        <div v-if="isEdit" class="field full">
+          <label>일정번호</label>
+          <span class="readonly-value">{{ scheduleId }}</span>
+        </div>
+        <div class="field full">
+          <label for="category">일정 분류 <em>*</em></label>
+          <MySelect
+            id="category"
+            v-model="form.category"
+            :disabled="isEdit"
+            @change="applyTemplate"
+          >
+            <option value="">선택해 주세요</option>
+            <option
+              v-for="template in templates"
+              :key="template.category"
+              :value="template.category"
+            >
+              {{ template.label }}
+            </option>
+          </MySelect>
+          <small v-if="isEdit">
+            기간 제어 대상이 달라질 수 있어 일정 분류는 등록 후 변경할 수 없습니다.
+          </small>
+        </div>
+        <div class="field full">
+          <label for="title">일정명 <em>*</em></label>
+          <MyInput id="title" v-model="form.title" placeholder="일정명을 입력해 주세요" />
+        </div>
+        <div class="field full">
+          <label for="content">일정 내용</label>
+          <textarea
+            id="content"
+            v-model="form.content"
+            maxlength="5000"
+            placeholder="일정 내용을 입력해 주세요"
+          />
+        </div>
+        <div class="field">
+          <label for="target">공지 대상 <em>*</em></label>
+          <MySelect id="target" v-model="form.targetRole">
+            <option value="ALL">전체</option>
+            <option value="STUDENT">학생</option>
+            <option value="PROFESSOR">교수</option>
+          </MySelect>
+        </div>
+        <div class="field">
+          <label for="start-date">시작일 <em>*</em></label>
+          <MyInput id="start-date" v-model="form.startDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="end-date">종료일</label>
+          <MyInput id="end-date" v-model="form.endDate" type="date" />
+        </div>
+        <div v-if="isEdit" class="field full">
+          <label for="reason">수정 사유 <em>*</em></label>
+          <MyInput id="reason" v-model="form.reason" placeholder="예: 신청 기간 연장" />
+        </div>
       </section>
-      <aside class="summary-card"><h3>일정 정보 확인</h3><dl><dt>일정 분류</dt><dd>{{ selectedTemplate?.label || '-' }}</dd><dt>일정명</dt><dd>{{ form.title || '-' }}</dd><dt>공지 대상</dt><dd>{{ { ALL: '전체', STUDENT: '학생', PROFESSOR: '교수' }[form.targetRole] }}</dd><dt>연도</dt><dd>{{ assignment ? `${assignment.academicYear}학년도` : '저장 후 자동 지정' }}</dd><dt>학기</dt><dd>{{ assignment ? termLabel[assignment.term] : '저장 후 자동 지정' }}</dd><dt>시작일</dt><dd>{{ form.startDate || '-' }}</dd><dt>종료일</dt><dd>{{ form.endDate || '-' }}</dd></dl></aside>
-      <div class="actions"><MyButton btn-type="button" color="white" size="middle" content="목록" @click="router.push({ name: 'AcademicScheduleIndex' })" /><MyButton type="submit" color="deep-blue" size="middle" :disabled="saving" :content="saving ? '저장 중' : isEdit ? '수정 저장' : '등록'" /></div>
+      <aside class="summary-card">
+        <h3>일정 정보 확인</h3>
+        <dl>
+          <dt>일정 분류</dt>
+          <dd>{{ selectedTemplate?.label || '-' }}</dd>
+          <dt>일정명</dt>
+          <dd>{{ form.title || '-' }}</dd>
+          <dt>공지 대상</dt>
+          <dd>{{ { ALL: '전체', STUDENT: '학생', PROFESSOR: '교수' }[form.targetRole] }}</dd>
+          <dt>연도</dt>
+          <dd>{{ assignment ? `${assignment.academicYear}학년도` : '저장 후 자동 지정' }}</dd>
+          <dt>학기</dt>
+          <dd>{{ assignment ? termLabel[assignment.term] : '저장 후 자동 지정' }}</dd>
+          <dt>시작일</dt>
+          <dd>{{ form.startDate || '-' }}</dd>
+          <dt>종료일</dt>
+          <dd>{{ form.endDate || '-' }}</dd>
+        </dl>
+      </aside>
+      <div class="actions">
+        <MyButton
+          btn-type="button"
+          color="white"
+          size="middle"
+          content="목록"
+          @click="router.push({ name: 'AcademicScheduleIndex' })"
+        />
+        <MyButton
+          type="submit"
+          color="admin-indigo"
+          size="middle"
+          :disabled="saving"
+          :content="saving ? '저장 중' : isEdit ? '수정 저장' : '등록'"
+        />
+      </div>
     </form>
   </MyPageContainer>
 </template>
 
 <style scoped>
-.schedule-form { display:grid; grid-template-columns:minmax(0, 1.7fr) minmax(280px, .8fr); gap:16px; }.form-card,.summary-card { background:#fff; border:1px solid var(--personal-color-border-mist); border-radius:8px; padding:22px; }.form-card h3,.summary-card h3 { margin:0 0 20px; font-size:1rem; border-bottom:1px solid var(--personal-color-border-mist); padding-bottom:12px; }.field { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }.full { grid-column:1 / -1; }.form-card { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; align-content:start; }.form-card h3 { grid-column:1 / -1; }.field label { font-size:.86rem; font-weight:700; }.field em { color:#d33; font-style:normal; }.field small { color:var(--personal-color-text-secondary-steel); font-size:.76rem; }.readonly-value { color:var(--personal-color-text-secondary-steel); font-size:.9rem; } textarea { min-height:120px; resize:vertical; padding:10px 12px; border:1px solid var(--personal-color-border-mist); border-radius:4px; font:inherit; }.summary-card dl { display:grid; grid-template-columns:90px 1fr; gap:15px 10px; font-size:.88rem; }.summary-card dt { color:var(--personal-color-text-secondary-steel); }.summary-card dd { margin:0; font-weight:600; overflow-wrap:anywhere; }.actions { grid-column:1 / -1; display:flex; justify-content:flex-end; gap:10px; }.loading { padding:48px; text-align:center; } @media (max-width:850px) { .schedule-form { grid-template-columns:1fr; }.form-card { grid-template-columns:1fr; } }
+.schedule-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+  gap: 16px;
+}
+
+.form-card,
+.summary-card {
+  padding: 22px;
+  background: var(--personal-color-white);
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
+}
+
+.form-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+  align-content: start;
+}
+
+.form-card h3,
+.summary-card h3 {
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--personal-color-border-mist);
+}
+
+.form-card h3,
+.full {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.field label {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.field em {
+  color: #d33;
+  font-style: normal;
+}
+
+.field small {
+  color: var(--personal-color-text-secondary-steel);
+  font-size: 0.76rem;
+}
+
+.readonly-value {
+  color: var(--personal-color-text-secondary-steel);
+  font-size: 0.9rem;
+}
+
+textarea {
+  min-height: 120px;
+  padding: 10px 12px;
+  font: inherit;
+  resize: vertical;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 4px;
+}
+
+.summary-card dl {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 15px 10px;
+  font-size: 0.88rem;
+}
+
+.summary-card dt {
+  color: var(--personal-color-text-secondary-steel);
+}
+
+.summary-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.loading {
+  padding: 48px;
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  .schedule-form,
+  .form-card {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
