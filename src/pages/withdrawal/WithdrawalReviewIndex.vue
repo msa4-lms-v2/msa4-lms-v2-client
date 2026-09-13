@@ -238,7 +238,7 @@ onMounted(loadRequests);
 <template>
   <MyPageContainer
     :title="pageTitle"
-    :subtitle="pageSubtitle"
+    :subtitle="isAdmin ? pageSubtitle : undefined"
   >
     <section class="filter-card">
       <label>
@@ -479,7 +479,7 @@ onMounted(loadRequests);
 .reset-action { border: 1px solid var(--personal-color-border-mist); }
 .admin-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
 .professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
-.professor-primary { background: var(--personal-color-professor-primary-navy); }
+.professor-primary { background: var(--personal-color-primary-navy); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .professor-text { color: var(--personal-color-professor-primary-navy); }
 .admin-text { color: var(--personal-color-admin-secondary-indigo); }

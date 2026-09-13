@@ -71,6 +71,36 @@ const editingRequestId = ref(null);
 const isLoadingEdit = ref(false);
 const history = ref([]);
 const isLoadingHistory = ref(false);
+const importRequestId = ref('');
+const draftKey = () => {
+  const userId = authStore.userInfo?.userId;
+  return userId ? `professor-opening-draft-v1:${userId}` : null;
+};
+const saveDraft = async () => {
+  if (isSubmitting.value || isLoadingEdit.value || editingRequestId.value) return;
+  try {
+    const key = draftKey();
+    if (!key) throw new Error();
+    sessionStorage.setItem(key, JSON.stringify({ form: { ...form }, schedules: schedules.value }));
+    await notify('이 브라우저 탭에 임시저장했습니다.');
+  } catch {
+    await notify('임시저장할 수 없습니다. 로그인 상태와 브라우저 저장소를 확인해 주세요.');
+  }
+};
+const restoreDraft = async () => {
+  if (isSubmitting.value || isLoadingEdit.value || editingRequestId.value) return;
+  try {
+    const raw = draftKey() && sessionStorage.getItem(draftKey());
+    if (!raw) { await notify('임시저장한 내용이 없습니다.'); return; }
+    const draft = JSON.parse(raw);
+    if (!draft.form || !Array.isArray(draft.schedules)) throw new Error();
+    if (!await confirmDialog('임시저장한 내용으로 현재 입력을 바꾸시겠습니까?')) return;
+    for (const key of Object.keys(form)) form[key] = String(draft.form[key] ?? '');
+    schedules.value = draft.schedules.slice(0, 10).map(({ dayOfWeek, startPeriod, endPeriod }) => ({ dayOfWeek, startPeriod: String(startPeriod), endPeriod: String(endPeriod) }));
+    syllabusEditorKey.value += 1;
+    formError.value = '';
+  } catch { await notify('임시저장한 내용을 불러올 수 없습니다.'); }
+};
 const historyStatus = ref('');
 const historyPage = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 
@@ -191,15 +221,15 @@ const loadHistory = async (pageNumber = 1) => {
   }
 };
 
-const editRequest = async (item) => {
-  if (item.status !== 'PENDING' || isLoadingEdit.value) return;
+const editRequest = async (item, copy = false) => {
+  if ((!copy && item.status !== 'PENDING') || isLoadingEdit.value || isSubmitting.value) return;
   isLoadingEdit.value = true;
   try {
     const response = await getLectureOpeningRequest(item.openingRequestId);
     const detail = response.data.data;
-    editingRequestId.value = detail.openingRequestId;
+    editingRequestId.value = copy ? null : detail.openingRequestId;
     form.courseId = String(detail.courseId);
-    form.semesterId = detail.semesterId;
+    form.semesterId = copy ? '' : detail.semesterId;
     form.sectionNo = detail.sectionNo || '';
     form.requestedCapacity = String(detail.requestedCapacity ?? '');
     form.classroom = detail.classroom || '';
@@ -223,16 +253,19 @@ const editRequest = async (item) => {
   }
 };
 
+const importRequest = async () => {
+  const item = history.value.find((entry) => String(entry.openingRequestId) === String(importRequestId.value));
+  if (!item || isLoadingEdit.value || isSubmitting.value) return;
+  if (await confirmDialog('선택한 신청 내역으로 현재 입력을 바꾸시겠습니까? 개설 학기는 다시 선택해야 합니다.')) await editRequest(item, true);
+};
+
 const submitRequest = async () => {
-  if (isSubmitting.value) return;
+  if (isSubmitting.value || isLoadingEdit.value) return;
   formError.value = validate();
   if (formError.value) return;
 
   const isEditing = Boolean(editingRequestId.value);
-  const confirmed = await confirmDialog(
-    isEditing ? '수정한 내용으로 강의 개설 신청을 보완하시겠습니까?' : '입력한 내용으로 강의 개설을 신청하시겠습니까?',
-  );
-  if (!confirmed) return;
+  const requestId = editingRequestId.value;
 
   const payload = {
     courseId: Number(form.courseId),
@@ -254,10 +287,17 @@ const submitRequest = async () => {
 
   isSubmitting.value = true;
   try {
+    const confirmed = await confirmDialog(
+      isEditing ? '수정한 내용으로 강의 개설 신청을 보완하시겠습니까?' : '입력한 내용으로 강의 개설을 신청하시겠습니까?',
+    );
+    if (!confirmed) return;
     const response = isEditing
-      ? await updateLectureOpeningRequest(editingRequestId.value, payload)
+      ? await updateLectureOpeningRequest(requestId, payload)
       : await createLectureOpeningRequest(payload);
     const saved = response.data.data;
+    if (!isEditing) {
+      try { if (draftKey()) sessionStorage.removeItem(draftKey()); } catch { /* 신청 성공 결과는 유지한다. */ }
+    }
     resetForm();
     await notify(
       isEditing
@@ -285,7 +325,7 @@ onMounted(async () => {
 <template>
   <MyPageContainer title="강의 개설 신청">
     <div class="content-card">
-      <form class="create-form-layout" @submit.prevent="submitRequest">
+      <form class="create-form-layout" :inert="isSubmitting || isLoadingEdit" @submit.prevent="submitRequest">
         <div v-if="editingRequestId" class="edit-notice full-width">
           <strong>신청 번호 {{ editingRequestId }} 수정 중</strong>
           <span>처리 대기 상태에서만 수정할 수 있습니다.</span>
@@ -297,6 +337,16 @@ onMounted(async () => {
               <h3>기본 정보 설정</h3>
             </div>
             <div class="info-grid">
+              <div class="form-group full-width">
+                <label for="opening-import">기존 신청 불러오기</label>
+                <div class="import-controls">
+                  <MySelect id="opening-import" v-model="importRequestId" :disabled="isLoadingHistory || isLoadingEdit || isSubmitting || Boolean(editingRequestId)">
+                    <option value="">신청 내역에서 선택</option>
+                    <option v-for="item in history" :key="item.openingRequestId" :value="String(item.openingRequestId)">{{ item.academicYear }} · {{ item.courseName }} ({{ item.sectionNo }}분반)</option>
+                  </MySelect>
+                  <MyButton btn-type="button" color="deep-blue" size="middle" content="불러오기" :disabled="!importRequestId || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
+                </div>
+              </div>
               <div class="form-group full-width">
                 <label for="opening-course-id">교과목 번호 (필수)</label>
                 <MyInput id="opening-course-id" v-model="form.courseId" numeric-only placeholder="교과목 번호를 입력해 주세요." />
@@ -410,6 +460,8 @@ onMounted(async () => {
         <p v-if="formError" class="form-error full-width" role="alert">{{ formError }}</p>
 
         <div class="form-actions full-width">
+          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장 불러오기" :disabled="isSubmitting || isLoadingEdit" @click="restoreDraft" />
+          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="middle" content="임시저장" :disabled="isSubmitting || isLoadingEdit" @click="saveDraft" />
           <MyButton
             v-if="editingRequestId"
             btn-type="button"
@@ -484,6 +536,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.import-controls { display: flex; gap: 8px; align-items: end; }
+.import-controls select { flex: 1; min-width: 0; }
 .content-card {
   margin-bottom: 28px;
 }

@@ -340,9 +340,7 @@ onMounted(() => load());
   border: 1px solid var(--personal-color-black);
 }
 
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
-}
+.professor-primary { background: var(--personal-color-primary-navy); }
 
 .review-grid {
   display: grid;
