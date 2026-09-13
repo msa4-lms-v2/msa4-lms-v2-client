@@ -176,7 +176,7 @@ onMounted(() => load());
       </div>
 
       <div class="filter-actions">
-        <MyButton color="admin-indigo" size="middle" content="조회" @click="search" />
+        <MyButton color="deep-blue" size="middle" content="조회" @click="search" />
         <MyButton color="white" size="middle" content="초기화" @click="reset" />
       </div>
     </section>
@@ -204,7 +204,7 @@ onMounted(() => load());
             {{ LEAVE_REQUEST_STATUS_LABEL[item.status] || item.status }}
           </td>
           <td>
-            <MyButton color="admin-indigo" size="small" content="확인" @click="openDetail(item)" />
+            <MyButton color="deep-blue" size="small" content="확인" @click="openDetail(item)" />
           </td>
         </tr>
       </MyTable>
@@ -309,7 +309,7 @@ onMounted(() => load());
         <MyButton color="white" size="middle" content="닫기" :disabled="leaveRequestStore.isReviewing" @click="closeDetail" />
         <template v-if="leaveRequestStore.currentRequest?.status === 'PENDING'">
           <MyButton color="red" size="middle" content="반려" :disabled="leaveRequestStore.isReviewing" @click="reject" />
-          <MyButton color="admin-indigo" size="middle" content="승인" :disabled="leaveRequestStore.isReviewing" @click="approve" />
+          <MyButton color="deep-blue" size="middle" content="승인" :disabled="leaveRequestStore.isReviewing" @click="approve" />
         </template>
       </template>
     </MyModal>
@@ -397,7 +397,7 @@ onMounted(() => load());
 }
 
 .result-heading p {
-  color: var(--personal-color-admin-secondary-indigo);
+  color: var(--personal-color-primary-navy);
   font-size: 0.78rem;
   font-weight: 600;
 }

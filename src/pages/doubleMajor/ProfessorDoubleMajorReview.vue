@@ -146,7 +146,7 @@ onMounted(() => load());
   <MyPageContainer
     title="복수전공 신청 검토"
   >
-    <section class="filter-card professor-accent">
+    <section class="filter-card">
       <label>
         신청자
         <input
@@ -329,7 +329,6 @@ onMounted(() => load());
   background: white;
 }
 
-.professor-accent,
 .professor-border {
   border-top: 3px solid var(--personal-color-professor-primary-navy);
 }
