@@ -169,6 +169,10 @@ const selectAttachment = async (event) => {
   form.attachmentFile = file;
 };
 
+const openNewAttachmentPicker = () => {
+  attachmentInput.value?.click();
+};
+
 const submitRequest = async () => {
   if (isSubmitting.value) return;
   if (!form.lectureDate) {
@@ -296,7 +300,7 @@ onMounted(() => loadRequests());
         <div class="form-field date-field">
           <label for="excuse-date">날짜</label>
           <div class="date-chip-wrap">
-            <span>{{ selectedDateLabel }}</span>
+            <span :class="{ 'placeholder-text': !form.lectureDate }">{{ selectedDateLabel }}</span>
             <MyInput
               id="excuse-date"
               v-model="form.lectureDate"
@@ -318,7 +322,7 @@ onMounted(() => loadRequests());
             <option value="">
               {{
                 !form.lectureDate
-                  ? '날짜를 먼저 선택'
+                  ? '과목을 먼저 선택'
                   : isLoadingCourses
                     ? '수업 조회 중'
                     : courseOptions.length === 0
@@ -337,7 +341,7 @@ onMounted(() => loadRequests());
           <MyInput
             id="excuse-reason"
             v-model="form.reason"
-            maxlength="500"
+            maxlength="400"
             placeholder="사유 입력"
           />
         </div>
@@ -347,10 +351,24 @@ onMounted(() => loadRequests());
           <input
             id="excuse-attachment"
             ref="attachmentInput"
+            class="visually-hidden"
             type="file"
             accept=".pdf,application/pdf"
             @change="selectAttachment"
           >
+          <div class="attachment-picker">
+            <MyButton
+              btn-type="button"
+              class="file-select-action"
+              color="white"
+              size="middle"
+              content="파일 선택"
+              @click="openNewAttachmentPicker"
+            />
+            <span :class="{ 'placeholder-text': !form.attachmentFile }">
+              {{ form.attachmentFile?.name || '선택된 파일 없음' }}
+            </span>
+          </div>
         </div>
 
         <div class="button-field">
@@ -358,7 +376,7 @@ onMounted(() => loadRequests());
           <MyButton
             type="submit"
             color="deep-blue"
-            size="small"
+            size="middle"
             :content="isSubmitting ? '신청 중' : '신청'"
             :disabled="isSubmitting"
           />
@@ -470,7 +488,7 @@ onMounted(() => loadRequests());
 
 .request-form {
   display: grid;
-  grid-template-columns: 170px minmax(180px, 1fr) minmax(200px, 1.25fr) minmax(190px, 1fr) 57px;
+  grid-template-columns: 160px minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(210px, 1.1fr) 77px;
   align-items: end;
   gap: 12px;
   padding: 15px;
@@ -492,8 +510,7 @@ onMounted(() => loadRequests());
 }
 
 .form-field :deep(input),
-.form-field :deep(select),
-.attachment-field > input {
+.form-field :deep(select) {
   box-sizing: border-box;
   width: 100%;
   height: 38px;
@@ -502,31 +519,36 @@ onMounted(() => loadRequests());
   font-weight: 400;
 }
 
-.reason-field :deep(input::placeholder) {
-  color: var(--personal-color-text-faint-fog);
-  font-size: 0.9rem;
-  font-weight: 400;
-  opacity: 1;
-}
-
-.attachment-field > input {
-  padding: 3px 8px;
+.attachment-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 40px;
+  padding: 0 4px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);
 }
 
-.attachment-field > input::file-selector-button {
-  height: 29px;
-  margin-right: 10px;
-  padding: 0 10px;
+.file-select-action {
+  flex: 0 0 auto;
   border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  color: var(--personal-color-text-secondary-steel);
   background: var(--personal-color-table-header-smoke);
-  font: inherit;
+}
+
+.attachment-picker > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--personal-color-primary-text-navy);
   font-size: 0.8rem;
-  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-picker > .placeholder-text,
+.date-chip-wrap > .placeholder-text {
+  color: var(--personal-color-text-faint-fog);
 }
 
 .date-chip-wrap {

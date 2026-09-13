@@ -622,11 +622,13 @@ onMounted(async () => {
 }
 
 .file-picker {
-  min-height: 44px;
+  box-sizing: border-box;
+  height: 38px;
+  min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
+  gap: 10px;
+  padding: 4px 5px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);
@@ -634,8 +636,11 @@ onMounted(async () => {
 
 .file-select-action {
   flex: 0 0 auto;
+  width: 64px;
+  height: 24px;
   border: 1px solid var(--personal-color-border-mist);
   background: var(--personal-color-bg-surface-frost);
+  font-size: 0.7rem;
 }
 
 .file-count {
@@ -746,6 +751,11 @@ onMounted(async () => {
   .form-grid,
   .file-chips {
     grid-template-columns: 1fr;
+  }
+
+  .file-picker {
+    height: auto;
+    min-height: 38px;
   }
 
   .file-picker,

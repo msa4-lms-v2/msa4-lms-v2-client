@@ -97,6 +97,7 @@ button:hover {
 
 .white {
   background-color: var(--personal-color-white);
+  border: 1px solid var(--personal-color-border-mist);
   color: var(--personal-color-black);
 }
 

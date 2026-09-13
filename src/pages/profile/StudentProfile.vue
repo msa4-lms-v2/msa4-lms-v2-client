@@ -87,7 +87,9 @@ const academicRows = computed(() => [
       <div class="profile-actions">
         <PasswordChange />
         <MyButton
-          color="deep-blue"
+          btn-type="button"
+          class="info-change-request-button"
+          color="white"
           size="big"
           content="정보 변경 신청"
           @click="router.push('/profile/info-change')"
@@ -147,6 +149,10 @@ const academicRows = computed(() => [
   align-items: center;
   gap: 12px;
   flex: 0 0 auto;
+}
+
+.info-change-request-button {
+  color: var(--personal-color-primary-navy);
 }
 
 .student-intro {

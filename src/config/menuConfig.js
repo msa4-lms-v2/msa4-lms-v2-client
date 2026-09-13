@@ -82,6 +82,7 @@ export const MENU_TITLES_BY_NAME = {
     InstallmentApply: '분할납부 신청',
     StudentCounselingResult: '상담 결과',
     ProfessorCounselingAnswer: '온라인 상담 답변',
+    StudentAttendanceStatus: '출결 현황',
 };
 
 // 권한에 따른 메뉴 타이틀 반환 유틸리티
