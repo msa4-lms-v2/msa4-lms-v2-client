@@ -133,7 +133,7 @@ onMounted(load);
 </script>
 
 <template>
-  <MyPageContainer title="자퇴 관리" subtitle="지도교수 승인이 끝난 자퇴 신청을 최종 승인·반려합니다.">
+  <MyPageContainer title="자퇴 관리">
     <section class="filter-card">
       <label>처리 상태<MySelect v-model="statusFilter" :options="STATUS_OPTIONS" /></label>
     </section>

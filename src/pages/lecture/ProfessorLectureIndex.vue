@@ -2,7 +2,7 @@
 import { onMounted, reactive, ref } from 'vue';
 import { getMyLectures } from '../../api/lectureApi';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -88,7 +88,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="강의 조회">
+  <MyPageContainer class="professor-page" title="강의 조회">
     <MySearchFilter class="lecture-filter" submit-at-end aria-label="강의 조회 조건" @search="load(1)">
       <label class="filter-field" for="lecture-year">
         <span>연도</span>

@@ -7,7 +7,7 @@ import {
   getLectureOpeningRequests,
   updateLectureOpeningRequest,
 } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -350,7 +350,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :title="showCoursePicker ? '강의 개설 · 교과목 선택' : '강의 개설 신청'">
+  <MyPageContainer class="professor-page" :title="showCoursePicker ? '강의 개설 · 교과목 선택' : '강의 개설 신청'">
     <section v-if="showCoursePicker" class="course-picker">
       <div class="course-picker-search">
         <MyInput v-model="courseKeyword" aria-label="교과목 검색" maxlength="100" placeholder="교과목명 또는 코드" @keydown.enter.prevent="searchCourses(1)" />

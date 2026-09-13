@@ -124,7 +124,7 @@
               <MyButton
                 color="deep-blue"
                 :content="appStore.isSubmittingApplication ? '제출 중...' : '신청서 제출'"
-                size="middle"
+                size="big"
                 type="submit"
                 :disabled="appStore.isSubmittingApplication"
               />
@@ -286,13 +286,12 @@ const onSubmit = async () => {
 .application-form {
   display: flex;
   flex-direction: column;
-  min-height: 344px;
   padding: 18px 14px;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 270px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -321,12 +320,8 @@ textarea {
   font-size: 0.75rem;
 }
 
-.reason-group {
-  max-width: 583px;
-}
-
 textarea {
-  height: 68px;
+  height: 160px;
   resize: vertical;
 }
 
@@ -445,14 +440,7 @@ textarea {
   padding-top: 18px;
 }
 
-.action-area :deep(button) {
-  width: 99px;
-  height: 29px;
-  font-size: 0.75rem;
-}
-
 .cancel-button {
-  width: 73px !important;
   border: 1px solid var(--personal-color-border-mist);
   color: var(--personal-color-primary-navy);
 }
@@ -465,10 +453,6 @@ textarea {
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;
-  }
-
-  .reason-group {
-    max-width: none;
   }
 
   .file-picker {

@@ -5,7 +5,6 @@ import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
@@ -109,10 +108,7 @@ onMounted(() => {
             <span class="semester">{{ semesterStore.getSemesterLabel(bill.semesterId) }}</span>
             <span class="amount">{{ formatCurrency(bill.billingAmount) }}</span>
             <span class="due">{{ formatDate(bill.dueDate) }} 까지</span>
-            <MyStatusBadge
-              :label="TUITION_BILL_STATUS_LABEL[bill.status]"
-              :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
-            />
+            <span :class="['status-text', `status-text--${TUITION_BILL_STATUS_VARIANT[bill.status]}`]">{{ TUITION_BILL_STATUS_LABEL[bill.status] }}</span>
           </RouterLink>
         </li>
       </ul>
@@ -121,6 +117,22 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.status-text--success {
+  color: var(--personal-color-status-success-text-forest);
+}
+
+.status-text--processing {
+  color: var(--personal-color-status-processing-text-navy);
+}
+
+.status-text--warning {
+  color: var(--personal-color-status-warning-text-amber);
+}
+
+.status-text--fail {
+  color: var(--personal-color-status-fail-text-maroon);
+}
+
 .summary-bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

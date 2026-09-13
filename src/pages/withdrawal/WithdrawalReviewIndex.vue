@@ -262,7 +262,7 @@ onMounted(loadRequests);
 <template>
   <MyPageContainer
     :title="pageTitle"
-    :class="{ 'professor-review': !isAdmin }"
+    :class="{ 'professor-review professor-page': !isAdmin }"
   >
     <section v-if="isAdmin || !detailId" class="filter-card">
       <label>
@@ -511,7 +511,7 @@ onMounted(loadRequests);
 .filter-actions { display: flex; gap: 8px; }
 .reset-action { border: 1px solid var(--personal-color-border-mist); }
 .admin-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
-.professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-professor-primary-navy); }
+.professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-primary-navy); }
 .professor-primary { background: var(--personal-color-primary-navy); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .professor-text { color: var(--personal-color-professor-primary-navy); }

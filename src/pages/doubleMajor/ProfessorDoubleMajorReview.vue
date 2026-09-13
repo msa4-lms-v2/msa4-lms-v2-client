@@ -154,7 +154,7 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer
+  <MyPageContainer class="professor-page"
     :title="detailId ? '복수전공 지도교수 검토 · 상세' : '복수전공 지도교수 검토'"
   >
     <section v-if="!detailId" class="filter-card">

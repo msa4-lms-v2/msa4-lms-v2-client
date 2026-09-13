@@ -101,7 +101,7 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="공지사항 목록">
-    <MySearchFilter class="admin-search" submit-text="조회" @search="load(1)">
+    <MySearchFilter class="admin-search" :show-submit="false">
       <div class="search-group">
         <label for="notice-keyword">통합 검색</label>
         <MyInput id="notice-keyword" v-model="filters.keyword" placeholder="제목 · 내용 검색" @keyup-enter="load(1)" />
@@ -149,6 +149,7 @@ onMounted(() => load());
         <MyInput id="notice-created-to" v-model="filters.createdTo" type="date" />
       </div>
 
+      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
       <MyButton btn-type="button" class="secondary-button" color="white" size="middle" content="초기화" @click="resetFilters" />
     </MySearchFilter>
 

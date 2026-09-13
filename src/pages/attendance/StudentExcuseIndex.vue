@@ -361,8 +361,8 @@ onMounted(() => loadRequests());
               btn-type="button"
               class="file-select-action"
               color="white"
-              size="middle"
-              content="파일 선택"
+              size="small"
+              content="선택"
               @click="openNewAttachmentPicker"
             />
             <span :class="{ 'placeholder-text': !form.attachmentFile }">

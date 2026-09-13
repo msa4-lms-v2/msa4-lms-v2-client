@@ -152,7 +152,7 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="출결 승인">
+  <MyPageContainer class="professor-page" title="출결 승인">
     <section class="approval-filters"><MyInput v-model="keyword" aria-label="학번 또는 이름" placeholder="학번 / 이름" @keyup-enter="applyFilters" /><MySelect v-model="statusFilter" aria-label="처리 상태" :options="tabOptions" /><div class="filter-actions"><MyButton color="deep-blue" size="middle" content="조회" :disabled="isLoading" @click="applyFilters" /><MyButton color="white" size="middle" content="초기화" :disabled="isLoading" @click="resetFilters" /></div></section>
     <section class="attendance-section">
       <div class="common-section-header">

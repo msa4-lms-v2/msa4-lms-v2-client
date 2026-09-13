@@ -180,7 +180,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role'" :title="isAdmin ? '졸업요건 진단 현황' : '학생 졸업요건 현황'">
+  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role professor-page'" :title="isAdmin ? '졸업요건 진단 현황' : '학생 졸업요건 현황'">
     <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" submit-at-end @search="loadDiagnoses(1)">
       <div class="search-group">
         <label for="diagnosis-keyword">학생 이름</label>
@@ -611,7 +611,7 @@ onMounted(async () => {
 }
 
 .professor-secondary {
-  color: var(--personal-color-professor-primary-navy);
+  color: var(--personal-color-primary-navy);
 }
 
 @media (max-width: 1100px) {

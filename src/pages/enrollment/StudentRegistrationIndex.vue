@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import { cancelEnrollment, createEnrollment, getAvailableLectures, getMyEnrollments } from '../../api/enrollmentApi';
+import { cancelEnrollment, createEnrollment, getAvailableLectures, getMyEnrollments, getMyTimetable } from '../../api/enrollmentApi';
 import { getDepartments } from '../../api/peopleManagementApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
@@ -16,10 +16,6 @@ defineOptions({ name: 'StudentRegistrationIndex' });
 
 const TERM_NUMBER = { FIRST: 1, SECOND: 2 };
 const DAY_LABEL = { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금' };
-const COMPLETION_TYPE_LABEL = {
-  MAJOR_REQUIRED: '전공필수', MAJOR_ELECTIVE: '전공선택',
-  GENERAL_REQUIRED: '교양필수', GENERAL_ELECTIVE: '교양선택',
-};
 const lectureColumns = [
   { key: 'courseCode', label: '과목코드' }, { key: 'departmentName', label: '학과' },
   { key: 'courseName', label: '강의명' }, { key: 'credits', label: '학점' },
@@ -29,8 +25,8 @@ const lectureColumns = [
 ];
 const enrollmentColumns = [
   { key: 'courseCode', label: '과목코드' }, { key: 'courseName', label: '과목명' },
-  { key: 'completionType', label: '과목구분' }, { key: 'credits', label: '학점' },
-  { key: 'professorName', label: '담당교수' }, { key: 'schedule', label: '시간' },
+  { key: 'professorName', label: '교수명' }, { key: 'classroom', label: '강의실' },
+  { key: 'schedule', label: '수강시간' }, { key: 'credits', label: '학점' },
   { key: 'cancel', label: '취소' },
 ];
 
@@ -74,7 +70,14 @@ const periodTime = (period, isEnd = false) => `${String(Number(period) + 8).padS
 const formatSchedule = item => item.schedule || (item.schedules || []).map(schedule => (
   `${DAY_LABEL[schedule.dayOfWeek] || schedule.dayOfWeek} ${periodTime(schedule.startPeriod)}-${periodTime(schedule.endPeriod, true)}`
 )).join(', ') || '-';
-const completionTypeLabel = type => COMPLETION_TYPE_LABEL[type] || type || '-';
+const formatEnrollmentSchedule = (item) => {
+  if (item.schedules?.length) {
+    return item.schedules.map(schedule => (
+      `${DAY_LABEL[schedule.dayOfWeek] || schedule.dayOfWeek} ${periodTime(schedule.startPeriod)} ~ ${periodTime(schedule.endPeriod, true)}`
+    )).join('\n');
+  }
+  return item.schedule?.replace(/,\s*/g, '\n') || '-';
+};
 const isApplied = lecture => enrollments.value.some(item => Number(item.classId) === Number(lecture.classId));
 
 const onCollegeChange = () => {
@@ -105,8 +108,21 @@ const loadEnrollments = async ({ showError = true } = {}) => {
   if (!selectedSemester.value) return;
   isLoadingEnrollments.value = true;
   try {
-    const response = await getMyEnrollments({ academicYear: selectedSemester.value.academicYear, term: selectedSemester.value.term });
-    enrollments.value = normalizeItems(response.data.data);
+    const params = {
+      academicYear: selectedSemester.value.academicYear,
+      term: selectedSemester.value.term,
+    };
+    const [enrollmentResponse, timetableResponse] = await Promise.all([
+      getMyEnrollments(params),
+      getMyTimetable(params.academicYear, params.term),
+    ]);
+    const schedulesByEnrollmentId = new Map(
+      (timetableResponse.data.data?.items || []).map(item => [Number(item.enrollmentId), item.schedules || []]),
+    );
+    enrollments.value = normalizeItems(enrollmentResponse.data.data).map(item => ({
+      ...item,
+      schedules: schedulesByEnrollmentId.get(Number(item.enrollmentId)) || [],
+    }));
   } catch (error) {
     enrollments.value = [];
     if (showError) await notify(errorMessage(error, '수강 신청 목록을 불러오지 못했습니다.'));
@@ -180,10 +196,12 @@ onMounted(async () => {
 
     <section class="section-block enrollment-list">
       <h3>수강 신청 목록</h3>
-      <div class="credit-summary">신청 과목 학점 합계 <strong>{{ activeEnrollmentCredits }}학점</strong></div>
+      <div class="credit-summary">
+        신청 과목 합계 학점: <strong>{{ activeEnrollmentCredits }}학점</strong>
+      </div>
       <MyTable :columns="enrollmentColumns" :loading="isLoadingEnrollments" :empty="!isLoadingEnrollments && enrollments.length === 0" empty-message="수강 신청 내역이 없습니다.">
         <tr v-for="item in enrollments" :key="item.enrollmentId">
-          <td>{{ item.courseCode }}</td><td>{{ item.courseName }}</td><td>{{ completionTypeLabel(item.completionType) }}</td><td>{{ item.credits }}</td><td>{{ item.professorName || '-' }}</td><td>{{ formatSchedule(item) }}</td>
+          <td>{{ item.courseCode }}</td><td>{{ item.courseName }}</td><td>{{ item.professorName || '-' }}</td><td>{{ item.classroom || '-' }}</td><td class="schedule-cell">{{ formatEnrollmentSchedule(item) }}</td><td>{{ item.credits }}학점</td>
           <td><MyButton btn-type="button" color="red" size="small" :content="cancellingEnrollmentId === item.enrollmentId ? '처리 중' : '취소'" :disabled="isMutating" @click="cancel(item)" /></td>
         </tr>
       </MyTable>
@@ -202,11 +220,11 @@ onMounted(async () => {
 .section-block { margin-top: 28px; }
 .section-block h3 { margin: 0 0 12px; color: var(--personal-color-primary-text-navy); font-size: 1rem; font-weight: 700; }
 .enrollment-list { margin-bottom: 36px; }
-.credit-summary { height: 38px; padding: 10px 14px; border: 1px solid var(--personal-color-border-mist); border-bottom: 0; background: var(--personal-color-white); color: var(--personal-color-text-secondary-steel); font-size: .78rem; }
-.credit-summary strong { margin-left: 8px; color: var(--personal-color-primary-navy); }
-.enrollment-list :deep(.table-container) { border-top-left-radius: 0; border-top-right-radius: 0; }
+.credit-summary { display: flex; align-items: center; min-height: 38px; box-sizing: border-box; margin-bottom: 14px; padding: 0 14px; border: 1px solid var(--personal-color-border-mist); border-radius: 6px; background: var(--personal-color-white); color: var(--personal-color-primary-text-navy); font-size: .78rem; font-weight: 600; }
+.credit-summary strong { margin-left: 4px; color: var(--personal-color-primary-text-navy); }
 .enrollment-page :deep(th) { padding: 12px 10px; font-size: .76rem; }
 .enrollment-page :deep(td) { padding: 11px 10px; font-size: .76rem; }
+.enrollment-list :deep(.schedule-cell) { white-space: pre-line; }
 .inline-error { margin: -4px 0 10px; color: var(--personal-color-red); font-size: .78rem; }
 @media (max-width: 1100px) { .enrollment-page :deep(.search-row) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 700px) { .enrollment-page :deep(.search-row) { grid-template-columns: 1fr; } .semester-display { height: auto; } .enrollment-page :deep(.submit-at-end) { width: 100%; } }

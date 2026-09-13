@@ -98,7 +98,7 @@ const downloadAgain = async (item) => {
 </script>
 
 <template>
-  <MyPageContainer title="증명서 발급" class="certificate-page">
+  <MyPageContainer title="증명서 발급" class="certificate-page professor-page">
     <section class="certificate-grid" aria-label="증명서 발급 목록">
       <MyCard v-for="certificate in certificateTypes" :key="certificate.value" class="certificate-card">
         <div class="certificate-heading">

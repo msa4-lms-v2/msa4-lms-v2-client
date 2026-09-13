@@ -57,7 +57,7 @@ onMounted(load);
 </script>
 
 <template>
-  <MyPageContainer title="상담 관리" subtitle="학생-교수 간 온라인 상담 내역을 조회합니다.">
+  <MyPageContainer title="상담 관리">
     <section class="filter-card">
       <label>답변 상태<MySelect v-model="statusFilter" :options="STATUS_OPTIONS" /></label>
       <div class="filter-actions">

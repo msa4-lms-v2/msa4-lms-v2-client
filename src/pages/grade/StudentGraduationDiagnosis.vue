@@ -302,7 +302,7 @@ onMounted(loadDiagnosis);
 }
 
 .overview-item strong {
-  color: var(--personal-color-login-primary-navy);
+  color: var(--personal-color-heading-midnight);
   font-size: 1.42rem;
   font-weight: 800;
 }

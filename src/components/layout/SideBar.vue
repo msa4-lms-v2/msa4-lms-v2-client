@@ -50,12 +50,15 @@ const activeMenus = ref({
   adminNotice: false,
   adminApplicationManagement: false,
   adminLecture: false,
+  adminGraduation: false,
   adminAcademicOps: false,
+  adminTuition: false,
   studentAcademic: false,
   studentCourse: false,
   studentGrade: false,
   studentAttendance: false,
   studentRegistration: false,
+  studentCertificate: false,
   studentScholarship: false,
   studentCounseling: false,
   professorTeacher: false,
@@ -69,6 +72,7 @@ const activeMenus = ref({
 
 watch(() => route.path, path => {
   if (path.startsWith('/professor/certificates')) activeMenus.value.professorCertificate = true;
+  if (path.startsWith('/certificates')) activeMenus.value.studentCertificate = true;
   if (path.startsWith('/admin/admissions')) activeMenus.value.adminAdmission = true;
   if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
   if (path.startsWith('/admin/departments')) activeMenus.value.adminDepartment = true;
@@ -83,12 +87,25 @@ watch(() => route.path, path => {
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
   if (path.startsWith('/graduation-diagnoses')) activeMenus.value.professorStudent = true;
   if (
+    path.startsWith('/admin/graduation-requirements')
+    || path.startsWith('/graduation-diagnoses')
+  ) {
+    activeMenus.value.adminGraduation = true;
+  }
+  if (
     path.startsWith('/admin/attendance')
     || path.startsWith('/admin/counseling')
     || path.startsWith('/admin/withdrawals')
     || path.startsWith('/admin/dismissals')
   ) {
     activeMenus.value.adminAcademicOps = true;
+  }
+  if (
+    path.startsWith('/admin/tuition')
+    || path.startsWith('/payment/health')
+    || path.startsWith('/admin/certificates/revoke')
+  ) {
+    activeMenus.value.adminTuition = true;
   }
   if (path.startsWith('/professor/withdrawals')) activeMenus.value.professorStudent = true;
 }, { immediate: true });
@@ -249,6 +266,16 @@ const toggleMenu = (menuKey) => {
               getMenuTitle("/tuition/history")
             }}</router-link>
             <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
+          </div>
+        </div>
+
+        <!-- 증명서 -->
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.studentCertificate" @click="toggleMenu('studentCertificate')">
+            <span>증명서</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.studentCertificate }">▼</span>
+          </button>
+          <div class="submenu-list" v-show="activeMenus.studentCertificate">
             <router-link to="/certificates/apply" class="submenu-item">{{
               getMenuTitle("/certificates/apply")
             }}</router-link>
@@ -538,18 +565,19 @@ const toggleMenu = (menuKey) => {
             </router-link>
           </div>
         </div>
-        <router-link to="/admin/graduation-requirements" class="nav-item">
-          {{ getMenuTitle("/admin/graduation-requirements") }}
-        </router-link>
-        <router-link to="/graduation-diagnoses" class="nav-item">
-          {{ getMenuTitle("/graduation-diagnoses") }}
-        </router-link>
-        <router-link to="/admin/grades/retake-reflection" class="nav-item">
-          {{ getMenuTitle("/admin/grades/retake-reflection") }}
-        </router-link>
-        <router-link to="/admin/dismissals" class="nav-item">
-          {{ getMenuTitle("/admin/dismissals") }}
-        </router-link>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminGraduation" @click="toggleMenu('adminGraduation')">
+            <span>졸업 요건 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminGraduation }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminGraduation" class="submenu-list">
+            <router-link to="/admin/graduation-requirements" class="submenu-item">
+              {{ getMenuTitle("/admin/graduation-requirements") }}
+            </router-link>
+            <router-link to="/graduation-diagnoses" class="submenu-item">
+              {{ getMenuTitle("/graduation-diagnoses") }}
+            </router-link>
+          </div>
+        </div>
         <div class="menu-group">
           <button type="button" class="menu-header" :aria-expanded="activeMenus.adminAcademicOps" @click="toggleMenu('adminAcademicOps')">
             <span>학사 운영 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminAcademicOps }">▼</span>
@@ -564,17 +592,24 @@ const toggleMenu = (menuKey) => {
             <router-link to="/admin/withdrawals" class="submenu-item">
               {{ getMenuTitle("/admin/withdrawals") }}
             </router-link>
+            <router-link to="/admin/dismissals" class="submenu-item">
+              {{ getMenuTitle("/admin/dismissals") }}
+            </router-link>
           </div>
         </div>
         <router-link to="/students" class="nav-item">{{
           getMenuTitle("/students")
         }}</router-link>
-        <router-link to="/profile" class="nav-item">{{
-          getMenuTitle("/profile", "ADMIN")
-        }}</router-link>
-        <router-link to="/admin/tuition" class="nav-item">등록금 관리</router-link>
-        <router-link to="/payment/health" class="nav-item">결제 상태</router-link>
-        <router-link to="/admin/certificates/revoke" class="nav-item">증명서 폐기</router-link>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminTuition" @click="toggleMenu('adminTuition')">
+            <span>등록금 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminTuition }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminTuition" class="submenu-list">
+            <router-link to="/admin/tuition" class="submenu-item">등록금 목록</router-link>
+            <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
+            <router-link to="/admin/certificates/revoke" class="submenu-item">증명서 폐기</router-link>
+          </div>
+        </div>
       </template>
     </nav>
   </aside>
