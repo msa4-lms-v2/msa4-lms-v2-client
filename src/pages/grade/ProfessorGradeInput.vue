@@ -306,7 +306,7 @@ onMounted(async () => {
     </div>
 
     <h3 class="section-title">수강생 성적 입력</h3>
-    <MyTable :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="활성 수강생이 없습니다.">
+    <MyTable class="grade-table" :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="활성 수강생이 없습니다.">
       <tr v-for="row in rows" :key="row.enrollmentId">
         <td>{{ row.studentName }}</td>
         <td>{{ row.studentNumber || '-' }}</td>
@@ -359,4 +359,9 @@ onMounted(async () => {
 @media (max-width: 900px) {
   .lecture-group :deep(select) { min-width: 220px; }
 }
+.grade-table { overflow-x: auto; }
+.grade-table :deep(table) { min-width: 900px; }
+.score-input { background: var(--personal-color-sidebar-active-bg-sky); border: 1px solid var(--personal-color-border-mist); border-radius: 4px; }
+.lecture-group { min-width: 0; }
+@media (max-width: 560px) { .lecture-group { width: 100%; } .lecture-group :deep(select) { width: 100%; min-width: 0; } }
 </style>
