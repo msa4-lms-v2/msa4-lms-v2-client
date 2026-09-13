@@ -11,11 +11,11 @@ export const useDashboardStore = defineStore("dashboardStore", () => {
   const isNoticesLoading = ref(false);
   const isNoticesError = ref(false);
 
-  const loadSchedules = async () => {
+  const loadSchedules = async (params = {}) => {
     isSchedulesLoading.value = true;
     isSchedulesError.value = false;
     try {
-      const res = await myAxios.get("/api/academic/academic-schedules");
+      const res = await myAxios.get("/api/academic/academic-schedules", { params });
 
       if (res.data.code === "00") {
         schedules.value = res.data.data.items;
@@ -30,11 +30,11 @@ export const useDashboardStore = defineStore("dashboardStore", () => {
     }
   };
 
-  const loadNotices = async () => {
+  const loadNotices = async (params = {}) => {
     isNoticesLoading.value = true;
     isNoticesError.value = false;
     try {
-      const res = await myAxios.get("/api/academic/catalog/notices");
+      const res = await myAxios.get("/api/academic/catalog/notices", { params });
 
       if (res.data.code === "00") {
         notices.value = res.data.data.items;
