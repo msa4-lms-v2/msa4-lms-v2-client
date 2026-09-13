@@ -3,8 +3,8 @@ import { computed, onMounted, ref } from 'vue';
 import { downloadExcuseAttachment, reviewExcuseRequest, searchExcuseRequests } from '../../api/attendanceApi';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyModal from '../../components/common/MyModal.vue';
-import MyTabs from '../../components/common/MyTabs.vue';
+import MyInput from '../../components/input/MyInput.vue';
+import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
@@ -22,6 +22,11 @@ const columns = [
 
 const requests = ref([]);
 const activeTab = ref('PENDING');
+const statusFilter = ref('PENDING');
+const keyword = ref('');
+const appliedKeyword = ref('');
+const applyFilters = () => { activeTab.value = statusFilter.value; appliedKeyword.value = keyword.value.trim().toLowerCase(); };
+const resetFilters = () => { keyword.value = ''; statusFilter.value = 'PENDING'; applyFilters(); };
 const isLoading = ref(false);
 const rejectTarget = ref(null);
 const rejectReason = ref('');
@@ -31,15 +36,17 @@ const downloadingRequestId = ref(null);
 const tabOptions = [
   { value: 'PENDING', label: '승인 대기' },
   { value: 'COMPLETED', label: '처리 완료' },
+  { value: 'ALL', label: '전체' },
 ];
 const statusLabels = { PENDING: '대기', APPROVED: '승인', REJECTED: '반려' };
 const visibleRequests = computed(() => requests.value.filter((request) => (
-  activeTab.value === 'PENDING' ? request.status === 'PENDING' : request.status !== 'PENDING'
+  (activeTab.value === 'ALL' || (activeTab.value === 'PENDING' ? request.status === 'PENDING' : request.status !== 'PENDING'))
+  && (!appliedKeyword.value || [request.studentName, request.studentNumber].some(value => String(value || '').toLowerCase().includes(appliedKeyword.value)))
 )));
 const emptyMessage = computed(() => (
   activeTab.value === 'PENDING'
     ? '승인 대기 중인 공결 신청이 없습니다.'
-    : '처리 완료된 공결 신청이 없습니다.'
+    : activeTab.value === 'ALL' ? '검색 조건에 맞는 공결 신청이 없습니다.' : '처리 완료된 공결 신청이 없습니다.'
 ));
 
 const createIdempotencyKey = (prefix) => {
@@ -146,10 +153,11 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="출결 승인">
+    <section class="approval-filters"><MyInput v-model="keyword" aria-label="학번 또는 이름" placeholder="학번 / 이름" @keyup-enter="applyFilters" /><MySelect v-model="statusFilter" aria-label="처리 상태" :options="tabOptions" /><div class="filter-actions"><MyButton color="deep-blue" size="middle" content="조회" :disabled="isLoading" @click="applyFilters" /><MyButton color="white" size="middle" content="초기화" :disabled="isLoading" @click="resetFilters" /></div></section>
     <section class="attendance-section">
       <div class="common-section-header">
-        <h3>{{ activeTab === 'PENDING' ? '확인 대기 공결 신청' : '처리 완료 내역' }}</h3>
-        <MyTabs v-model="activeTab" :tabs="tabOptions" />
+        <h3>{{ activeTab === 'PENDING' ? '확인 대기 공결 신청' : activeTab === 'ALL' ? '전체 공결 신청' : '처리 완료 내역' }}</h3>
+
       </div>
 
       <MyTable
@@ -212,7 +220,8 @@ onMounted(() => load());
       </MyTable>
     </section>
 
-    <MyModal :is-open="Boolean(rejectTarget)" title="공결 신청 반려" max-width="520px" @close="closeRejectModal">
+    <section v-if="rejectTarget" class="reject-panel" aria-label="선택 신청 반려">
+      <h3>선택 신청 반려</h3>
       <template v-if="rejectTarget">
         <dl class="request-summary">
           <dt>학생</dt>
@@ -234,15 +243,23 @@ onMounted(() => load());
           />
         </div>
       </template>
-      <template #footer>
-        <MyButton class="secondary-button" color="white" size="small" content="닫기" :disabled="isReviewing" @click="closeRejectModal" />
-        <MyButton color="red" size="small" content="반려" :disabled="isReviewing" @click="rejectRequest" />
-      </template>
-    </MyModal>
+      <div class="filter-actions">
+        <MyButton class="secondary-button" color="white" size="middle" content="닫기" :disabled="isReviewing" @click="closeRejectModal" />
+        <MyButton color="red" size="middle" content="반려" :disabled="isReviewing" @click="rejectRequest" />
+      </div>
+    </section>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.approval-filters { display: flex; gap: 16px; padding: 24px; background: white; align-items: center; }
+.approval-filters > :first-child, .approval-filters > select { width: 220px; }
+.filter-actions { display: flex; justify-content: flex-end; gap: 12px; margin-left: auto; }
+.reject-panel { margin-top: 32px; }
+.reject-panel h3 { font-size: 16px; }
+.reject-panel .approval-form { padding: 18px; background: white; margin-bottom: 16px; }
+@media (max-width: 760px) { .approval-filters { flex-wrap: wrap; } }
+
 .attendance-section {
   margin-top: 24px;
 }

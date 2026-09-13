@@ -1,12 +1,14 @@
 <script setup>
-import { ref } from 'vue';
-import { downloadCertificate, issueEmploymentCertificate, issueCareerCertificate, issueLectureCareerCertificate } from '../../api/certificateApi';
+import { onMounted, ref } from 'vue';
+import { getProfessorCertificateHistory, downloadCertificate, issueEmploymentCertificate, issueCareerCertificate, issueLectureCareerCertificate } from '../../api/certificateApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyCard from '../../components/common/MyCard.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
+
+import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
 
 defineOptions({ name: 'ProfessorCertificateApply' });
 
@@ -24,6 +26,27 @@ const historyColumns = [
 
 const issuingType = ref(null);
 const issuedDocuments = ref([]);
+const historyLoading = ref(false);
+const historyError = ref('');
+const historyPage = ref(1);
+const historyHasNext = ref(false);
+let historyRevision = 0;
+const loadHistory = async (page = 1) => {
+ const revision = ++historyRevision;
+ historyLoading.value = true;
+ historyError.value = '';
+ try {
+  const { data } = await getProfessorCertificateHistory({ page, size: 10 });
+  if (revision !== historyRevision) return;
+  const result = data.data;
+  issuedDocuments.value = result.items.map(item => ({ ...item,
+   documentTypeLabel: certificateTypes.find(type => type.value === item.documentType)?.label || item.documentType,
+   status: item.revoked ? '폐기' : item.downloadable ? '발급 완료' : '다운로드 불가' }));
+  historyPage.value = result.page; historyHasNext.value = result.hasNext;
+ } catch (error) { if (revision !== historyRevision) return; historyError.value = error.response?.data?.message || '발급 내역을 불러오지 못했습니다.'; }
+ finally { if (revision === historyRevision) historyLoading.value = false; }
+};
+onMounted(() => loadHistory());
 
 const savePdf = (issuedDocument, response) => {
   const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
@@ -47,10 +70,11 @@ const issueAndDownload = async (certificate) => {
     const historyItem = {
       ...issued,
       documentTypeLabel: certificate.label.replaceAll(' ', ''),
-      status: '발급 완료',
+      status: '발급 완료', downloadable: true,
     };
 
     issuedDocuments.value.unshift(historyItem);
+    await loadHistory(1);
     const downloadResponse = await downloadCertificate(issued.id);
     savePdf(historyItem, downloadResponse);
     await notify(`${certificate.label}가 발급되었습니다.`);
@@ -61,7 +85,7 @@ const issueAndDownload = async (certificate) => {
   }
 };
 const downloadAgain = async (item) => {
-  if (issuingType.value) return;
+  if (issuingType.value || !item.downloadable) return;
   issuingType.value = 'DOWNLOAD';
   try {
     savePdf(item, await downloadCertificate(item.id));
@@ -74,7 +98,7 @@ const downloadAgain = async (item) => {
 </script>
 
 <template>
-  <MyPageContainer title="증명서 발급">
+  <MyPageContainer title="증명서 발급" class="certificate-page">
     <section class="certificate-grid" aria-label="증명서 발급 목록">
       <MyCard v-for="certificate in certificateTypes" :key="certificate.value" class="certificate-card">
         <div class="certificate-heading">
@@ -92,7 +116,7 @@ const downloadAgain = async (item) => {
           btn-type="button"
           class="issue-button"
           color="deep-blue"
-          size="middle"
+          size="big"
           :content="issuingType === certificate.value ? '발급 중...' : 'PDF 발급'"
           :disabled="Boolean(issuingType)"
           @click="issueAndDownload(certificate)"
@@ -102,8 +126,11 @@ const downloadAgain = async (item) => {
 
     <section class="history-section" aria-labelledby="certificate-history-title">
       <h3 id="certificate-history-title">발급 내역</h3>
+      <div class="history-actions"><MyButton content="새로고침" color="deep-blue" size="small" :disabled="historyLoading || Boolean(issuingType)" @click="loadHistory(historyPage)" /></div>
+      <p v-if="historyError" role="alert">{{ historyError }}</p>
       <MyTable
         :columns="historyColumns"
+        :loading="historyLoading"
         :empty="issuedDocuments.length === 0"
         empty-message="발급한 증명서가 없습니다."
       >
@@ -111,20 +138,24 @@ const downloadAgain = async (item) => {
           <td>{{ item.documentTypeLabel }}</td>
           <td>{{ formatDate(item.issuedAt) }}</td>
                     <td class="status-cell">
-            <button class="download-again" type="button" :disabled="Boolean(issuingType)"
+            <button class="download-again" type="button" :disabled="Boolean(issuingType) || !item.downloadable"
               :aria-label="`${item.documentTypeLabel} 다시 다운로드`" @click="downloadAgain(item)">{{ item.status }}</button>
           </td>
         </tr>
       </MyTable>
+      <PrevNextPagination :page="historyPage" :has-next="historyHasNext" :inert="historyLoading || Boolean(issuingType)" @page-change="loadHistory" />
     </section>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.certificate-page { max-width: 1048px; margin-left: 0; }
+.history-actions { display:flex; justify-content:flex-end; margin-bottom:12px; }
 .certificate-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  margin-top: 44px;
 }
 
 .certificate-card {
@@ -147,7 +178,8 @@ const downloadAgain = async (item) => {
   justify-content: center;
   border: 1px solid #7ca6ff;
   border-radius: 50%;
-  color: var(--personal-color-primary-navy);
+  color: #2463ff;
+  background: #eff6ff;
 }
 
 .document-icon {
@@ -172,7 +204,7 @@ const downloadAgain = async (item) => {
 .history-section h3 {
   margin: 0;
   color: var(--personal-color-primary-text-navy);
-  font-size: 0.95rem;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -182,12 +214,10 @@ const downloadAgain = async (item) => {
   bottom: 16px;
   width: 132px;
   height: 38px;
-  font-size: 0.72rem;
-  font-weight: 700;
 }
 
 .history-section {
-  margin-top: 24px;
+  margin-top: 32px;
 }
 
 .history-section h3 {
@@ -200,14 +230,14 @@ const downloadAgain = async (item) => {
 }
 
 .history-section :deep(.my-table th) {
-  padding: 11px 30px; text-align: left;
+  padding: 18px 30px; text-align: center;
   border-bottom-width: 1px;
   font-size: 0.69rem;
   font-weight: 600;
 }
 
 .history-section :deep(.my-table td) {
-  padding: 12px 30px; text-align: left;
+  padding: 22px 30px; text-align: center;
   border-bottom: 1px solid var(--personal-color-table-border-frost);
   font-size: 0.72rem;
 }

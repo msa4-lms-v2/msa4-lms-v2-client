@@ -747,4 +747,11 @@ h2 {
   border-radius: 50%; background: var(--personal-color-status-success-text-forest);
 }
 :deep(.modal-overlay) { backdrop-filter: none; }
+
+.session-panel { padding: 12px 24px; gap: 26px; }
+.summary-card, .qr-card { min-height: 210px; }
+.qr-card { padding: 24px; gap: 28px; }
+.summary-card { display: flex; flex-direction: column; justify-content: center; }
+@media (max-width: 1100px) { .qr-card { gap: 12px; padding: 18px; } }
+
 </style>

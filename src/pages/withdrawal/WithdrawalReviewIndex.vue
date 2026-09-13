@@ -7,6 +7,8 @@ import {
   reviewWithdrawalByAdvisor,
   searchWithdrawals,
 } from '../../api/withdrawalApi';
+import ProfessorApplicationDetail from '../../components/academic/ProfessorApplicationDetail.vue';
+import { useProfessorRequestDetail } from '../../composables/useProfessorRequestDetail';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -42,18 +44,16 @@ const statusLabels = Object.fromEntries(statusOptions.filter((item) => item.valu
 
 const authStore = useAuthStore();
 const requests = ref([]);
-const selectedRequest = ref(null);
 const filters = ref({ keyword: '', status: '' });
 const appliedFilters = ref({ keyword: '', status: '' });
 const page = ref(1);
 const isLoading = ref(false);
-const isLoadingDetail = ref(false);
 const isProcessing = ref(false);
 const rejectReason = ref('');
 const formError = ref('');
 
 const isAdmin = computed(() => authStore.userInfo?.role === 'ADMIN');
-const pageTitle = computed(() => (isAdmin.value ? '자퇴 신청 관리' : '자퇴 신청 검토'));
+const pageTitle = computed(() => (isAdmin.value ? '자퇴 신청 관리' : detailId.value ? '자퇴 지도교수 검토 · 상세' : '자퇴 지도교수 검토'));
 const filteredRequests = computed(() => {
   const keyword = appliedFilters.value.keyword.trim().toLowerCase();
   return requests.value.filter((item) => {
@@ -151,7 +151,29 @@ const resetReviewForm = () => {
   formError.value = '';
 };
 
+const { detailId, selectedRequest, isLoadingDetail, detailError, openDetail, closeDetail } = useProfessorRequestDetail({
+  fetchRequest: getWithdrawal,
+  resetForm: resetReviewForm,
+});
+const studentFields = computed(() => {
+  const item = selectedRequest.value || {};
+  return [
+    { label: '이름', value: item.studentName }, { label: '학번', value: item.studentNumber }, { label: '소속 단과대학', value: item.collegeName },
+    { label: '소속 학과', value: item.departmentName }, { label: '학년', value: item.gradeLevel ? item.gradeLevel + '학년' : undefined },
+    { label: '학적 상태', value: item.academicStatusName },
+  ];
+});
+const applicationFields = computed(() => {
+  const item = selectedRequest.value || {};
+  return [
+    { label: '신청 유형', value: '자퇴' }, { label: '신청번호', value: item.id }, { label: '신청일', value: formatDate(item.createdAt) },
+    { label: '희망 처리일', value: formatDate(item.requestedEffectiveDate) }, { label: '희망 학과', value: '해당 없음' },
+    { label: '처리 상태', value: statusLabel(item.status) },
+  ];
+});
+
 const selectRequest = async (withdrawalId) => {
+  if (!isAdmin.value) return openDetail(withdrawalId);
   isLoadingDetail.value = true;
   resetReviewForm();
   try {
@@ -184,11 +206,12 @@ const downloadAttachment = async () => {
 const updateLocalRequest = (updated) => {
   const index = requests.value.findIndex((item) => item.id === updated.id);
   if (index >= 0) requests.value.splice(index, 1, updated);
-  selectedRequest.value = updated;
+  if (selectedRequest.value?.id === updated.id) selectedRequest.value = updated;
 };
 
 const processReview = async (approved) => {
   if (!selectedRequest.value || isProcessing.value) return;
+  const requestId = selectedRequest.value.id;
 
   const reason = rejectReason.value.trim();
   if (!approved && !reason) {
@@ -203,13 +226,14 @@ const processReview = async (approved) => {
   const actionName = approved ? '승인' : '반려';
   const targetName = isAdmin.value ? '최종 처리' : '지도교수 검토';
   if (!await confirmDialog(`이 자퇴 신청을 ${actionName}하시겠습니까?`)) return;
+  if (isProcessing.value || selectedRequest.value?.id !== requestId || !canReview.value) return;
 
   isProcessing.value = true;
   formError.value = '';
   try {
     const response = isAdmin.value
       ? await reviewWithdrawalByAdmin(
-        selectedRequest.value.id,
+        requestId,
         {
           approved,
           effectiveDate: approved ? currentKoreanDate() : null,
@@ -218,7 +242,7 @@ const processReview = async (approved) => {
         createIdempotencyKey('withdrawal-final-review'),
       )
       : await reviewWithdrawalByAdvisor(
-        selectedRequest.value.id,
+        requestId,
         { approved, rejectReason: approved ? null : reason },
         createIdempotencyKey('withdrawal-advisor-review'),
       );
@@ -238,9 +262,9 @@ onMounted(loadRequests);
 <template>
   <MyPageContainer
     :title="pageTitle"
-    :subtitle="isAdmin ? pageSubtitle : undefined"
+    :class="{ 'professor-review': !isAdmin }"
   >
-    <section class="filter-card">
+    <section v-if="isAdmin || !detailId" class="filter-card">
       <label>
         신청자
         <input
@@ -276,7 +300,7 @@ onMounted(loadRequests);
     </section>
 
     <div class="review-grid">
-      <section class="list-card">
+      <section v-if="isAdmin || !detailId" class="list-card">
         <div class="section-title">
           <h3>자퇴 신청 목록</h3>
           <span :class="isAdmin ? 'admin-text' : 'professor-text'">총 {{ filteredRequests.length }}건</span>
@@ -306,7 +330,7 @@ onMounted(loadRequests);
                   :class="isAdmin ? 'admin-secondary' : 'professor-secondary'"
                   color="white"
                   size="small"
-                  content="선택"
+                  :content="isAdmin ? '선택' : '상세'"
                   :disabled="isLoadingDetail"
                   @click="selectRequest(item.id)"
                 />
@@ -322,7 +346,7 @@ onMounted(loadRequests);
         />
       </section>
 
-      <aside class="detail-column">
+      <aside v-if="isAdmin" class="detail-column">
         <section class="detail-card">
           <h3>선택한 신청 정보</h3>
           <p
@@ -458,11 +482,20 @@ onMounted(loadRequests);
           </div>
         </section>
       </aside>
+      <div v-if="!isAdmin && detailId" :aria-busy="isLoadingDetail">
+        <p v-if="isLoadingDetail" role="status">신청 정보를 불러오는 중입니다.</p>
+        <template v-else-if="detailError"><p class="form-error" role="alert">{{ detailError }}</p><MyButton color="white" size="middle" content="목록" @click="closeDetail" /></template>
+        <ProfessorApplicationDetail v-else-if="selectedRequest" v-model:review-reason="rejectReason" :student-fields="studentFields" :application-fields="applicationFields" :reason="selectedRequest.reason" :reviewable="canReview" :busy="isProcessing" :error="formError" @back="closeDetail" @approve="processReview(true)" @reject="processReview(false)">
+          <template #files><button v-if="selectedRequest.attachmentOriginalName" type="button" class="file-row" @click="downloadAttachment"><span>{{ selectedRequest.attachmentOriginalName }}</span><small>{{ formatFileSize(selectedRequest.attachmentSize) }}</small><strong>다운로드</strong></button><p v-else>첨부된 증빙 서류가 없습니다.</p></template>
+          <template v-if="selectedRequest.advisorReviewedAt" #history><section class="detail-card"><h3>지도교수 검토 내역</h3><p>{{ formatDate(selectedRequest.advisorReviewedAt, 'YYYY-MM-DD HH:mm') }}</p><p>{{ selectedRequest.advisorRejectReason || '승인' }}</p></section></template>
+        </ProfessorApplicationDetail>
+      </div>
     </div>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.professor-review .review-grid { grid-template-columns: minmax(0, 1fr); }
 .filter-card {
   display: grid;
   grid-template-columns: 1.2fr 1fr auto;

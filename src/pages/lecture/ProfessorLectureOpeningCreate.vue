@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import {
+  searchProfessorCourseCatalog,
   createLectureOpeningRequest,
   getLectureOpeningRequest,
   getLectureOpeningRequests,
@@ -65,6 +66,29 @@ const form = reactive({
 
 const schedules = ref([]);
 const scheduleDraft = reactive({ dayOfWeek: 'MON', startPeriod: '1', endPeriod: '2' });
+const showCoursePicker = ref(false);
+const pendingCourse = ref(null);
+const courseColumns = [{ key: 'code', label: '교과목 코드' }, { key: 'name', label: '교과목명' }, { key: 'department', label: '소속 학과' }, { key: 'credits', label: '학점' }, { key: 'completion', label: '이수구분' }, { key: 'action', label: '관리' }];
+const completionLabels = { MAJOR_REQUIRED: '전공필수', MAJOR_ELECTIVE: '전공선택', GENERAL_REQUIRED: '교양필수', GENERAL_ELECTIVE: '교양선택' };
+const openCoursePicker = () => { pendingCourse.value = selectedCourse.value; showCoursePicker.value = true; searchCourses(1); };
+const confirmCourse = () => { if (!pendingCourse.value) return; selectCourse(pendingCourse.value); showCoursePicker.value = false; };
+const courseKeyword = ref('');
+const courseResults = ref([]);
+const selectedCourse = ref(null);
+const courseLoading = ref(false);
+const courseError = ref('');
+const coursePage = ref(1);
+const courseHasNext = ref(false);
+const searchCourses = async (page = 1) => {
+ if (courseLoading.value) return;
+ courseLoading.value = true; courseError.value = '';
+ try {
+  const { data } = await searchProfessorCourseCatalog({ keyword: courseKeyword.value.trim(), page, size: 10 });
+  courseResults.value = data.data.items; coursePage.value = data.data.page; courseHasNext.value = data.data.hasNext;
+ } catch (error) { courseResults.value = []; courseError.value = error.response?.data?.message || '교과목을 불러오지 못했습니다.'; }
+ finally { courseLoading.value = false; }
+};
+const selectCourse = (course) => { form.courseId = String(course.id); selectedCourse.value = course; courseResults.value = []; };
 const formError = ref('');
 const isSubmitting = ref(false);
 const editingRequestId = ref(null);
@@ -81,7 +105,7 @@ const saveDraft = async () => {
   try {
     const key = draftKey();
     if (!key) throw new Error();
-    sessionStorage.setItem(key, JSON.stringify({ form: { ...form }, schedules: schedules.value }));
+    sessionStorage.setItem(key, JSON.stringify({ form: { ...form }, schedules: schedules.value, selectedCourse: selectedCourse.value }));
     await notify('이 브라우저 탭에 임시저장했습니다.');
   } catch {
     await notify('임시저장할 수 없습니다. 로그인 상태와 브라우저 저장소를 확인해 주세요.');
@@ -97,6 +121,7 @@ const restoreDraft = async () => {
     if (!await confirmDialog('임시저장한 내용으로 현재 입력을 바꾸시겠습니까?')) return;
     for (const key of Object.keys(form)) form[key] = String(draft.form[key] ?? '');
     schedules.value = draft.schedules.slice(0, 10).map(({ dayOfWeek, startPeriod, endPeriod }) => ({ dayOfWeek, startPeriod: String(startPeriod), endPeriod: String(endPeriod) }));
+    selectedCourse.value = draft.selectedCourse && String(draft.selectedCourse.id) === String(form.courseId) ? draft.selectedCourse : null;
     syllabusEditorKey.value += 1;
     formError.value = '';
   } catch { await notify('임시저장한 내용을 불러올 수 없습니다.'); }
@@ -145,6 +170,7 @@ const getDayLabel = (dayOfWeek) => DAY_LABELS[dayOfWeek] || dayOfWeek;
 
 const resetForm = () => {
   form.courseId = '';
+  selectedCourse.value = null;
   form.semesterId = '';
   form.sectionNo = '';
   form.requestedCapacity = '';
@@ -164,7 +190,7 @@ const resetForm = () => {
 };
 
 const validate = () => {
-  if (!form.courseId || Number(form.courseId) <= 0) return '교과목 번호를 입력해 주세요.';
+  if (!form.courseId || Number(form.courseId) <= 0) return '교과목을 검색해 선택해 주세요.';
   if (!form.semesterId) return '개설 학기를 선택해 주세요.';
   if (!/^[0-9A-Za-z-]{1,10}$/.test(form.sectionNo.trim())) return '분반은 영문, 숫자, 하이픈 10자 이내로 입력해 주세요.';
   const capacity = Number(form.requestedCapacity);
@@ -229,6 +255,7 @@ const editRequest = async (item, copy = false) => {
     const detail = response.data.data;
     editingRequestId.value = copy ? null : detail.openingRequestId;
     form.courseId = String(detail.courseId);
+    selectedCourse.value = { id: detail.courseId, name: detail.courseName, code: detail.courseCode };
     form.semesterId = copy ? '' : detail.semesterId;
     form.sectionNo = detail.sectionNo || '';
     form.requestedCapacity = String(detail.requestedCapacity ?? '');
@@ -323,7 +350,24 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="강의 개설 신청">
+  <MyPageContainer :title="showCoursePicker ? '강의 개설 · 교과목 선택' : '강의 개설 신청'">
+    <section v-if="showCoursePicker" class="course-picker">
+      <div class="course-picker-search">
+        <MyInput v-model="courseKeyword" aria-label="교과목 검색" maxlength="100" placeholder="교과목명 또는 코드" @keydown.enter.prevent="searchCourses(1)" />
+        <div class="picker-actions"><MyButton content="조회" color="deep-blue" size="middle" :disabled="courseLoading" @click="searchCourses(1)" /><MyButton content="초기화" color="white" size="middle" :disabled="courseLoading" @click="courseKeyword = ''; searchCourses(1)" /></div>
+      </div>
+      <h3>교과목 검색 결과</h3>
+      <p v-if="courseError" role="alert">{{ courseError }}</p>
+      <MyTable :columns="courseColumns" :loading="courseLoading" :empty="!courseLoading && !courseResults.length" empty-message="검색된 교과목이 없습니다.">
+        <tr v-for="course in courseResults" :key="course.id" :class="{ 'selected-course-row': pendingCourse?.id === course.id }"><td>{{ course.code }}</td><td>{{ course.name }}</td><td>{{ course.departmentName }}</td><td>{{ course.credits }}</td><td>{{ completionLabels[course.completionType] || course.completionType }}</td><td><MyButton content="선택" color="deep-blue" size="small" @click="pendingCourse = course" /></td></tr>
+      </MyTable>
+      <PrevNextPagination :page="coursePage" :has-next="courseHasNext" :inert="courseLoading" @page-change="searchCourses" />
+      <h3>선택한 교과목</h3>
+      <dl v-if="pendingCourse" class="course-picker-selection"><div><dt>교과목</dt><dd>{{ pendingCourse.name }}</dd></div><div><dt>교과목 코드</dt><dd>{{ pendingCourse.code }}</dd></div><div><dt>학점</dt><dd>{{ pendingCourse.credits }}학점</dd></div></dl>
+      <p v-else>교과목을 선택해 주세요.</p>
+      <div class="picker-actions"><MyButton content="닫기" color="white" size="middle" @click="showCoursePicker = false" /><MyButton content="선택 완료" color="deep-blue" size="middle" :disabled="!pendingCourse" @click="confirmCourse" /></div>
+    </section>
+    <template v-else>
     <div class="content-card">
       <form class="create-form-layout" :inert="isSubmitting || isLoadingEdit" @submit.prevent="submitRequest">
         <div v-if="editingRequestId" class="edit-notice full-width">
@@ -348,8 +392,8 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="form-group full-width">
-                <label for="opening-course-id">교과목 번호 (필수)</label>
-                <MyInput id="opening-course-id" v-model="form.courseId" numeric-only placeholder="교과목 번호를 입력해 주세요." />
+                <label for="opening-course-search">과목 선택 (필수)</label>
+                <button id="opening-course-search" type="button" class="course-picker-trigger" @click="openCoursePicker">{{ selectedCourse?.name || (form.courseId ? '저장된 교과목 (' + form.courseId + ')' : '개설할 과목을 선택하세요.') }}<span aria-hidden="true">⌄</span></button>
               </div>
               <div class="form-group">
                 <label for="opening-section">분반</label>
@@ -460,7 +504,7 @@ onMounted(async () => {
         <p v-if="formError" class="form-error full-width" role="alert">{{ formError }}</p>
 
         <div class="form-actions full-width">
-          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장 불러오기" :disabled="isSubmitting || isLoadingEdit" @click="restoreDraft" />
+          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장 복원" :disabled="isSubmitting || isLoadingEdit" @click="restoreDraft" />
           <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="middle" content="임시저장" :disabled="isSubmitting || isLoadingEdit" @click="saveDraft" />
           <MyButton
             v-if="editingRequestId"
@@ -532,10 +576,26 @@ onMounted(async () => {
         @page-change="loadHistory"
       />
     </section>
+    </template>
   </MyPageContainer>
 </template>
 
 <style scoped>
+.course-picker-search { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px; background: white; margin-bottom: 32px; }
+.course-picker-search > :first-child { width: 320px; }
+.picker-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.course-picker h3 { font-size: 16px; margin: 24px 0 12px; }
+.course-picker-selection { display: grid; grid-template-columns: repeat(3, 1fr); background: white; padding: 18px; margin-bottom: 20px; }
+.course-picker-selection dt { color: var(--personal-color-text-muted-slate); font-size: 12px; margin-bottom: 8px; }
+.course-picker-selection dd { margin: 0; font-size: 14px; }
+.course-picker-trigger { width: 100%; height: 38px; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; color: var(--personal-color-primary-text-navy); background: white; font: inherit; text-align: left; cursor: pointer; }
+.selected-course-row { background: var(--personal-color-sidebar-active-bg-sky); }
+@media (max-width: 760px) { .course-picker-search { flex-wrap: wrap; } .course-picker-search > :first-child { width: 100%; } }
+
+.course-results { border:1px solid var(--personal-color-border-mist); padding:12px; }
+.course-result { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; }
+.course-result small { display:block; color:#64748b; margin-top:4px; }
+.selected-course { font-size:13px; color:var(--personal-color-primary-navy); }
 .import-controls { display: flex; gap: 8px; align-items: end; }
 .import-controls select { flex: 1; min-width: 0; }
 .content-card {
@@ -829,4 +889,16 @@ onMounted(async () => {
     margin-bottom: 0;
   }
 }
+
+.info-grid { gap: 8px 18px; }
+.form-group label, .ratio-group label { font-size: 13px; margin-bottom: 6px; }
+.common-section-header { padding-bottom: 10px; border-bottom: 1px solid var(--personal-color-table-border-frost); margin-bottom: 10px; }
+.form-column { gap: 12px; }
+.section-box { padding: 14px 20px 6px; }
+.schedule-section, .ratio-section { padding: 14px 20px; }
+.empty-schedule-text { margin-top: 6px; font-size: 12px; font-style: normal; }
+.ratio-indicator { margin-top: 6px; font-size: 12px; }
+.form-actions { border: 0; padding-top: 0; margin-top: 0; gap: 8px; }
+.add-button { width: 77px; height: 38px; margin-bottom: 0; }
+
 </style>
