@@ -14,7 +14,7 @@ defineOptions({ name: 'ProfessorAttendanceApprovals' });
 const columns = [
   { key: 'student', label: '학생' },
   { key: 'course', label: '교과목' },
-  { key: 'lectureDate', label: '신청 날짜' },
+  { key: 'lectureDate', label: '수업일' },
   { key: 'reason', label: '사유' },
   { key: 'attachment', label: '첨부파일' },
   { key: 'status', label: '처리' },
@@ -70,6 +70,7 @@ const load = async () => {
 };
 
 const openRejectModal = (request) => {
+  if (isLoading.value || isReviewing.value || request.status !== 'PENDING') return;
   rejectTarget.value = request;
   rejectReason.value = '';
 };
@@ -99,12 +100,11 @@ const downloadAttachment = async (request) => {
 };
 
 const approveRequest = async (request) => {
-  if (isReviewing.value || request.status !== 'PENDING') return;
-  const confirmed = await confirmDialog(`${request.studentName} 학생의 공결 신청을 승인하시겠습니까?`);
-  if (!confirmed) return;
-
+  if (isLoading.value || isReviewing.value || request.status !== 'PENDING') return;
   isReviewing.value = true;
   try {
+    const confirmed = await confirmDialog(`${request.studentName} 학생의 공결 신청을 승인하시겠습니까?`);
+    if (!confirmed) return;
     await reviewExcuseRequest(request.id, 'APPROVED', null, createIdempotencyKey('excuse-approve'));
     await notify('승인 처리되었습니다.');
     await load();
@@ -149,10 +149,11 @@ onMounted(() => load());
     <section class="attendance-section">
       <div class="common-section-header">
         <h3>{{ activeTab === 'PENDING' ? '확인 대기 공결 신청' : '처리 완료 내역' }}</h3>
-        <MyTabs v-model="activeTab" class="professor-tabs" :tabs="tabOptions" />
+        <MyTabs v-model="activeTab" :tabs="tabOptions" />
       </div>
 
       <MyTable
+        class="approval-table"
         :columns="columns"
         :loading="isLoading"
         :empty="!isLoading && visibleRequests.length === 0"
@@ -174,7 +175,8 @@ onMounted(() => load());
               v-if="item.attachmentOriginalName"
               type="button"
               class="attachment-button"
-              :disabled="downloadingRequestId === item.id"
+              :disabled="downloadingRequestId !== null"
+              :title="item.attachmentOriginalName"
               @click="downloadAttachment(item)"
             >
               {{ downloadingRequestId === item.id ? '받는 중...' : item.attachmentOriginalName }}
@@ -188,16 +190,17 @@ onMounted(() => load());
                 color="red"
                 size="small"
                 content="반려"
-                :disabled="isReviewing"
+                :disabled="isLoading || isReviewing"
+                :aria-label="`${item.studentName} 공결 반려`"
                 @click="openRejectModal(item)"
               />
               <MyButton
                 btn-type="button"
-                class="professor-primary"
                 color="deep-blue"
                 size="small"
                 content="승인"
-                :disabled="isReviewing"
+                :disabled="isLoading || isReviewing"
+                :aria-label="`${item.studentName} 공결 승인`"
                 @click="approveRequest(item)"
               />
             </div>
@@ -224,6 +227,7 @@ onMounted(() => load());
           <textarea
             id="reject-reason"
             v-model="rejectReason"
+            :disabled="isReviewing"
             maxlength="500"
             rows="5"
             placeholder="학생에게 전달할 반려 사유를 입력해 주세요."
@@ -240,7 +244,7 @@ onMounted(() => load());
 
 <style scoped>
 .attendance-section {
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 .common-section-header {
@@ -256,9 +260,12 @@ onMounted(() => load());
   font-size: 1rem;
 }
 
-.professor-tabs :deep(.tab-button.active) {
-  border-color: var(--personal-color-professor-primary-navy);
-  background: var(--personal-color-professor-primary-navy);
+.approval-table {
+  overflow-x: auto;
+}
+
+.approval-table :deep(table) {
+  min-width: 820px;
 }
 
 .button-group {
@@ -271,6 +278,7 @@ onMounted(() => load());
   min-width: 220px;
   text-align: left;
   white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .reject-reason {
@@ -284,7 +292,7 @@ onMounted(() => load());
   padding: 0;
   overflow: hidden;
   border: 0;
-  color: var(--personal-color-professor-primary-navy);
+  color: var(--personal-color-primary-navy);
   background: transparent;
   font: inherit;
   font-size: 0.82rem;
@@ -356,13 +364,9 @@ onMounted(() => load());
   color: var(--personal-color-status-fail-text-maroon);
 }
 
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
-}
-
 :deep(.secondary-button) {
   border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-professor-primary-navy);
+  color: var(--personal-color-primary-navy);
 }
 
 @media (max-width: 760px) {
