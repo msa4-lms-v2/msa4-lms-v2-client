@@ -363,11 +363,11 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/grades/input" class="submenu-item">{{
               getMenuTitle("/professor/grades/input")
             }}</router-link>
-            <router-link to="/professor/evaluations" class="submenu-item">{{
-              getMenuTitle("/professor/evaluations")
-            }}</router-link>
             <router-link to="/professor/grades/correct" class="submenu-item">{{
               getMenuTitle("/professor/grades/correct")
+            }}</router-link>
+            <router-link to="/professor/evaluations" class="submenu-item">{{
+              getMenuTitle("/professor/evaluations")
             }}</router-link>
           </div>
         </div>
@@ -389,14 +389,14 @@ const toggleMenu = (menuKey) => {
               >{{ getMenuTitle("/professor/attendance/qr") }}</router-link
             >
             <router-link
-              to="/professor/attendance/approvals"
-              class="submenu-item"
-              >{{ getMenuTitle("/professor/attendance/approvals") }}</router-link
-            >
-            <router-link
               to="/professor/attendance"
               class="submenu-item"
               >{{ getMenuTitle("/professor/attendance") }}</router-link
+            >
+            <router-link
+              to="/professor/attendance/approvals"
+              class="submenu-item"
+              >{{ getMenuTitle("/professor/attendance/approvals") }}</router-link
             >
           </div>
         </div>
