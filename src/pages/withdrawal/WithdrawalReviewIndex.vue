@@ -509,9 +509,6 @@ onMounted(loadRequests);
 .filter-card label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; font-weight: 600; }
 .filter-card input { height: 38px; padding: 0 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: var(--personal-color-white); }
 .filter-actions { display: flex; gap: 8px; }
-.reset-action { border: 1px solid var(--personal-color-border-mist); }
-.admin-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-admin-secondary-indigo); }
-.professor-secondary { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-primary-navy); }
 .professor-primary { background: var(--personal-color-primary-navy); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .professor-text { color: var(--personal-color-professor-primary-navy); }

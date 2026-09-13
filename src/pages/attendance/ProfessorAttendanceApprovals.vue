@@ -381,11 +381,6 @@ onMounted(() => load());
   color: var(--personal-color-status-fail-text-maroon);
 }
 
-:deep(.secondary-button) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
-
 @media (max-width: 760px) {
   .common-section-header {
     align-items: stretch;

@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -42,7 +43,7 @@ const statusVariants = {
   CANCELLED: 'warning',
 };
 
-const fileInput = ref(null);
+const fileSelect = ref(null);
 const attachments = ref([]);
 const periods = ref([]);
 const requests = ref([]);
@@ -90,26 +91,21 @@ const returnSemesterLabel = computed(() => (
 
 const resetAttachment = () => {
   attachments.value = [];
-  if (fileInput.value) fileInput.value.value = '';
+  fileSelect.value?.reset();
 };
 
-const openFilePicker = () => fileInput.value?.click();
-
-const onFileChange = (event) => {
-  const selected = Array.from(event.target.files || []);
+const onFileChange = (files) => {
+  const selected = Array.from(files || []);
   if (selected.length !== 1) {
     formError.value = '군휴학 신청 시 입영통지서 파일 1개를 첨부해 주세요.';
-    event.target.value = '';
     return;
   }
   const validationMessage = validateLeaveAttachment(selected[0], '입영통지서');
   if (validationMessage) {
     formError.value = validationMessage;
-    event.target.value = '';
     return;
   }
   attachments.value = selected;
-  event.target.value = '';
   formError.value = '';
 };
 
@@ -278,20 +274,10 @@ onMounted(async () => {
         <div class="form-field file-field">
           <span>입영통지서 첨부 (PDF, HWP/HWPX, 이미지 가능)</span>
           <div class="file-picker">
-            <input
-              ref="fileInput"
-              class="visually-hidden"
-              type="file"
+            <MyFileSelectButton
+              ref="fileSelect"
               :accept="LEAVE_ATTACHMENT_ACCEPT"
               @change="onFileChange"
-            >
-            <MyButton
-              btn-type="button"
-              class="file-select-action"
-              color="white"
-              size="small"
-              content="파일 선택"
-              @click="openFilePicker"
             />
             <span
               class="file-count"
@@ -473,14 +459,6 @@ onMounted(async () => {
   background: var(--personal-color-white);
 }
 
-.file-select-action {
-  flex: 0 0 auto;
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-text-navy);
-  background: var(--personal-color-bg-surface-frost);
-  white-space: nowrap;
-}
-
 .file-name {
   min-width: 0;
   overflow: hidden;
@@ -595,18 +573,6 @@ onMounted(async () => {
 
 .leave-status--rejected.status-badge {
   color: var(--personal-color-red);
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 @media (max-width: 860px) {

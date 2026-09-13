@@ -151,10 +151,6 @@ const academicRows = computed(() => [
   flex: 0 0 auto;
 }
 
-.info-change-request-button {
-  color: var(--personal-color-primary-navy);
-}
-
 .student-intro {
   display: flex;
   align-items: center;

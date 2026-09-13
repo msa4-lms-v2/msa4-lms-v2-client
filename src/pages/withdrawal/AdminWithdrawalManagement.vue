@@ -274,6 +274,5 @@ onMounted(load);
 .action-card textarea { width: 100%; padding: 9px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; resize: vertical; }
 .form-error { color: var(--personal-color-danger-coral); font-size: .78rem; }
 .decision-actions { display: flex; gap: 10px; margin-top: 12px; justify-content: flex-end; }
-.decision-actions :deep(button) { width: auto; }
 @media (max-width: 1100px) { .management-grid { grid-template-columns: 1fr; } }
 </style>

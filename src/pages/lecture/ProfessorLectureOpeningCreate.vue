@@ -844,11 +844,6 @@ onMounted(async () => {
   color: var(--personal-color-status-fail-text-maroon);
 }
 
-:deep(.secondary-button) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-primary-navy);
-}
-
 @media (max-width: 1000px) {
   .create-form-layout {
     grid-template-columns: 1fr;
