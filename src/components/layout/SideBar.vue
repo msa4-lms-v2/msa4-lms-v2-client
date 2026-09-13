@@ -45,6 +45,7 @@ watch(
 const activeMenus = ref({
   adminAdmission: false,
   adminProfessor: false,
+  adminDepartment: false,
   adminAcademicSchedule: false,
   adminNotice: false,
   adminApplicationManagement: false,
@@ -68,6 +69,7 @@ const activeMenus = ref({
 watch(() => route.path, path => {
   if (path.startsWith('/admin/admissions')) activeMenus.value.adminAdmission = true;
   if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
+  if (path.startsWith('/admin/departments')) activeMenus.value.adminDepartment = true;
   if (path.startsWith('/admin/academic-schedules')) activeMenus.value.adminAcademicSchedule = true;
   if (path.startsWith('/admin/notices')) activeMenus.value.adminNotice = true;
   if (
@@ -427,6 +429,15 @@ const toggleMenu = (menuKey) => {
           <div v-show="activeMenus.adminProfessor" class="submenu-list">
             <router-link to="/admin/professors" class="submenu-item" exact-active-class="router-link-active">교수 목록</router-link>
             <router-link to="/admin/professors/new" class="submenu-item">교수 등록</router-link>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminDepartment" @click="toggleMenu('adminDepartment')">
+            <span>학과 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminDepartment }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminDepartment" class="submenu-list">
+            <router-link to="/admin/departments" class="submenu-item" exact-active-class="router-link-active">학과 목록</router-link>
+            <router-link to="/admin/departments/new" class="submenu-item">학과 등록</router-link>
           </div>
         </div>
         <div class="menu-group">

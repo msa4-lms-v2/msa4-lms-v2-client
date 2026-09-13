@@ -359,10 +359,6 @@ onMounted(() => load());
   background: white;
 }
 
-.professor-border {
-  border-top: 3px solid var(--personal-color-professor-primary-navy);
-}
-
 .section-title {
   display: flex;
   align-items: center;
