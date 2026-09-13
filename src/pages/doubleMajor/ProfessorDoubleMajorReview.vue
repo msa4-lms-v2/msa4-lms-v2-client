@@ -144,6 +144,7 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer
+    class="professor-page"
     title="복수전공 신청 검토"
   >
     <section class="filter-card">

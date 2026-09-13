@@ -5,7 +5,7 @@ import { getMyLectures } from '../../api/lectureApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -149,7 +149,7 @@ onMounted(loadLectures);
 </script>
 
 <template>
-  <MyPageContainer title="출결 확인">
+  <MyPageContainer class="professor-page" title="출결 확인">
     <MySearchFilter :show-submit="false" class="attendance-filter">
       <div class="search-group class-field">
         <label for="attendance-class">강의 선택</label>

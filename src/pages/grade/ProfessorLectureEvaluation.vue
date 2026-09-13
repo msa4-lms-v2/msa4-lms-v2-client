@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getProfessorLectureEvaluations } from '../../api/gradeApi';
 import { getMyLectures } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -176,7 +176,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :title="isDetail ? '강의평가 결과(상세)' : '강의평가 결과'">
+  <MyPageContainer class="professor-page" :title="isDetail ? '강의평가 결과(상세)' : '강의평가 결과'">
     <template v-if="!isDetail">
       <MySearchFilter submit-text="조회" submit-at-end @search="load(1)">
         <div class="search-group semester-filter">

@@ -22,7 +22,7 @@ import MyModal from "../../components/common/MyModal.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MySelect from "../../components/input/MySelect.vue";
-import MyPageContainer from "../../components/layout/ProfessorPageContainer.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyStatusBadge from "../../components/common/MyStatusBadge.vue";
 
 const lectures = ref([]);
@@ -249,7 +249,7 @@ onBeforeUnmount(stopLiveUpdates);
 </script>
 
 <template>
-  <MyPageContainer title="QR 출석 관리">
+  <MyPageContainer class="professor-page" title="QR 출석 관리">
     <section class="attendance-page" :aria-busy="isLoading">
       <div class="lecture-panel panel">
         <label for="lecture-select">강의 선택</label>

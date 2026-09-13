@@ -6,7 +6,7 @@ import {
   getLectureOpeningRequests,
   updateLectureOpeningRequest,
 } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -323,7 +323,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="강의 개설 신청">
+  <MyPageContainer class="professor-page" title="강의 개설 신청">
     <div class="content-card">
       <form class="create-form-layout" :inert="isSubmitting || isLoadingEdit" @submit.prevent="submitRequest">
         <div v-if="editingRequestId" class="edit-notice full-width">

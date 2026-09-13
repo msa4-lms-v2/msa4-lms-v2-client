@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
-import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
+import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { useCounselingStore } from '../../store/counseling/useCounselingStore';
 
@@ -37,7 +37,7 @@ onMounted(load);
 </script>
 
 <template>
-  <MyPageContainer title="온라인 상담">
+  <MyPageContainer class="professor-page" title="온라인 상담">
     <section class="summary-grid">
       <article><span>오늘의 상담</span><strong>{{ todayCount }}건</strong></article>
       <article><span>답변 대기</span><strong>{{ waitingCount }}건</strong></article>
