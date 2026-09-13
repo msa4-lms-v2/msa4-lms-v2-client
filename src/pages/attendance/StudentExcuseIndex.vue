@@ -8,6 +8,7 @@ import {
   uploadExcuseAttachment,
 } from '../../api/attendanceApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -47,7 +48,7 @@ const isLoadingRequests = ref(false);
 const isSubmitting = ref(false);
 const uploadingRequestId = ref(null);
 const downloadingRequestId = ref(null);
-const attachmentInput = ref(null);
+const attachmentFileSelect = ref(null);
 const fileInputRefs = ref({});
 const formError = ref('');
 
@@ -145,32 +146,26 @@ const resetForm = () => {
   form.reason = '';
   form.attachmentFile = null;
   formError.value = '';
-  if (attachmentInput.value) attachmentInput.value.value = '';
+  attachmentFileSelect.value?.reset();
 };
 
-const selectAttachment = async (event) => {
-  const file = event.target.files?.[0];
+const selectAttachment = async (files) => {
+  const file = files?.[0];
   if (!file) {
     form.attachmentFile = null;
     return;
   }
   if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
-    event.target.value = '';
     form.attachmentFile = null;
     await notify('증빙 파일은 PDF 형식만 첨부할 수 있습니다.');
     return;
   }
   if (file.size > PDF_MAX_SIZE) {
-    event.target.value = '';
     form.attachmentFile = null;
     await notify('증빙 파일은 10MB 이하만 첨부할 수 있습니다.');
     return;
   }
   form.attachmentFile = file;
-};
-
-const openNewAttachmentPicker = () => {
-  attachmentInput.value?.click();
 };
 
 const submitRequest = async () => {
@@ -348,22 +343,12 @@ onMounted(() => loadRequests());
 
         <div class="form-field attachment-field">
           <label for="excuse-attachment">첨부파일</label>
-          <input
-            id="excuse-attachment"
-            ref="attachmentInput"
-            class="visually-hidden"
-            type="file"
-            accept=".pdf,application/pdf"
-            @change="selectAttachment"
-          >
           <div class="attachment-picker">
-            <MyButton
-              btn-type="button"
-              class="file-select-action"
-              color="white"
-              size="small"
-              content="선택"
-              @click="openNewAttachmentPicker"
+            <MyFileSelectButton
+              id="excuse-attachment"
+              ref="attachmentFileSelect"
+              accept=".pdf,application/pdf"
+              @change="selectAttachment"
             />
             <span :class="{ 'placeholder-text': !form.attachmentFile }">
               {{ form.attachmentFile?.name || '선택된 파일 없음' }}
@@ -529,12 +514,6 @@ onMounted(() => loadRequests());
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 4px;
   background: var(--personal-color-white);
-}
-
-.file-select-action {
-  flex: 0 0 auto;
-  border: 1px solid var(--personal-color-border-mist);
-  background: var(--personal-color-table-header-smoke);
 }
 
 .attachment-picker > span {

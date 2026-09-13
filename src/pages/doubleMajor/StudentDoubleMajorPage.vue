@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
 import AcademicChangeGuidelineModal from '../../components/common/AcademicChangeGuidelineModal.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -92,7 +93,7 @@ const statusVariants = {
   CANCELLED: 'warning',
 };
 
-const fileInput = ref(null);
+const fileSelect = ref(null);
 const attachments = ref([]);
 const departments = ref([]);
 const periods = ref([]);
@@ -151,17 +152,14 @@ const validateHwp = (file) => {
 
 const resetAttachment = () => {
   attachments.value = [];
-  if (fileInput.value) fileInput.value.value = '';
+  fileSelect.value?.reset();
 };
 
-const openFilePicker = () => fileInput.value?.click();
-
-const onFileChange = (event) => {
-  const selected = Array.from(event.target.files || []);
+const onFileChange = (files) => {
+  const selected = Array.from(files || []);
   const validationMessage = selected.map(validateHwp).find(Boolean) || '';
   if (validationMessage) {
     formError.value = validationMessage;
-    event.target.value = '';
     return;
   }
   const combined = [...attachments.value, ...selected].filter(
@@ -173,11 +171,9 @@ const onFileChange = (event) => {
   );
   if (combined.length > ATTACHMENTS_REQUIRED_COUNT) {
     formError.value = '복수전공 첨부파일은 정확히 2개만 선택할 수 있습니다.';
-    event.target.value = '';
     return;
   }
   attachments.value = combined;
-  event.target.value = '';
   formError.value = '';
 };
 
@@ -408,21 +404,11 @@ onMounted(async () => {
               <span class="required-guide">* 필수 제출 서류 : 자기소개서 / 학업계획서</span>
             </div>
             <div class="file-picker">
-              <input
-                ref="fileInput"
-                class="visually-hidden"
-                type="file"
+              <MyFileSelectButton
+                ref="fileSelect"
                 accept=".hwp,.hwpx,application/x-hwp,application/vnd.hancom.hwp,application/vnd.hancom.hwpx"
                 multiple
                 @change="onFileChange"
-              >
-              <MyButton
-                btn-type="button"
-                class="file-select-action"
-                color="white"
-                size="middle"
-                content="파일 선택"
-                @click="openFilePicker"
               />
               <span
                 class="file-count"
@@ -634,15 +620,6 @@ onMounted(async () => {
   background: var(--personal-color-white);
 }
 
-.file-select-action {
-  flex: 0 0 auto;
-  width: 64px;
-  height: 24px;
-  border: 1px solid var(--personal-color-border-mist);
-  background: var(--personal-color-bg-surface-frost);
-  font-size: 0.7rem;
-}
-
 .file-count {
   flex: 0 0 auto;
   color: var(--personal-color-text-faint-fog);
@@ -723,18 +700,6 @@ onMounted(async () => {
 
 .double-major-status--rejected.status-badge {
   color: var(--personal-color-danger-coral);
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 @media (max-width: 800px) {

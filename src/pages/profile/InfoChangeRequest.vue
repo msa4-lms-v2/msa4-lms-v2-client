@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -65,7 +66,7 @@ const infoChangeStore = isProfessor.value
   : useInfoChangeStore();
 const profileStore = useProfileStore();
 const profileImageInput = ref(null);
-const attachmentInput = ref(null);
+const attachmentFileSelect = ref(null);
 const profileImage = ref(null);
 const attachments = ref([]);
 const previewUrl = ref('');
@@ -104,7 +105,7 @@ const resetForm = () => {
   errorMessage.value = '';
   revokePreview();
   if (profileImageInput.value) profileImageInput.value.value = '';
-  if (attachmentInput.value) attachmentInput.value.value = '';
+  attachmentFileSelect.value?.reset();
 };
 
 const buildPayload = () => ({
@@ -157,7 +158,6 @@ const validatePayload = (payload) => {
 };
 
 const openProfileImagePicker = () => profileImageInput.value?.click();
-const openAttachmentPicker = () => attachmentInput.value?.click();
 
 const onProfileImageChange = (event) => {
   profileImage.value = event.target.files?.[0] || null;
@@ -165,8 +165,8 @@ const onProfileImageChange = (event) => {
   if (profileImage.value) previewUrl.value = URL.createObjectURL(profileImage.value);
 };
 
-const onAttachmentsChange = (event) => {
-  const selected = Array.from(event.target.files || []);
+const onAttachmentsChange = (files) => {
+  const selected = Array.from(files || []);
   attachments.value = [...attachments.value, ...selected].filter(
     (file, index, files) =>
       files.findIndex((candidate) =>
@@ -175,7 +175,6 @@ const onAttachmentsChange = (event) => {
         && candidate.lastModified === file.lastModified
       ) === index,
   );
-  event.target.value = '';
 };
 
 const removeAttachment = (index) => attachments.value.splice(index, 1);
@@ -348,21 +347,11 @@ onUnmounted(revokePreview);
             <div class="field">
               <span>증빙파일 (PDF, JPG/PNG/GIF/WebP, HWP/HWPX 가능)</span>
               <div class="attachment-picker">
-                <input
-                  ref="attachmentInput"
-                  class="visually-hidden"
-                  type="file"
+                <MyFileSelectButton
+                  ref="attachmentFileSelect"
                   multiple
                   :accept="ATTACHMENT_ACCEPT"
                   @change="onAttachmentsChange"
-                >
-                <MyButton
-                  btn-type="button"
-                  class="outlined-action file-select-action"
-                  color="white"
-                  size="middle"
-                  content="파일 선택"
-                  @click="openAttachmentPicker"
                 />
                 <span
                   v-if="attachments.length > 0"
@@ -670,10 +659,6 @@ onUnmounted(revokePreview);
 
 .profile-photo-action {
   color: var(--personal-color-login-primary-navy);
-}
-
-.file-select-action {
-  background: var(--personal-color-bg-surface-frost);
 }
 
 .error-message {

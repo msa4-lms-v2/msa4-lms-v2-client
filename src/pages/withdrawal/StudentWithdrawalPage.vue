@@ -9,6 +9,7 @@ import {
 } from '../../api/withdrawalApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
+import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -47,7 +48,7 @@ const statusLabels = {
   REJECTED: '관리자 반려',
   CANCELLED: '신청 취소',
 };
-const fileInput = ref(null);
+const fileSelect = ref(null);
 const attachment = ref(null);
 const pendingUpload = ref(null);
 const requests = ref([]);
@@ -210,20 +211,17 @@ const cancelSelectedRequest = async () => {
   }
 };
 
-const openFilePicker = () => fileInput.value?.click();
-
 const resetAttachment = () => {
   attachment.value = null;
   pendingUpload.value = null;
-  if (fileInput.value) fileInput.value.value = '';
+  fileSelect.value?.reset();
 };
 
-const onFileChange = (event) => {
-  const selected = event.target.files?.[0] || null;
+const onFileChange = (files) => {
+  const selected = files?.[0] || null;
   const validationMessage = validateWithdrawalAttachment(selected);
   if (validationMessage) {
     formError.value = validationMessage;
-    event.target.value = '';
     return;
   }
 
@@ -236,12 +234,11 @@ const onFileChange = (event) => {
     };
   }
   formError.value = '';
-  event.target.value = '';
 };
 
 const removeAttachment = () => {
   attachment.value = null;
-  if (fileInput.value) fileInput.value.value = '';
+  fileSelect.value?.reset();
   if (pendingUpload.value) {
     formError.value = '이미 접수된 신청의 증빙을 다시 선택해 주세요.';
   }
@@ -419,20 +416,10 @@ onMounted(async () => {
           <div class="form-field file-field">
             <span>증빙 파일 (PDF, HWP/HWPX, 이미지 가능)</span>
             <div class="file-picker">
-              <input
-                ref="fileInput"
-                class="visually-hidden"
-                type="file"
+              <MyFileSelectButton
+                ref="fileSelect"
                 :accept="WITHDRAWAL_ATTACHMENT_ACCEPT"
                 @change="onFileChange"
-              >
-              <MyButton
-                btn-type="button"
-                class="file-select-action"
-                color="white"
-                size="middle"
-                content="파일 선택"
-                @click="openFilePicker"
               />
               <span
                 v-if="!attachment"
@@ -699,14 +686,6 @@ onMounted(async () => {
   border-radius: 4px;
   background: var(--personal-color-white);
 }
-.file-select-action {
-  flex: 0 0 auto;
-  width: 64px;
-  height: 24px;
-  border: 1px solid var(--personal-color-border-mist);
-  background: var(--personal-color-bg-surface-frost);
-  font-size: 0.7rem;
-}
 .file-placeholder {
   color: var(--personal-color-text-faint-fog);
   font-weight: 400 !important;
@@ -756,17 +735,6 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 28px;
-}
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 .history-section { margin-top: 34px; }
 .history-heading {
