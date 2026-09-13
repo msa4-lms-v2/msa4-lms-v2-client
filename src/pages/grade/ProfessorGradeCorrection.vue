@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { correctOpenedGrades, getGradeCorrectionHistories, getManagedGrades } from '../../api/gradeApi';
 import { getMyLectures } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';

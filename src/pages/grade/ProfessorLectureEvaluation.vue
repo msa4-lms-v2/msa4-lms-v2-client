@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getProfessorLectureEvaluations } from '../../api/gradeApi';
 import { getMyLectures } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
