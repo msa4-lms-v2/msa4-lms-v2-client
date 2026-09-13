@@ -64,9 +64,11 @@ const activeMenus = ref({
   professorGrade: false,
   professorAttendance: false,
   professorCounseling: false,
+  professorCertificate: false,
 });
 
 watch(() => route.path, path => {
+  if (path.startsWith('/professor/certificates')) activeMenus.value.professorCertificate = true;
   if (path.startsWith('/admin/admissions')) activeMenus.value.adminAdmission = true;
   if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
   if (path.startsWith('/admin/departments')) activeMenus.value.adminDepartment = true;
@@ -288,9 +290,6 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/profile/info-change" class="submenu-item">{{
               getMenuTitle("/professor/profile/info-change")
             }}</router-link>
-            <router-link to="/professor/certificates/apply" class="submenu-item">{{
-              getMenuTitle("/professor/certificates/apply")
-            }}</router-link>
           </div>
         </div>
 
@@ -408,6 +407,15 @@ const toggleMenu = (menuKey) => {
           </button>
           <div class="submenu-list" v-show="activeMenus.professorCounseling">
             <router-link to="/professor/counseling" class="submenu-item">온라인 상담</router-link>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.professorCertificate" @click="toggleMenu('professorCertificate')">
+            <span>증명서</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorCertificate }">▼</span>
+          </button>
+          <div class="submenu-list" v-show="activeMenus.professorCertificate">
+            <router-link to="/professor/certificates/apply" class="submenu-item">{{ getMenuTitle('/professor/certificates/apply') }}</router-link>
           </div>
         </div>
       </template>
