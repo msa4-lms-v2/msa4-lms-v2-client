@@ -414,7 +414,6 @@ onMounted(async () => {
 }
 
 .request-card {
-  margin-top: 32px;
   padding: 20px 20px 20px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
