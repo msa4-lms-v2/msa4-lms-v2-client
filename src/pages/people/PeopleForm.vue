@@ -363,7 +363,9 @@ onUnmounted(() => {
 
         <fieldset :disabled="saving">
           <label v-for="field in fields" :key="field.key">
-            {{ field.label }} <em v-if="field.required && !detail">*</em>
+            <span class="field-label">
+              {{ field.label }} <em v-if="field.required && !detail">*</em>
+            </span>
             <MyInput
               v-model="form[field.key]"
               :type="field.type"
@@ -381,7 +383,7 @@ onUnmounted(() => {
               <MyInput v-model="departmentQuery" placeholder="학과를 검색해 주세요." />
             </label>
             <label>
-              학과 선택 <em>*</em>
+              <span class="field-label">학과 선택 <em>*</em></span>
               <MySelect v-model="form.departmentId" required>
                 <option value="" disabled>학과를 선택해 주세요.</option>
                 <option v-for="department in filteredDepartments" :key="department.id" :value="department.id">
@@ -401,7 +403,7 @@ onUnmounted(() => {
           </label>
 
           <label v-if="admission && !detail">
-            지도교수 <em>*</em>
+            <span class="field-label">지도교수 <em>*</em></span>
             <MySelect v-model="form.advisorProfessorId" :disabled="!form.departmentId || professorsLoading" required>
               <option value="" disabled>
                 {{ professorsLoading ? '교수 목록을 불러오는 중...' : professors.length ? '지도교수를 선택해 주세요.' : '해당 학과에 활성 교수가 없습니다.' }}
@@ -413,7 +415,7 @@ onUnmounted(() => {
           </label>
 
           <label v-if="admission">
-            입학 연도 <em v-if="!detail">*</em>
+            <span class="field-label">입학 연도 <em v-if="!detail">*</em></span>
             <MySelect v-if="!detail" v-model="form.admissionYear" required>
               <option :value="year">{{ year }}</option>
               <option :value="year + 1">{{ year + 1 }}</option>
@@ -428,7 +430,7 @@ onUnmounted(() => {
           </label>
 
           <label v-else>
-            임용 연도 <em v-if="!detail">*</em>
+            <span class="field-label">임용 연도 <em v-if="!detail">*</em></span>
             <MyInput
               v-model="form.hireYear"
               numeric-only
@@ -440,7 +442,7 @@ onUnmounted(() => {
           </label>
 
           <label v-if="detail && !admission" class="reason-field">
-            변경 사유 <em>*</em>
+            <span class="field-label">변경 사유 <em>*</em></span>
             <textarea
               v-model="changeReason"
               rows="3"
@@ -506,18 +508,19 @@ onUnmounted(() => {
           </dl>
         </section>
 
-        <section v-if="!detail" class="people-card people-guide">
+        <section v-if="!detail || !admission" class="people-card people-guide">
           <h3>등록 안내</h3>
           <p>입력한 정보는 {{ admission ? '입학 전형 및 학사' : '교수' }} 관리에 활용됩니다.</p>
           <p>저장 전 필수 항목과 소속 정보를 확인해 주세요.</p>
-          <p>등록하면 {{ admission ? '학생 계정과 학번' : '교수 계정과 교번' }}이 자동으로 생성됩니다.</p>
+          <p v-if="detail">등록 후에도 교수 상세 화면에서 수정할 수 있습니다.</p>
+          <p v-else>등록하면 {{ admission ? '학생 계정과 학번' : '교수 계정과 교번' }}이 자동으로 생성됩니다.</p>
         </section>
 
         <div class="people-actions page-actions">
           <MyButton
             class="secondary-button"
             color="white"
-            size="middle"
+            size="big"
             :content="detail ? '목록' : '취소'"
             :disabled="saving"
             @click="router.push(base)"

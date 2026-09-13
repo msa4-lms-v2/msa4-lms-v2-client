@@ -24,6 +24,7 @@ const fileAccept = '.pdf,.jpg,.jpeg,.png,.gif,.webp,.hwp,.hwpx';
 const formatDate = (value) => value || '-';
 const fileSize = (value) => `${(value / 1024 / 1024).toFixed(value < 1024 * 1024 ? 1 : 0)}MB`;
 const previewLabel = computed(() => ({ ALL: '전체', STUDENT: '학생', PROFESSOR: '교수' }[form.targetRole]));
+const openFilePicker = () => fileInput.value?.click();
 
 const selectFiles = async (event) => {
   const selected = Array.from(event.target.files || []);
@@ -112,8 +113,8 @@ onMounted(load);
     <form v-else class="notice-form" @submit.prevent="save">
       <section class="form-card">
         <h3>공지 정보</h3>
-        <div class="field full">
-          <span class="field-label">분류 <em>*</em></span>
+        <div class="field full choice-field">
+          <span class="field-label">분류</span>
           <div class="inline-options">
             <label>
               <input v-model="form.category" type="radio" value="NORMAL" @change="form.normalTransitionDate = ''" />
@@ -126,13 +127,19 @@ onMounted(load);
           </div>
         </div>
 
-        <div class="field full">
-          <label for="notice-title">제목 <em>*</em></label>
-          <MyInput id="notice-title" v-model="form.title" maxlength="100" placeholder="공지 제목을 입력해 주세요" />
+        <div class="field full title-field">
+          <label for="notice-title">제목</label>
+          <MyInput
+            id="notice-title"
+            v-model="form.title"
+            class="title-input"
+            maxlength="100"
+            placeholder="공지 제목을 입력해 주세요"
+          />
         </div>
 
-        <div class="field full">
-          <span class="field-label">게시 대상 <em>*</em></span>
+        <div class="field full choice-field">
+          <span class="field-label">게시 대상</span>
           <div class="inline-options">
             <label><input v-model="form.targetRole" type="radio" value="ALL" /> 전체</label>
             <label><input v-model="form.targetRole" type="radio" value="STUDENT" /> 학생</label>
@@ -141,9 +148,11 @@ onMounted(load);
         </div>
 
         <div v-if="form.category === 'IMPORTANT'" class="field full">
-          <label for="notice-transition">일반 공지 전환일 <em>*</em></label>
+          <div class="field-heading">
+            <label for="notice-transition">일반 공지 전환일</label>
+            <span class="transition-guide">선택한 날짜 00:00부터 서버가 중요 공지를 일반 공지로 자동 전환합니다.</span>
+          </div>
           <MyInput id="notice-transition" v-model="form.normalTransitionDate" type="date" />
-          <small>선택한 날짜 00:00부터 서버가 중요 공지를 일반 공지로 자동 전환합니다.</small>
         </div>
 
         <div class="field full">
@@ -153,9 +162,17 @@ onMounted(load);
 
         <div class="field full">
           <span class="field-label">첨부파일</span>
+          <input
+            ref="fileInput"
+            class="file-input"
+            type="file"
+            :accept="fileAccept"
+            multiple
+            @change="selectFiles"
+          />
           <div class="file-row">
-            <input ref="fileInput" type="file" :accept="fileAccept" multiple @change="selectFiles" />
-            <small>PDF, 이미지(JPEG/PNG/GIF/WebP), HWP/HWPX · 최대 5개 · 파일당 10MB · 전체 20MB</small>
+            <MyButton color="white" size="middle" content="파일 추가" @click="openFilePicker" />
+            <small>최대 5개, 파일당 10MB 이하</small>
           </div>
 
           <ul v-if="files.length" class="file-list">
@@ -171,6 +188,23 @@ onMounted(load);
               ({{ fileSize(file.fileSize) }})
             </li>
           </ul>
+
+          <div class="actions">
+            <MyButton
+              btn-type="button"
+              color="white"
+              size="big"
+              content="목록"
+              @click="router.push({ name: 'AdminNoticeIndex' })"
+            />
+            <MyButton
+              type="submit"
+              color="admin-indigo"
+              size="big"
+              :disabled="isSaving"
+              :content="isSaving ? '저장 중' : isEdit ? '수정 저장' : '게시하기'"
+            />
+          </div>
         </div>
       </section>
 
@@ -191,22 +225,6 @@ onMounted(load);
         </p>
       </aside>
 
-      <div class="actions">
-        <MyButton
-          btn-type="button"
-          color="white"
-          size="middle"
-          content="목록"
-          @click="router.push({ name: 'AdminNoticeIndex' })"
-        />
-        <MyButton
-          type="submit"
-          color="admin-indigo"
-          size="middle"
-          :disabled="isSaving"
-          :content="isSaving ? '저장 중' : isEdit ? '수정 저장' : '게시하기'"
-        />
-      </div>
     </form>
   </MyPageContainer>
 </template>
@@ -214,8 +232,8 @@ onMounted(load);
 <style scoped>
 .notice-form {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 1fr);
+  gap: 18px;
 }
 
 .form-card,
@@ -264,6 +282,42 @@ onMounted(load);
   font-style: normal;
 }
 
+.choice-field {
+  flex-direction: row;
+  align-items: center;
+  min-height: 38px;
+}
+
+.choice-field .field-label {
+  flex: 0 0 40px;
+}
+
+.title-field {
+  flex-direction: row;
+  align-items: center;
+}
+
+.title-field label {
+  flex: 0 0 40px;
+}
+
+.title-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.transition-guide {
+  color: #d33;
+  font-size: 0.76rem;
+}
+
 .field small {
   color: var(--personal-color-text-secondary-steel);
   font-size: 0.76rem;
@@ -294,10 +348,25 @@ textarea {
   font-weight: 400;
 }
 
+input[type='radio'] {
+  accent-color: var(--personal-color-admin-secondary-indigo);
+}
+
 .file-row {
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
+  min-height: 29px;
+}
+
+.file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .file-list {
@@ -369,6 +438,7 @@ textarea {
   grid-column: 1 / -1;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 14px;
 }
 
 .loading {

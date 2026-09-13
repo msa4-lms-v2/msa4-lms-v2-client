@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { downloadCertificate, issueEmploymentCertificate } from '../../api/certificateApi';
+import MyCard from '../../components/common/MyCard.vue';
+import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { notify } from '../../composables/useDialog';
@@ -14,9 +16,9 @@ const isDownloading = ref(false);
 const formError = ref('');
 
 const issue = async () => {
-  if (isIssuing.value) return;
+  if (isIssuing.value || isDownloading.value) return;
   formError.value = '';
-  issuedDocument.value = null;
+
   isIssuing.value = true;
   try {
     const response = await issueEmploymentCertificate();
@@ -30,7 +32,7 @@ const issue = async () => {
 };
 
 const download = async () => {
-  if (!issuedDocument.value || isDownloading.value) return;
+  if (!issuedDocument.value || isDownloading.value || isIssuing.value) return;
   isDownloading.value = true;
   try {
     const response = await downloadCertificate(issuedDocument.value.id);
@@ -50,162 +52,84 @@ const download = async () => {
 
 <template>
   <MyPageContainer title="증명서 발급">
-    <section class="certificate-card">
-      <div class="common-section-header">
-        <h3>재직증명서 발급</h3>
-      </div>
+    <div class="certificate-grid">
+      <MyCard class="certificate-card">
+        <h3>재직증명서</h3>
+        <div class="form-actions">
+          <MyButton btn-type="button" color="deep-blue" size="big"
+            :content="isIssuing ? '발급 중...' : 'PDF 발급'"
+            :disabled="isIssuing || isDownloading" @click="issue" />
+        </div>
+      </MyCard>
+    </div>
+    <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
 
-      <dl class="certificate-info">
-        <div>
-          <dt>증명서 종류</dt>
-          <dd>재직증명서</dd>
-        </div>
-        <div>
-          <dt>발급 형식</dt>
-          <dd>PDF 문서</dd>
-        </div>
-      </dl>
-
-      <p v-if="formError" class="form-error" role="alert">
-        {{ formError }}
-      </p>
-
-      <div class="form-actions">
-        <MyButton
-          btn-type="button"
-          class="professor-primary"
-          color="deep-blue"
-          size="big"
-          :content="isIssuing ? '발급 중...' : '발급 신청'"
-          :disabled="isIssuing"
-          @click="issue"
-        />
-      </div>
-    </section>
-
-    <section v-if="issuedDocument" class="result-card" aria-live="polite">
-      <div class="common-section-header">
-        <div>
-          <h3>발급 완료</h3>
-          <p class="success-text">재직증명서가 정상적으로 발급되었습니다.</p>
-        </div>
-        <MyButton
-          btn-type="button"
-          class="secondary-button"
-          color="white"
-          size="middle"
-          :content="isDownloading ? '받는 중...' : '다운로드'"
-          :disabled="isDownloading"
-          @click="download"
-        />
-      </div>
-
-      <dl class="result-details">
-        <div>
-          <dt>증명서 종류</dt>
-          <dd>재직증명서</dd>
-        </div>
-        <div>
-          <dt>문서 번호</dt>
-          <dd>{{ issuedDocument.id }}</dd>
-        </div>
-        <div>
-          <dt>발급 일시</dt>
-          <dd>{{ formatDate(issuedDocument.issuedAt, 'YYYY-MM-DD HH:mm') }}</dd>
-        </div>
-      </dl>
+    <section class="result-section" aria-live="polite">
+      <h3>이번 발급 내역</h3>
+      <MyTable class="result-table"
+        :columns="[{ key: 'type', label: '증명서' }, { key: 'id', label: '문서 번호' }, { key: 'date', label: '발급 일시' }, { key: 'download', label: '다운로드' }]"
+        :empty="!issuedDocument" empty-message="이 화면에서 발급한 증명서가 없습니다.">
+        <tr v-if="issuedDocument">
+          <td>재직증명서</td>
+          <td>{{ issuedDocument.id }}</td>
+          <td>{{ formatDate(issuedDocument.issuedAt, 'YYYY-MM-DD HH:mm') }}</td>
+          <td class="download-cell">
+            <MyButton btn-type="button" color="deep-blue" size="middle"
+              :content="isDownloading ? '받는 중...' : '다운로드'"
+              :disabled="isDownloading || isIssuing" @click="download" />
+          </td>
+        </tr>
+      </MyTable>
     </section>
   </MyPageContainer>
 </template>
 
 <style scoped>
-.certificate-card,
-.result-card {
-  padding: 22px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  background: var(--personal-color-white);
+.certificate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
 }
-
-.result-card {
-  margin-top: 24px;
+.certificate-card {
+  min-height: 180px;
+  box-sizing: border-box;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
 }
-
-.common-section-header {
-  align-items: flex-start;
-}
-
-.common-section-header h3 {
+h3 {
   margin: 0;
   color: var(--personal-color-primary-text-navy);
   font-size: 1rem;
 }
-
-.certificate-info,
-.result-details {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  margin: 20px 0;
-  border: 1px solid var(--personal-color-border-mist);
-  background: var(--personal-color-border-mist);
-}
-
-.result-details {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 0;
-}
-
-.certificate-info div,
-.result-details div {
-  padding: 14px;
-  background: var(--personal-color-white);
-}
-
-.certificate-info dt,
-.result-details dt {
-  color: var(--personal-color-text-muted-slate);
-  font-size: 0.78rem;
-}
-
-.certificate-info dd,
-.result-details dd {
-  margin: 7px 0 0;
-  color: var(--personal-color-primary-text-navy);
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.form-error {
-  margin: 0 0 14px;
-  color: var(--personal-color-status-fail-text-maroon);
-  font-size: 0.85rem;
-}
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
 }
-
-.success-text {
-  margin: 5px 0 0;
-  color: var(--personal-color-status-success-text-forest);
-  font-size: 0.84rem;
+.form-error {
+  margin: 16px 0 0;
+  color: var(--personal-color-status-fail-text-maroon);
+  font-size: 0.85rem;
 }
-
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
+.result-section {
+  margin-top: 24px;
 }
-
-:deep(.secondary-button) {
-  border: 1px solid var(--personal-color-border-mist);
-  color: var(--personal-color-professor-primary-navy);
+.result-section h3 {
+  margin-bottom: 12px;
 }
-
-@media (max-width: 680px) {
-  .certificate-info,
-  .result-details {
+.result-table {
+  overflow-x: auto;
+}
+.result-table :deep(table) {
+  min-width: 600px;
+}
+.result-table :deep(td.download-cell) {
+  text-align: right;
+}
+@media (max-width: 760px) {
+  .certificate-grid {
     grid-template-columns: 1fr;
   }
 }

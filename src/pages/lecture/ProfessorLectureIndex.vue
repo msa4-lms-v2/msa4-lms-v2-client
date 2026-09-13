@@ -155,7 +155,7 @@ onMounted(async () => {
 
 <style scoped>
 .filter-field {
-  flex: 1 1 160px;
+  flex: 0 1 200px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -171,7 +171,7 @@ onMounted(async () => {
 
 .course-name {
   color: var(--personal-color-primary-text-navy);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .section-number {

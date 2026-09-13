@@ -9,6 +9,7 @@ const authStore = useAuthStore();
 const AdminDashboard = defineAsyncComponent(() =>
   import("./AdminDashboard.vue")
 );
+
 const AcademicDashboard = defineAsyncComponent(() =>
   import("./AcademicDashboard.vue")
 );

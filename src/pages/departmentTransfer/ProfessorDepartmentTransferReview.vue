@@ -340,9 +340,7 @@ onMounted(() => load());
   border: 1px solid var(--personal-color-black);
 }
 
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
-}
+.professor-primary { background: var(--personal-color-primary-navy); }
 
 .review-grid {
   display: grid;
@@ -357,10 +355,6 @@ onMounted(() => load());
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 10px;
   background: white;
-}
-
-.professor-border {
-  border-top: 3px solid var(--personal-color-professor-primary-navy);
 }
 
 .section-title {

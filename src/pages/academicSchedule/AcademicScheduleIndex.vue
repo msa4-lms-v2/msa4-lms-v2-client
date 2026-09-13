@@ -76,29 +76,122 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="학사일정 목록" subtitle="일정 분류와 기간을 관리하고, 실제 접수 기간을 함께 설정합니다.">
+  <MyPageContainer title="학사일정 목록">
     <MySearchFilter :show-submit="false">
-      <div class="search-group"><label for="schedule-keyword">통합 검색</label><MyInput id="schedule-keyword" v-model="filters.keyword" placeholder="일정명 검색" @keyup-enter="load(1)" /></div>
-      <div class="search-group"><label for="schedule-target">대상</label><MySelect id="schedule-target" v-model="filters.targetRole"><option value="">전체</option><option value="ALL">전체 공지</option><option value="STUDENT">학생</option><option value="PROFESSOR">교수</option></MySelect></div>
-      <div class="search-group"><label for="schedule-category">일정 분류</label><MySelect id="schedule-category" v-model="filters.category"><option value="">전체</option><option v-for="template in templates" :key="template.category" :value="template.category">{{ template.label }}</option></MySelect></div>
-      <div class="search-group"><label for="schedule-year">연도</label><MyInput id="schedule-year" v-model="filters.academicYear" numeric-only placeholder="예: 2026" /></div>
-      <div class="search-group"><label for="schedule-term">학기</label><MySelect id="schedule-term" v-model="filters.term"><option value="">전체</option><option value="FIRST">1학기</option><option value="SECOND">2학기</option></MySelect></div>
-      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
+      <div class="search-group">
+        <label for="schedule-keyword">통합 검색</label>
+        <MyInput
+          id="schedule-keyword"
+          v-model="filters.keyword"
+          placeholder="일정명 검색"
+          @keyup-enter="load(1)"
+        />
+      </div>
+      <div class="search-group">
+        <label for="schedule-target">대상</label>
+        <MySelect id="schedule-target" v-model="filters.targetRole">
+          <option value="">전체</option>
+          <option value="ALL">전체 공지</option>
+          <option value="STUDENT">학생</option>
+          <option value="PROFESSOR">교수</option>
+        </MySelect>
+      </div>
+      <div class="search-group">
+        <label for="schedule-category">일정 분류</label>
+        <MySelect id="schedule-category" v-model="filters.category">
+          <option value="">전체</option>
+          <option
+            v-for="template in templates"
+            :key="template.category"
+            :value="template.category"
+          >
+            {{ template.label }}
+          </option>
+        </MySelect>
+      </div>
+      <div class="search-group">
+        <label for="schedule-year">연도</label>
+        <MyInput
+          id="schedule-year"
+          v-model="filters.academicYear"
+          numeric-only
+          placeholder="예: 2026"
+        />
+      </div>
+      <div class="search-group">
+        <label for="schedule-term">학기</label>
+        <MySelect id="schedule-term" v-model="filters.term">
+          <option value="">전체</option>
+          <option value="FIRST">1학기</option>
+          <option value="SECOND">2학기</option>
+        </MySelect>
+      </div>
+      <MyButton btn-type="button" color="admin-indigo" size="middle" content="조회" @click="load(1)" />
       <MyButton btn-type="button" color="white" size="middle" content="초기화" @click="resetFilters" />
     </MySearchFilter>
 
-    <div class="list-heading"><div><h3>검색 결과</h3><span>총 {{ page.totalCount || 0 }}개 일정</span></div><MyButton btn-type="button" color="deep-blue" size="middle" content="학사일정 작성" @click="router.push({ name: 'AcademicScheduleCreate' })" /></div>
-    <MyTable :columns="columns" :loading="loading" :empty="!loading && schedules.length === 0" empty-message="조회된 학사일정이 없습니다.">
+    <div class="list-heading">
+      <div>
+        <h3>검색 결과</h3>
+        <span>총 {{ page.totalCount || 0 }}개 일정</span>
+      </div>
+      <MyButton
+        btn-type="button"
+        color="admin-indigo"
+        size="big"
+        content="학사일정 작성"
+        @click="router.push({ name: 'AcademicScheduleCreate' })"
+      />
+    </div>
+    <MyTable
+      :columns="columns"
+      :loading="loading"
+      :empty="!loading && schedules.length === 0"
+      empty-message="조회된 학사일정이 없습니다."
+    >
       <tr v-for="schedule in schedules" :key="schedule.id">
-        <td>{{ schedule.title }}</td><td>{{ targetRoleLabel[schedule.targetRole] || schedule.targetRole }}</td><td>{{ schedule.academicYear }}학년도</td><td>{{ termLabel[schedule.term] || schedule.term }}</td><td>{{ schedule.categoryLabel }}</td><td>{{ formatDateTime(schedule.createdAt) }}</td>
-        <td><MyButton btn-type="button" color="deep-blue" size="small" content="상세" @click="router.push({ name: 'AcademicScheduleDetail', params: { scheduleId: schedule.id } })" /></td>
+        <td>{{ schedule.title }}</td>
+        <td>{{ targetRoleLabel[schedule.targetRole] || schedule.targetRole }}</td>
+        <td>{{ schedule.academicYear }}학년도</td>
+        <td>{{ termLabel[schedule.term] || schedule.term }}</td>
+        <td>{{ schedule.categoryLabel }}</td>
+        <td>{{ formatDateTime(schedule.createdAt) }}</td>
+        <td>
+          <MyButton
+            btn-type="button"
+            color="admin-indigo"
+            size="small"
+            content="상세"
+            @click="router.push({ name: 'AcademicScheduleDetail', params: { scheduleId: schedule.id } })"
+          />
+        </td>
       </tr>
     </MyTable>
-    <PrevNextPagination v-if="page.page > 1 || page.hasNext" :page="page.page" :has-next="page.hasNext" @page-change="load" />
+    <PrevNextPagination
+      v-if="page.page > 1 || page.hasNext"
+      :page="page.page"
+      :has-next="page.hasNext"
+      @page-change="load"
+    />
   </MyPageContainer>
 </template>
 
 <style scoped>
-.list-heading { display:flex; justify-content:space-between; align-items:center; margin:24px 0 12px; }
-.list-heading h3 { margin:0 0 4px; font-size:1rem; }.list-heading span { color:var(--personal-color-link-blue); font-size:.86rem; font-weight:600; }
+.list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0 12px;
+}
+
+.list-heading h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.list-heading span {
+  color: var(--personal-color-admin-secondary-indigo);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
 </style>

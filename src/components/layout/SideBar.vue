@@ -45,6 +45,7 @@ watch(
 const activeMenus = ref({
   adminAdmission: false,
   adminProfessor: false,
+  adminDepartment: false,
   adminAcademicSchedule: false,
   adminNotice: false,
   adminApplicationManagement: false,
@@ -63,11 +64,14 @@ const activeMenus = ref({
   professorGrade: false,
   professorAttendance: false,
   professorCounseling: false,
+  professorCertificate: false,
 });
 
 watch(() => route.path, path => {
+  if (path.startsWith('/professor/certificates')) activeMenus.value.professorCertificate = true;
   if (path.startsWith('/admin/admissions')) activeMenus.value.adminAdmission = true;
   if (path.startsWith('/admin/professors')) activeMenus.value.adminProfessor = true;
+  if (path.startsWith('/admin/departments')) activeMenus.value.adminDepartment = true;
   if (path.startsWith('/admin/academic-schedules')) activeMenus.value.adminAcademicSchedule = true;
   if (path.startsWith('/admin/notices')) activeMenus.value.adminNotice = true;
   if (
@@ -286,9 +290,6 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/profile/info-change" class="submenu-item">{{
               getMenuTitle("/professor/profile/info-change")
             }}</router-link>
-            <router-link to="/professor/certificates/apply" class="submenu-item">{{
-              getMenuTitle("/professor/certificates/apply")
-            }}</router-link>
           </div>
         </div>
 
@@ -361,11 +362,11 @@ const toggleMenu = (menuKey) => {
             <router-link to="/professor/grades/input" class="submenu-item">{{
               getMenuTitle("/professor/grades/input")
             }}</router-link>
-            <router-link to="/professor/evaluations" class="submenu-item">{{
-              getMenuTitle("/professor/evaluations")
-            }}</router-link>
             <router-link to="/professor/grades/correct" class="submenu-item">{{
               getMenuTitle("/professor/grades/correct")
+            }}</router-link>
+            <router-link to="/professor/evaluations" class="submenu-item">{{
+              getMenuTitle("/professor/evaluations")
             }}</router-link>
           </div>
         </div>
@@ -387,14 +388,14 @@ const toggleMenu = (menuKey) => {
               >{{ getMenuTitle("/professor/attendance/qr") }}</router-link
             >
             <router-link
-              to="/professor/attendance/approvals"
-              class="submenu-item"
-              >{{ getMenuTitle("/professor/attendance/approvals") }}</router-link
-            >
-            <router-link
               to="/professor/attendance"
               class="submenu-item"
               >{{ getMenuTitle("/professor/attendance") }}</router-link
+            >
+            <router-link
+              to="/professor/attendance/approvals"
+              class="submenu-item"
+              >{{ getMenuTitle("/professor/attendance/approvals") }}</router-link
             >
           </div>
         </div>
@@ -406,6 +407,15 @@ const toggleMenu = (menuKey) => {
           </button>
           <div class="submenu-list" v-show="activeMenus.professorCounseling">
             <router-link to="/professor/counseling" class="submenu-item">온라인 상담</router-link>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.professorCertificate" @click="toggleMenu('professorCertificate')">
+            <span>증명서</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorCertificate }">▼</span>
+          </button>
+          <div class="submenu-list" v-show="activeMenus.professorCertificate">
+            <router-link to="/professor/certificates/apply" class="submenu-item">{{ getMenuTitle('/professor/certificates/apply') }}</router-link>
           </div>
         </div>
       </template>
@@ -427,6 +437,15 @@ const toggleMenu = (menuKey) => {
           <div v-show="activeMenus.adminProfessor" class="submenu-list">
             <router-link to="/admin/professors" class="submenu-item" exact-active-class="router-link-active">교수 목록</router-link>
             <router-link to="/admin/professors/new" class="submenu-item">교수 등록</router-link>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminDepartment" @click="toggleMenu('adminDepartment')">
+            <span>학과 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminDepartment }">▼</span>
+          </button>
+          <div v-show="activeMenus.adminDepartment" class="submenu-list">
+            <router-link to="/admin/departments" class="submenu-item" exact-active-class="router-link-active">학과 목록</router-link>
+            <router-link to="/admin/departments/new" class="submenu-item">학과 등록</router-link>
           </div>
         </div>
         <div class="menu-group">

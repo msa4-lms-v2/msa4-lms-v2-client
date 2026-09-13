@@ -469,9 +469,7 @@ h2 {
 .section-title-row :deep(.status-badge) {
   margin-bottom: 12px;
 }
-.professor-primary {
-  background: var(--personal-color-professor-primary-navy);
-}
+.professor-primary { background: var(--personal-color-primary-navy); }
 .session-panel {
   display: grid;
   grid-template-columns: minmax(260px, 0.8fr) minmax(480px, 1.2fr);
