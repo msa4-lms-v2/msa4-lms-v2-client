@@ -56,14 +56,14 @@ DB나 서비스 조회 실패는 오류로 표시하며, 실패를 0건 또는 �
 ```json
 {
   "currentSemester": { "id": 20, "year": 2026, "label": "2학기" },
-  "summary": { "installmentPending": 0, "certificatePending": 0 },
+  "summary": { "installmentPending": 0, "scholarshipPending": 0 },
   "tasks": [],
   "tuitionStats": { "paid": 0, "inProgress": 0, "unpaid": 0 }
 }
 ```
 
-- 분할납부 대기: 전체 학기의 `installment_plans.REQUESTED`.
-- **증명서는 현재 DocumentService에서 즉시 발급되고 승인 대기 모델이 없다.** 따라서 `certificatePending`은 0이며 증명서 대기 행은 없다. 발급된 증명서 수나 `file_path` 미설정 건을 대기로 오인하지 않는다.
+- 분할납부 대기: 현재 학기의 `installment_plans.REQUESTED`.
+- 장학금 신청 대기: 현재 학기의 `scholarship_applications.REQUESTED`.
 - 현재 학기의 고지서별 납부 대상액: `max(고지액 - 장학금 합계, 0)`.
 - 순납부액: `max(SUCCEEDED 결제 합계 - SUCCEEDED 환불 합계, 0)`.
 - 납부 완료: 순납부액 >= 납부 대상액. 0원 고지서·전액 장학금 포함.
@@ -79,7 +79,7 @@ DB나 서비스 조회 실패는 오류로 표시하며, 실패를 0건 또는 �
 ```json
 {
   "id": 1,
-  "type": "INSTALLMENT",
+  "type": "INSTALLMENT 또는 SCHOLARSHIP",
   "requesterName": "요청자 이름",
   "requestedAt": "2026-09-01T09:00:00",
   "tuitionBillId": 42

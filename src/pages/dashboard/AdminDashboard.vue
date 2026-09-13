@@ -23,7 +23,7 @@ const cards = [
     service: "academic",
   },
   { label: "등록금 분할납부", key: "installmentPending", service: "payment" },
-  { label: "증명서 발급", key: "certificatePending", service: "payment" },
+  { label: "장학금 신청", key: "scholarshipPending", service: "payment" },
 ];
 const taskLabels = {
   LECTURE: "강의 개설 검토",
@@ -34,7 +34,7 @@ const taskLabels = {
   TRANSFER: "전과 신청",
   DOUBLE_MAJOR: "복수전공 신청",
   INSTALLMENT: "등록금 분할납부",
-  CERTIFICATE: "증명서 발급",
+  SCHOLARSHIP: "장학금 신청",
 };
 const tasks = computed(() =>
   mergePendingTasks(store.academic.data?.tasks, store.payment.data?.tasks)
@@ -181,14 +181,6 @@ onActivated(() => {
               >
               <span class="pending-label">처리 대기</span>
             </div>
-            <span
-              v-if="
-                card.key === 'certificatePending' &&
-                store.payment.status === 'ready'
-              "
-              class="card-status"
-              >현재 즉시 발급 방식</span
-            >
             <span
               v-if="store[card.service].status !== 'ready'"
               class="card-status"
