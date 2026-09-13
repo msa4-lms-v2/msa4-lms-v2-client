@@ -657,10 +657,6 @@ onUnmounted(revokePreview);
   gap: 12px;
 }
 
-.profile-photo-action {
-  color: var(--personal-color-login-primary-navy);
-}
-
 .error-message {
   margin: 0;
   color: var(--personal-color-red);

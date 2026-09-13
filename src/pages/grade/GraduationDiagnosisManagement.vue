@@ -611,20 +611,6 @@ onMounted(async () => {
   background: var(--personal-color-primary-navy);
 }
 
-.admin-secondary,
-.professor-secondary {
-  border: 1px solid var(--personal-color-border-mist);
-  background: var(--personal-color-white);
-}
-
-.admin-secondary {
-  color: var(--personal-color-admin-secondary-indigo);
-}
-
-.professor-secondary {
-  color: var(--personal-color-primary-navy);
-}
-
 @media (max-width: 1100px) {
   .credit-overview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
