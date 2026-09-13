@@ -289,7 +289,6 @@ onMounted(async () => {
             <div class="common-section-header">
               <h3>기본 정보 설정</h3>
             </div>
-            <p class="course-guide">교과목 번호는 학과사무실 교과목 안내 자료에서 확인할 수 있습니다.</p>
             <div class="info-grid">
               <div class="form-group full-width">
                 <label for="opening-course-id">교과목 번호 (필수)</label>

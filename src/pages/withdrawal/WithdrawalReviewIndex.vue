@@ -54,11 +54,6 @@ const formError = ref('');
 
 const isAdmin = computed(() => authStore.userInfo?.role === 'ADMIN');
 const pageTitle = computed(() => (isAdmin.value ? '자퇴 신청 관리' : '자퇴 신청 검토'));
-const pageSubtitle = computed(() => (isAdmin.value
-  ? '지도교수 검토가 끝난 자퇴 신청을 확인하고 최종 승인 또는 반려합니다.'
-  : '담당 지도학생의 자퇴 신청과 상담 내용을 확인하고 승인 또는 반려합니다.'));
-const accentClass = computed(() => (isAdmin.value ? 'admin-accent' : 'professor-accent'));
-
 const filteredRequests = computed(() => {
   const keyword = appliedFilters.value.keyword.trim().toLowerCase();
   return requests.value.filter((item) => {
@@ -245,10 +240,7 @@ onMounted(loadRequests);
     :title="pageTitle"
     :subtitle="pageSubtitle"
   >
-    <section
-      class="filter-card"
-      :class="accentClass"
-    >
+    <section class="filter-card">
       <label>
         신청자
         <input
@@ -284,10 +276,7 @@ onMounted(loadRequests);
     </section>
 
     <div class="review-grid">
-      <section
-        class="list-card"
-        :class="accentClass"
-      >
+      <section class="list-card">
         <div class="section-title">
           <h3>자퇴 신청 목록</h3>
           <span :class="isAdmin ? 'admin-text' : 'professor-text'">총 {{ filteredRequests.length }}건</span>
@@ -423,7 +412,6 @@ onMounted(loadRequests);
         <section
           v-if="canReview"
           class="detail-card action-card"
-          :class="accentClass"
         >
           <h3>{{ isAdmin ? '최종 승인 처리' : '지도교수 검토' }}</h3>
           <p v-if="isAdmin">
@@ -497,8 +485,6 @@ onMounted(loadRequests);
 .admin-text { color: var(--personal-color-admin-secondary-indigo); }
 .review-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(310px, .85fr); gap: 18px; margin-top: 20px; }
 .list-card, .detail-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
-.professor-accent { border-top: 3px solid var(--personal-color-professor-primary-navy); }
-.admin-accent { border-top: 3px solid var(--personal-color-admin-secondary-indigo); }
 .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .section-title h3, .detail-card h3 { margin: 0; font-size: 1rem; }
 .section-title span { font-size: .8rem; font-weight: 700; }
