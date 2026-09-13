@@ -234,10 +234,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer
-    title="전과 신청 관리"
-    subtitle="지도교수 승인 건의 학장 날인본을 확인하고 학적을 반영합니다."
-  >
+  <MyPageContainer title="전과 신청 관리">
     <section class="filter-card">
       <label>학기<MySelect
         v-model="filters.semesterId"

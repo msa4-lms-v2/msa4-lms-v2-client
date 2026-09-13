@@ -5,7 +5,7 @@ import { getMyLectures } from '../../api/lectureApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -298,10 +298,8 @@ onMounted(loadLectures);
   font-size: 0.76rem;
 }
 
-.row-select,
-.remarks-input {
-  min-width: 106px;
-}
+.row-select { width: 108px; min-width: 108px; }
+.remarks-input { width: 180px; min-width: 106px; }
 
 :deep(select.row-select),
 :deep(input.remarks-input) {

@@ -92,7 +92,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="학적 변경 이력" subtitle="확정된 학적 변경만 표시하며 신청 대기·반려 내역은 포함하지 않습니다.">
+  <MyPageContainer title="학적 변경 이력">
     <section class="filter-card">
       <label>학생명<MyInput v-model="filters.keyword" placeholder="이름 검색" @keyup.enter="load(1)" /></label>
       <label>소속 학과<MySelect v-model="filters.departmentId" :options="departmentOptions" /></label>

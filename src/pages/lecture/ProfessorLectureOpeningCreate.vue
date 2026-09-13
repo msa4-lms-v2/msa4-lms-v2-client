@@ -6,7 +6,7 @@ import {
   getLectureOpeningRequests,
   updateLectureOpeningRequest,
 } from '../../api/lectureApi';
-import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import MyPageContainer from '../../components/layout/ProfessorPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
