@@ -58,7 +58,6 @@ dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
 .preserve-line { white-space: pre-wrap; overflow-wrap: anywhere; }
 textarea { display: block; box-sizing: border-box; width: 100%; min-height: 60px; padding: 18px; border: 1px solid transparent; border-radius: 0; background: var(--personal-color-white); font: inherit; font-size: 14px; resize: vertical; }
 textarea:focus { outline: 2px solid var(--personal-color-primary-navy); }
-textarea::placeholder { color: var(--personal-color-text-muted-slate); }
 .actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .review-actions { display: flex; justify-content: flex-end; gap: 12px; margin-left: auto; }
 .error { color: var(--personal-color-danger-coral); font-size: 13px; }

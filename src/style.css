@@ -123,6 +123,10 @@ body {
   color: var(--personal-color-primary-text-navy);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body,
 #app {
@@ -139,4 +143,10 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--personal-color-text-faint-fog);
+  font-weight: 400;
 }

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { createNotice, getNotice, updateNotice } from '../../api/noticeApi';
 import MyAttachmentList from '../../components/common/MyAttachmentList.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { notify } from '../../composables/useDialog';
@@ -167,7 +168,7 @@ onMounted(load);
             <label for="notice-transition">일반 공지 전환일</label>
             <span class="transition-guide">선택한 날짜 00:00부터 서버가 중요 공지를 일반 공지로 자동 전환합니다.</span>
           </div>
-          <MyInput id="notice-transition" v-model="form.normalTransitionDate" type="date" />
+          <MyDateField id="notice-transition" v-model="form.normalTransitionDate" />
         </div>
 
         <div class="field full">

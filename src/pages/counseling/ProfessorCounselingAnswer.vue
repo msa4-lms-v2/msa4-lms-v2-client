@@ -99,7 +99,6 @@ h3 { margin: 0 0 12px 6px; font-size: 1.1rem; }
 .answer-card label { display: block; margin-bottom: 12px; }
 textarea { width: 100%; min-height: 150px; padding: 16px; resize: vertical; border: 1px solid var(--personal-color-border-mist); border-radius: 6px; background: white; color: var(--personal-color-primary-text-navy); line-height: 1.7; outline: none; }
 textarea:focus { border-color: var(--personal-color-primary-navy); }
-textarea::placeholder { color: var(--personal-color-text-faint-fog); font-weight: 400; opacity: .78; }
 .count { position: absolute; right: 28px; bottom: 18px; color: var(--personal-color-text-faint-fog); font-size: .8rem; }
 .actions { display: flex; justify-content: flex-end; gap: 20px; margin-top: 20px; }
 .actions :deep(.white) { border: 1px solid var(--personal-color-border-mist); color: var(--personal-color-primary-navy); }

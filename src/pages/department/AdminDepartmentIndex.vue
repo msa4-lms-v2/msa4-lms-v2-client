@@ -127,20 +127,22 @@ onMounted(async () => {
           </option>
         </MySelect>
       </div>
-      <MyButton
-        btn-type="button"
-        color="admin-indigo"
-        size="middle"
-        content="조회"
-        @click="load(1)"
-      />
-      <MyButton
-        btn-type="button"
-        color="white"
-        size="middle"
-        content="초기화"
-        @click="resetFilters"
-      />
+      <div class="search-actions">
+        <MyButton
+          btn-type="button"
+          color="admin-indigo"
+          size="middle"
+          content="조회"
+          @click="load(1)"
+        />
+        <MyButton
+          btn-type="button"
+          color="white"
+          size="middle"
+          content="초기화"
+          @click="resetFilters"
+        />
+      </div>
     </MySearchFilter>
 
     <div class="list-heading">
@@ -216,13 +218,19 @@ onMounted(async () => {
   font-weight: 600;
 }
 
+.search-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .status-active {
   color: var(--personal-color-status-success-text-forest);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .status-inactive {
   color: var(--personal-color-text-tertiary-slate);
-  font-weight: 700;
+  font-weight: 400;
 }
 </style>

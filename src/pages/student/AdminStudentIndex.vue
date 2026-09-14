@@ -80,7 +80,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="학생 관리">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+    <MySearchFilter submit-text="조회" submit-at-end @search="applyFilters">
       <div class="search-group">
         <label for="student-keyword">이름</label>
         <MyInput id="student-keyword" v-model="filters.keyword" placeholder="학생 이름" @keyup-enter="applyFilters" />

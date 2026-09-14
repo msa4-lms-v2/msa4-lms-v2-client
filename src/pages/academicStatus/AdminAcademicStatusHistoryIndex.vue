@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { searchAcademicStatusHistories } from '../../api/academicStatusHistoryApi';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -98,8 +99,8 @@ onMounted(async () => {
       <label>소속 학과<MySelect v-model="filters.departmentId" :options="departmentOptions" /></label>
       <label>변경 후 상태<MySelect v-model="filters.newStatus" :options="STATUS_OPTIONS" /></label>
       <label>원인<MySelect v-model="filters.sourceType" :options="SOURCE_TYPE_OPTIONS" /></label>
-      <label>시작일<MyInput v-model="filters.fromDate" type="date" /></label>
-      <label>종료일<MyInput v-model="filters.toDate" type="date" /></label>
+      <label>시작일<MyDateField v-model="filters.fromDate" /></label>
+      <label>종료일<MyDateField v-model="filters.toDate" /></label>
       <div class="filter-actions">
         <MyButton class="admin-primary" color="deep-blue" size="middle" content="조회" @click="load(1)" />
         <MyButton class="reset-action" color="white" size="middle" content="초기화" @click="resetFilters" />
