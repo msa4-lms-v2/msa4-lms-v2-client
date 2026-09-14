@@ -320,7 +320,7 @@ onMounted(() => load());
 
 .reason-cell {
   min-width: 220px;
-  text-align: left;
+  text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
 }
