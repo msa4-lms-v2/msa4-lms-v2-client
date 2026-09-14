@@ -32,7 +32,12 @@
               </label>
 
         <p v-if="appStore.isLoadingPeriod" class="notice">신청 기간을 확인하고 있습니다.</p>
-        <div v-else-if="!appStore.applicationPeriod || !appStore.applicationPeriod.open">
+        <div v-else-if="appStore.applicationPeriodError">
+          <p class="error-notice">{{ appStore.applicationPeriodError }}</p>
+          <MyButton content="다시 확인" @click="fetchPeriod" />
+        </div>
+        <p v-else-if="!appStore.applicationPeriod" class="notice">해당 학기의 장학금 신청기간이 설정되지 않았습니다.</p>
+        <div v-else-if="!appStore.applicationPeriod.open">
           <p class="notice">
             현재 장학금 신청기간이 아닙니다.
             <span v-if="appStore.applicationPeriod">
@@ -44,7 +49,7 @@
         <div v-else-if="submitSuccess">
           <p class="success-notice">신청 완료, 관리자 심사를 기다려주세요.</p>
         </div>
-        <div v-else-if="submitConflict">
+        <div v-else-if="submitConflict || hasPendingApplication">
           <p class="error-notice">이미 심사 중인 신청이 있습니다.</p>
         </div>
         <section v-else class="application-section" aria-labelledby="application-form-title">
@@ -180,6 +185,9 @@ const submitConflict = ref(false);
 const selectedBill = computed(() =>
   tuitionStore.myBills.find((bill) => bill.id === selectedBillId.value),
 );
+const hasPendingApplication = computed(() => appStore.myApplications.some(
+  item => item.tuitionBillId === selectedBillId.value && item.status === 'REQUESTED',
+));
 
 onMounted(async () => {
   await Promise.all([tuitionStore.fetchMyBills(), semesterStore.fetchSemesters(), loadHistory()]);
@@ -201,8 +209,7 @@ const onBillChange = async () => {
 
 const fetchPeriod = async () => {
   if (selectedBill.value) {
-    try { await appStore.fetchApplicationPeriod(selectedBill.value.semesterId); }
-    catch { await notify('신청 기간을 확인하지 못했습니다. 다시 시도해 주세요.'); }
+    await appStore.fetchApplicationPeriod(selectedBill.value.semesterId);
   }
 };
 
@@ -241,7 +248,7 @@ const onFilesSelected = async (files) => {
 const removeFile = (index) => form.value.files.splice(index, 1);
 
 const onSubmit = async () => {
-  if (appStore.isSubmittingApplication || appStore.isLoadingPeriod || !appStore.applicationPeriod?.open) return;
+  if (appStore.isSubmittingApplication || appStore.isLoadingPeriod || !appStore.applicationPeriod?.open || hasPendingApplication.value) return;
   submitConflict.value = false;
   if (!form.value.requestedAmount || !form.value.reason.trim()) {
     await notify('모든 항목을 입력해주세요.');
