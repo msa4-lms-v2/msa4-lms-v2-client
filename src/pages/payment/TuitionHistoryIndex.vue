@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { useDocumentStore } from '../../store/payment/useDocumentStore';
+import { downloadCertificate } from '../../api/certificateApi';
 import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
@@ -75,7 +76,14 @@ const handleIssueReceipt = async () => {
     return;
   }
   try {
-    await documentStore.issuePaymentReceipt(bill.id);
+    const issued = await documentStore.issuePaymentReceipt(bill.id);
+    const downloadResponse = await downloadCertificate(issued.id);
+    const url = URL.createObjectURL(new Blob([downloadResponse.data], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '납부확인서.pdf';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
     await notify('납부확인서가 발급되었습니다.');
   } catch (error) {
     await notify(error.response?.data?.message || '납부확인서를 발급하지 못했습니다.');

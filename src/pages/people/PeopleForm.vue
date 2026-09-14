@@ -14,6 +14,7 @@ import {
   updatePerson,
 } from '../../api/peopleManagementApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -402,12 +403,20 @@ onUnmounted(() => {
             <span class="field-label">
               {{ field.label }} <em v-if="field.required && !detail">*</em>
             </span>
+            <MyDateField
+              v-if="field.type === 'date'"
+              v-model="form[field.key]"
+              :max="maxBirth"
+              :required="field.required"
+              :disabled="detail && (!admission || !canEditDetail)"
+              :placeholder="`${field.label} 선택`"
+            />
             <MyInput
+              v-else
               v-model="form[field.key]"
               :type="field.type"
               :maxlength="field.max"
               :required="field.required"
-              :max="field.type === 'date' ? maxBirth : undefined"
               :disabled="detail && (!admission || !canEditDetail)"
               :placeholder="`${field.label}을 입력해 주세요.`"
             />
