@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { useDocumentStore } from '../../store/payment/useDocumentStore';
@@ -11,6 +11,7 @@ import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import MyModal from '../../components/common/MyModal.vue';
 import { notify } from '../../composables/useDialog';
 import { formatCurrency, formatDate } from '../../util/format';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_VARIANT, PAYMENT_TYPE_LABEL } from '../../util/payment/enumLabels';
@@ -54,17 +55,18 @@ const filteredHistory = computed(() => tuitionStore.paymentHistory.filter((row) 
 }));
 const pagedHistory = computed(() => filteredHistory.value.slice((historyPage.value - 1) * HISTORY_PAGE_SIZE, historyPage.value * HISTORY_PAGE_SIZE));
 
-// 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급/상세내역 조회를 한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
+// 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급을 한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
 const resolveTargetBill = () => {
   const matches = tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId));
   return matches[0] || null;
 };
 
-const targetBill = computed(() => resolveTargetBill());
+const billDetailModalOpen = ref(false);
 
-watch(targetBill, (bill) => {
-  if (bill) tuitionStore.fetchBillItems(bill.id);
-}, { immediate: true });
+const showBillDetail = async (tuitionBillId) => {
+  billDetailModalOpen.value = true;
+  await tuitionStore.fetchBillItems(tuitionBillId);
+};
 
 const handlePrintNotice = async () => {
   const bill = resolveTargetBill();
@@ -142,8 +144,50 @@ onMounted(() => {
       </div>
     </MySearchFilter>
 
-    <section v-if="targetBill" class="bill-items-section">
-      <h3>등록금 상세 내역</h3>
+    <div class="list-heading">
+      <h3>나의 납부 내역</h3>
+      <div class="document-actions">
+        <MyButton btn-type="button" color="white" size="big" content="고지서 출력" @click="handlePrintNotice" />
+        <MyButton btn-type="button" color="white" size="big" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
+      </div>
+    </div>
+    <MyTable
+      :loading="tuitionStore.isLoadingPaymentHistory"
+      :empty="!tuitionStore.isLoadingPaymentHistory && filteredHistory.length === 0"
+      empty-message="조회된 납부 내역이 없습니다."
+      :columns="[
+        { key: 'semester', label: '학기' },
+        { key: 'type', label: '납부 구분' },
+        { key: 'date', label: '납부일' },
+        { key: 'amount', label: '납부금액' },
+        { key: 'status', label: '상태' },
+        { key: 'detail', label: '상세' },
+      ]"
+    >
+      <tr v-for="row in pagedHistory" :key="`${row.tuitionBillId}-${row.paymentDate}-${row.amount}`">
+        <td>{{ semesterStore.getSemesterLabel(row.semesterId) }}</td>
+        <td>{{ PAYMENT_TYPE_LABEL[row.paymentType] || row.paymentType }}</td>
+        <td>{{ row.paymentDate ? formatDate(row.paymentDate) : '-' }}</td>
+        <td>{{ formatCurrency(row.amount) }}</td>
+        <td>
+          <MyStatusBadge
+            :label="PAYMENT_STATUS_LABEL[row.status]"
+            :variant="PAYMENT_STATUS_VARIANT[row.status]"
+          />
+        </td>
+        <td><MyButton color="deep-blue" size="middle" content="상세보기" @click="showBillDetail(row.tuitionBillId)" /></td>
+      </tr>
+    </MyTable>
+    <NumberedPagination
+      v-if="filteredHistory.length > HISTORY_PAGE_SIZE"
+      :page="historyPage"
+      :total-count="filteredHistory.length"
+      :size="HISTORY_PAGE_SIZE"
+      color="student-cyan"
+      @page-change="historyPage = $event"
+    />
+
+    <MyModal :is-open="billDetailModalOpen" title="등록금 상세 내역" max-width="600px" @close="billDetailModalOpen = false">
       <MyTable
         :loading="tuitionStore.isLoadingBillItems"
         :empty="!tuitionStore.isLoadingBillItems && tuitionStore.billItems.length === 0"
@@ -162,60 +206,14 @@ onMounted(() => {
           </td>
         </tr>
       </MyTable>
-    </section>
-
-    <div class="list-heading">
-      <h3>나의 납부 내역</h3>
-      <div class="document-actions">
-        <MyButton btn-type="button" color="white" size="big" content="고지서 출력" @click="handlePrintNotice" />
-        <MyButton btn-type="button" color="white" size="big" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
-      </div>
-    </div>
-    <MyTable
-      :loading="tuitionStore.isLoadingPaymentHistory"
-      :empty="!tuitionStore.isLoadingPaymentHistory && filteredHistory.length === 0"
-      empty-message="조회된 납부 내역이 없습니다."
-      :columns="[
-        { key: 'semester', label: '학기' },
-        { key: 'type', label: '납부 구분' },
-        { key: 'date', label: '납부일' },
-        { key: 'amount', label: '납부금액' },
-        { key: 'status', label: '상태' },
-      ]"
-    >
-      <tr v-for="row in pagedHistory" :key="`${row.tuitionBillId}-${row.paymentDate}-${row.amount}`">
-        <td>{{ semesterStore.getSemesterLabel(row.semesterId) }}</td>
-        <td>{{ PAYMENT_TYPE_LABEL[row.paymentType] || row.paymentType }}</td>
-        <td>{{ row.paymentDate ? formatDate(row.paymentDate) : '-' }}</td>
-        <td>{{ formatCurrency(row.amount) }}</td>
-        <td>
-          <MyStatusBadge
-            :label="PAYMENT_STATUS_LABEL[row.status]"
-            :variant="PAYMENT_STATUS_VARIANT[row.status]"
-          />
-        </td>
-      </tr>
-    </MyTable>
-    <NumberedPagination
-      v-if="filteredHistory.length > HISTORY_PAGE_SIZE"
-      :page="historyPage"
-      :total-count="filteredHistory.length"
-      :size="HISTORY_PAGE_SIZE"
-      color="student-cyan"
-      @page-change="historyPage = $event"
-    />
+      <template #footer>
+        <MyButton color="deep-blue" size="middle" content="닫기" @click="billDetailModalOpen = false" />
+      </template>
+    </MyModal>
   </MyPageContainer>
 </template>
 
 <style scoped>
-.bill-items-section {
-  margin-bottom: 24px;
-}
-
-.bill-items-section h3 {
-  margin: 0 0 12px;
-}
-
 .list-heading {
   display: flex;
   align-items: center;
