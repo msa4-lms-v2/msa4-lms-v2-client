@@ -4,7 +4,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { useInfoChangeStore } from '../../store/infochange/useInfoChangeStore';
@@ -421,10 +421,12 @@ onUnmounted(revokePreview);
           </MyTable>
         </div>
 
-        <PrevNextPagination
-          v-if="infoChangeStore.myRequestsPage.page > 1 || infoChangeStore.myRequestsPage.hasNext"
+        <NumberedPagination
+          v-if="infoChangeStore.myRequestsPage.totalCount > infoChangeStore.myRequestsPage.size"
           :page="infoChangeStore.myRequestsPage.page"
-          :has-next="infoChangeStore.myRequestsPage.hasNext"
+          :total-count="infoChangeStore.myRequestsPage.totalCount"
+          :size="infoChangeStore.myRequestsPage.size"
+          color="student-cyan"
           @page-change="loadRequests"
         />
       </section>

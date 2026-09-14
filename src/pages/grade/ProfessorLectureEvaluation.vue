@@ -9,7 +9,7 @@ import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyCard from '../../components/common/MyCard.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { notify } from '../../composables/useDialog';
 
 defineOptions({ name: 'ProfessorLectureEvaluation' });
@@ -197,7 +197,7 @@ onMounted(async () => {
         <MyTable :columns="[{ key: 'comment', label: '서술형 의견' }]" :empty="!detail.comments?.length" empty-message="등록된 서술형 의견이 없습니다.">
           <tr v-for="(comment, index) in visibleComments" :key="index"><td class="comment-text">{{ comment }}</td></tr>
         </MyTable>
-        <PrevNextPagination v-if="(detail.comments?.length || 0) > 10" :page="commentPage" :has-next="commentPage * 10 < detail.comments.length" @page-change="commentPage = $event" />
+        <NumberedPagination v-if="(detail.comments?.length || 0) > 10" :page="commentPage" :total-count="detail.comments.length" :size="10" color="professor-navy" @page-change="commentPage = $event" />
       </section>
       <div class="detail-actions comments-actions"><MyButton color="white" size="big" content="목록으로" @click="commentsOpen = false" /><MyButton color="deep-blue" size="big" content="결과 다운로드" @click="downloadResults" /></div>
     </template>
@@ -227,7 +227,7 @@ onMounted(async () => {
         </tr>
       </MyTable>
 
-      <PrevNextPagination v-if="page.page > 1 || page.hasNext" :page="page.page" :has-next="page.hasNext" @page-change="load" />
+      <NumberedPagination v-if="page.totalCount > page.size" :page="page.page" :total-count="page.totalCount" :size="page.size" color="professor-navy" @page-change="load" />
     </template>
 
     <template v-else>

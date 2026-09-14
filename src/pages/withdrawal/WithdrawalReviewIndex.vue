@@ -12,7 +12,7 @@ import { useProfessorRequestDetail } from '../../composables/useProfessorRequest
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { useAuthStore } from '../../store/auth/useAuthStore';
@@ -68,7 +68,6 @@ const visibleRequests = computed(() => {
   const start = (page.value - 1) * PAGE_SIZE;
   return filteredRequests.value.slice(start, start + PAGE_SIZE);
 });
-const hasNext = computed(() => page.value * PAGE_SIZE < filteredRequests.value.length);
 
 const statusLabel = (status) => statusLabels[status] || status || '-';
 const statusClass = (status) => ({
@@ -338,10 +337,12 @@ onMounted(loadRequests);
             </tr>
           </MyTable>
         </div>
-        <PrevNextPagination
-          v-if="page > 1 || hasNext"
+        <NumberedPagination
+          v-if="filteredRequests.length > PAGE_SIZE"
           :page="page"
-          :has-next="hasNext"
+          :total-count="filteredRequests.length"
+          :size="PAGE_SIZE"
+          :color="isAdmin ? 'admin-indigo' : 'professor-navy'"
           @page-change="page = $event"
         />
       </section>
