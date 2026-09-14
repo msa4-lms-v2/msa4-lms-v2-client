@@ -282,6 +282,7 @@ onMounted(async () => {
       :page="page.page"
       :total-count="page.totalCount"
       :size="page.size"
+      :color="isAdmin ? 'admin-indigo' : 'professor-navy'"
       @page-change="loadDiagnoses"
     />
 
@@ -387,6 +388,7 @@ onMounted(async () => {
         :page="recordPage.page"
         :total-count="recordPage.totalCount"
         :size="recordPage.size"
+        :color="isAdmin ? 'admin-indigo' : 'professor-navy'"
         @page-change="loadCreditRecords"
       />
     </component>
@@ -426,15 +428,6 @@ onMounted(async () => {
 .result-summary strong {
   color: var(--role-accent);
   font-size: 1rem;
-}
-
-:deep(.numbered-pagination .page-btn.active) {
-  background: var(--role-accent);
-}
-
-:deep(.numbered-pagination .nav-btn:hover:not(:disabled)),
-:deep(.numbered-pagination .page-btn:hover:not(.active)) {
-  color: var(--role-accent);
 }
 
 :deep(.compact-filter input),

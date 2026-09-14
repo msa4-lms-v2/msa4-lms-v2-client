@@ -6,7 +6,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { getCounselings } from '../../api/counselingApi';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 
 const counselings = ref([]);
 const page = ref(1);
@@ -77,7 +77,7 @@ onMounted(load);
           </td>
         </tr>
       </MyTable>
-      <PrevNextPagination :page="page" :has-next="page * 10 < counselings.length" :inert="loading" @page-change="page = $event" />
+      <NumberedPagination v-if="counselings.length > 10" :page="page" :total-count="counselings.length" :size="10" color="professor-navy" :inert="loading" @page-change="page = $event" />
     </section>
   </MyPageContainer>
 </template>

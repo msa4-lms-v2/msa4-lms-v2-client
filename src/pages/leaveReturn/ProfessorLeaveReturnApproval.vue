@@ -5,7 +5,7 @@ import MyInput from '../../components/input/MyInput.vue';
 import ProfessorApplicationDetail from '../../components/academic/ProfessorApplicationDetail.vue';
 import { useProfessorRequestDetail } from '../../composables/useProfessorRequestDetail';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { downloadLeaveRequestFile, getLeaveRequest } from '../../api/leaveApi';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -224,10 +224,12 @@ onMounted(() => load());
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="leaveRequestStore.pageInfo.page > 1 || leaveRequestStore.pageInfo.hasNext"
+      <NumberedPagination
+        v-if="leaveRequestStore.pageInfo.totalCount > leaveRequestStore.pageInfo.size"
         :page="leaveRequestStore.pageInfo.page"
-        :has-next="leaveRequestStore.pageInfo.hasNext"
+        :total-count="leaveRequestStore.pageInfo.totalCount"
+        :size="leaveRequestStore.pageInfo.size"
+        color="professor-navy"
         @page-change="load"
       />
     </section>

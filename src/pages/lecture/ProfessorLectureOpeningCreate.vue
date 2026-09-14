@@ -15,7 +15,7 @@ import MyTable from '../../components/table/MyTable.vue';
 import MyCard from '../../components/common/MyCard.vue';
 import ProfessorWeeklySyllabus from './ProfessorWeeklySyllabus.vue';
 import { useAuthStore } from '../../store/auth/useAuthStore';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
@@ -78,13 +78,15 @@ const selectedCourse = ref(null);
 const courseLoading = ref(false);
 const courseError = ref('');
 const coursePage = ref(1);
+const courseSize = ref(10);
+const courseTotalCount = ref(0);
 const courseHasNext = ref(false);
 const searchCourses = async (page = 1) => {
  if (courseLoading.value) return;
  courseLoading.value = true; courseError.value = '';
  try {
   const { data } = await searchProfessorCourseCatalog({ keyword: courseKeyword.value.trim(), page, size: 10 });
-  courseResults.value = data.data.items; coursePage.value = data.data.page; courseHasNext.value = data.data.hasNext;
+  courseResults.value = data.data.items; coursePage.value = data.data.page; courseSize.value = data.data.size; courseTotalCount.value = data.data.totalCount; courseHasNext.value = data.data.hasNext;
  } catch (error) { courseResults.value = []; courseError.value = error.response?.data?.message || '교과목을 불러오지 못했습니다.'; }
  finally { courseLoading.value = false; }
 };
@@ -361,7 +363,7 @@ onMounted(async () => {
       <MyTable :columns="courseColumns" :loading="courseLoading" :empty="!courseLoading && !courseResults.length" empty-message="검색된 교과목이 없습니다.">
         <tr v-for="course in courseResults" :key="course.id" :class="{ 'selected-course-row': pendingCourse?.id === course.id }"><td>{{ course.code }}</td><td>{{ course.name }}</td><td>{{ course.departmentName }}</td><td>{{ course.credits }}</td><td>{{ completionLabels[course.completionType] || course.completionType }}</td><td><MyButton content="선택" color="deep-blue" size="small" @click="pendingCourse = course" /></td></tr>
       </MyTable>
-      <PrevNextPagination :page="coursePage" :has-next="courseHasNext" :inert="courseLoading" @page-change="searchCourses" />
+      <NumberedPagination v-if="courseTotalCount > courseSize" :page="coursePage" :total-count="courseTotalCount" :size="courseSize" color="professor-navy" :inert="courseLoading" @page-change="searchCourses" />
       <h3>선택한 교과목</h3>
       <dl v-if="pendingCourse" class="course-picker-selection"><div><dt>교과목</dt><dd>{{ pendingCourse.name }}</dd></div><div><dt>교과목 코드</dt><dd>{{ pendingCourse.code }}</dd></div><div><dt>학점</dt><dd>{{ pendingCourse.credits }}학점</dd></div></dl>
       <p v-else>교과목을 선택해 주세요.</p>
@@ -569,10 +571,12 @@ onMounted(async () => {
           </td>
         </tr>
       </MyTable>
-      <PrevNextPagination
-        v-if="historyPage.page > 1 || historyPage.hasNext"
+      <NumberedPagination
+        v-if="historyPage.totalCount > historyPage.size"
         :page="historyPage.page"
-        :has-next="historyPage.hasNext"
+        :total-count="historyPage.totalCount"
+        :size="historyPage.size"
+        color="professor-navy"
         @page-change="loadHistory"
       />
     </section>

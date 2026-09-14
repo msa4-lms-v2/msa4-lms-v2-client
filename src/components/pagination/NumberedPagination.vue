@@ -5,6 +5,8 @@ const props = defineProps({
   page: { type: Number, required: true },
   totalCount: { type: Number, required: true },
   size: { type: Number, default: 20 },
+  // 역할별 강조색: 'admin-indigo'(기본) | 'student-cyan' | 'professor-navy'
+  color: { type: String, default: 'admin-indigo' },
 });
 
 const emit = defineEmits(['page-change']);
@@ -39,7 +41,7 @@ const goTo = (target) => {
 </script>
 
 <template>
-  <nav class="numbered-pagination" aria-label="페이지 내비게이션">
+  <nav class="numbered-pagination" :class="color" aria-label="페이지 내비게이션">
     <button type="button" class="nav-btn" :disabled="page <= 1" aria-label="첫 페이지" @click="goTo(1)">«</button>
     <button type="button" class="nav-btn" :disabled="page <= 1" aria-label="이전 페이지" @click="goTo(page - 1)">‹</button>
 
@@ -73,6 +75,15 @@ const goTo = (target) => {
   justify-content: center;
   gap: 4px;
   margin-top: 16px;
+  --pagination-accent: var(--personal-color-admin-secondary-indigo);
+}
+
+.numbered-pagination.student-cyan {
+  --pagination-accent: var(--personal-color-student-primary-cyan);
+}
+
+.numbered-pagination.professor-navy {
+  --pagination-accent: var(--personal-color-professor-primary-navy);
 }
 
 .nav-btn,
@@ -93,8 +104,8 @@ const goTo = (target) => {
 
 .nav-btn:hover:not(:disabled),
 .page-btn:hover:not(.active) {
-  background: var(--personal-color-indigo-soft-lavender);
-  color: var(--personal-color-admin-secondary-indigo);
+  background: color-mix(in srgb, var(--pagination-accent) 12%, white);
+  color: var(--pagination-accent);
 }
 
 .nav-btn:disabled {
@@ -103,7 +114,7 @@ const goTo = (target) => {
 }
 
 .page-btn.active {
-  background: var(--personal-color-admin-secondary-indigo);
+  background: var(--pagination-accent);
   color: var(--personal-color-white);
   font-weight: 600;
 }

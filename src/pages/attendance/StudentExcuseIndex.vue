@@ -13,7 +13,7 @@ import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
@@ -433,10 +433,12 @@ onMounted(() => loadRequests());
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="page.page > 1 || page.hasNext"
+      <NumberedPagination
+        v-if="page.totalCount > page.size"
         :page="page.page"
-        :has-next="page.hasNext"
+        :total-count="page.totalCount"
+        :size="page.size"
+        color="student-cyan"
         @page-change="loadRequests"
       />
     </section>
