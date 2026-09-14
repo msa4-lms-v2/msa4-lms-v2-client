@@ -467,8 +467,8 @@ onUnmounted(revokePreview);
 .request-form {
   display: grid;
   grid-template-columns: 130px minmax(0, 1fr);
-  gap: 24px;
-  padding: 18px 26px 16px;
+  gap: 32px;
+  padding: 28px 50px;
   border: 1px solid var(--personal-color-border-mist);
   border-radius: 8px;
   background: var(--personal-color-white);
@@ -647,7 +647,7 @@ onUnmounted(revokePreview);
 
 @media (max-width: 560px) {
   .request-form {
-    padding: 16px;
+    padding: 24px;
   }
 
 }
