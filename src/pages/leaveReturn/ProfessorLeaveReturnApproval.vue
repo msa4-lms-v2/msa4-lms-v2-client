@@ -237,7 +237,7 @@ onMounted(() => load());
     <div v-if="detailId" :aria-busy="isLoadingDetail">
       <p v-if="isLoadingDetail" role="status">신청 정보를 불러오는 중입니다.</p>
       <template v-else-if="detailError"><p role="alert">{{ detailError }}</p><MyButton color="white" size="middle" content="목록" @click="closeDetail" /></template>
-      <ProfessorApplicationDetail v-else-if="selectedRequest" v-model:review-reason="rejectReason" :student-fields="studentFields" :application-fields="applicationFields" :reason="selectedRequest.reason" :reviewable="selectedRequest.status === 'PENDING'" :busy="leaveRequestStore.isReviewing" @back="closeDetail" @approve="approve" @reject="reject">
+      <ProfessorApplicationDetail v-else-if="selectedRequest" class="leave-detail" v-model:review-reason="rejectReason" :student-fields="studentFields" :application-fields="applicationFields" :reason="selectedRequest.reason" :reviewable="selectedRequest.status === 'PENDING'" :busy="leaveRequestStore.isReviewing" @back="closeDetail" @approve="approve" @reject="reject">
         <template #files>
           <p v-if="!selectedRequest.files?.length">첨부된 증빙 서류가 없습니다.</p>
           <ul v-else class="file-list"><li v-for="file in selectedRequest.files" :key="file.id"><span>{{ file.originalName }}</span><MyButton color="white" size="small" content="다운로드" @click="downloadFile(file)" /></li></ul>
@@ -249,6 +249,20 @@ onMounted(() => load());
 </template>
 
 <style scoped>
+.leave-detail :deep(.field-grid),
+.leave-detail :deep(.content-box),
+.leave-detail :deep(textarea) {
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
+}
+.leave-detail :deep(.field-grid dd) {
+  box-sizing: border-box;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 4px;
+  background: var(--personal-color-bg-subtle-snow);
+}
 .filter-card {
   border: 1px solid var(--personal-color-border-mist);
   border-radius: var(--personal-radius);

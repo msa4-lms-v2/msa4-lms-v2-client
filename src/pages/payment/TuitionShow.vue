@@ -149,7 +149,6 @@ onMounted(async () => {
         <h3>등록금 고지 목록</h3>
         <div class="bill-grid">
           <div class="bill-detail">
-            <h4>등록금 상세 내역</h4>
             <MyTable
               :loading="tuitionStore.isLoadingBillItems"
               :empty="!tuitionStore.isLoadingBillItems && tuitionStore.billItems.length === 0"
@@ -327,11 +326,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.bill-detail h4 {
-  margin: 0;
-  font-size: 0.95rem;
 }
 
 .payment-form {
