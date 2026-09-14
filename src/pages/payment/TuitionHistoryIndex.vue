@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { useDocumentStore } from '../../store/payment/useDocumentStore';
@@ -54,11 +54,17 @@ const filteredHistory = computed(() => tuitionStore.paymentHistory.filter((row) 
 }));
 const pagedHistory = computed(() => filteredHistory.value.slice((historyPage.value - 1) * HISTORY_PAGE_SIZE, historyPage.value * HISTORY_PAGE_SIZE));
 
-// 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
+// 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급/상세내역 조회를 한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
 const resolveTargetBill = () => {
   const matches = tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId));
   return matches[0] || null;
 };
+
+const targetBill = computed(() => resolveTargetBill());
+
+watch(targetBill, (bill) => {
+  if (bill) tuitionStore.fetchBillItems(bill.id);
+}, { immediate: true });
 
 const handlePrintNotice = async () => {
   const bill = resolveTargetBill();
@@ -136,6 +142,28 @@ onMounted(() => {
       </div>
     </MySearchFilter>
 
+    <section v-if="targetBill" class="bill-items-section">
+      <h3>등록금 상세 내역</h3>
+      <MyTable
+        :loading="tuitionStore.isLoadingBillItems"
+        :empty="!tuitionStore.isLoadingBillItems && tuitionStore.billItems.length === 0"
+        empty-message="등록된 항목이 없습니다."
+        :columns="[
+          { key: 'itemName', label: '수급자금명' },
+          { key: 'amount', label: '수납금액' },
+          { key: 'paid', label: '납입여부' },
+        ]"
+      >
+        <tr v-for="item in tuitionStore.billItems" :key="item.id">
+          <td>{{ item.itemName }}</td>
+          <td>{{ formatCurrency(item.amount) }}</td>
+          <td>
+            <input type="checkbox" :checked="item.paid" disabled>
+          </td>
+        </tr>
+      </MyTable>
+    </section>
+
     <div class="list-heading">
       <h3>나의 납부 내역</h3>
       <div class="document-actions">
@@ -180,6 +208,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.bill-items-section {
+  margin-bottom: 24px;
+}
+
+.bill-items-section h3 {
+  margin: 0 0 12px;
+}
+
 .list-heading {
   display: flex;
   align-items: center;
