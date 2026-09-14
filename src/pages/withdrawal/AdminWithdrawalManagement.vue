@@ -7,6 +7,7 @@ import {
   searchWithdrawals,
 } from '../../api/withdrawalApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
@@ -227,7 +228,7 @@ onMounted(load);
         <section v-if="selectedRequest?.status === 'ADVISOR_APPROVED'" class="detail-card action-card">
           <h3>최종 검토</h3>
           <label class="field-label" for="effective-date">승인 처리일 (희망일 이상)</label>
-          <input id="effective-date" v-model="effectiveDate" type="date" class="date-input">
+          <MyDateField id="effective-date" v-model="effectiveDate" class="date-input" />
           <textarea
             v-model="rejectReason"
             maxlength="500"
@@ -270,7 +271,7 @@ onMounted(load);
 .file-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-row strong { color: var(--personal-color-admin-secondary-indigo); font-size: .75rem; }
 .field-label { display: block; margin-bottom: 6px; color: var(--personal-color-text-muted-slate); font-size: .8rem; font-weight: 600; }
-.date-input { width: 100%; height: 38px; margin-bottom: 12px; padding: 0 10px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; }
+.date-input { margin-bottom: 12px; }
 .action-card textarea { width: 100%; padding: 9px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; resize: vertical; }
 .form-error { color: var(--personal-color-danger-coral); font-size: .78rem; }
 .decision-actions { display: flex; gap: 10px; margin-top: 12px; justify-content: flex-end; }

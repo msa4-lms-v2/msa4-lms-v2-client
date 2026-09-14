@@ -144,3 +144,9 @@ textarea,
 select {
   font: inherit;
 }
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--personal-color-text-faint-fog);
+  font-weight: 400;
+}

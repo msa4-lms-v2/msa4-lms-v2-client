@@ -132,7 +132,6 @@ const submit = async () => {
 .input-wrap { height: 48px; padding: 0 14px; display: flex; align-items: center; gap: 10px; border: 1px solid #d8dfeb; border-radius: 7px; transition: .2s; }
 .input-wrap:focus-within { border-color: #2f45a4; box-shadow: 0 0 0 3px rgba(47, 69, 164, .1); }
 .input-wrap input { min-width: 0; flex: 1; border: 0; outline: 0; color: #172033; background: transparent; font-size: 12px; }
-.input-wrap input::placeholder { color: #a3aec0; }
 .input-icon, .toggle svg { width: 17px; fill: none; stroke: #98a5b9; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .toggle { padding: 4px; display: grid; place-items: center; border: 0; background: transparent; cursor: pointer; }
 .requirements { margin-top: 90px; padding: 16px; border: 1px solid #dbe3f2; border-radius: 7px; background: #f3f6fc; font-size: 11px; }

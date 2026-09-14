@@ -3,6 +3,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -122,9 +123,9 @@ onMounted(() => load());
       <div class="search-group date-field">
         <label>신청일</label>
         <div class="date-range">
-          <MyInput v-model="filters.requestedFrom" type="date" aria-label="신청일 시작" />
+          <MyDateField v-model="filters.requestedFrom" aria-label="신청일 시작" />
           <span aria-hidden="true">~</span>
-          <MyInput v-model="filters.requestedTo" type="date" aria-label="신청일 종료" />
+          <MyDateField v-model="filters.requestedTo" aria-label="신청일 종료" />
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import {
   uploadExcuseAttachment,
 } from '../../api/attendanceApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -20,7 +21,6 @@ import { formatDate } from '../../util/format';
 defineOptions({ name: 'StudentExcuseIndex' });
 
 const PDF_MAX_SIZE = 10 * 1024 * 1024;
-const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const columns = [
   { key: 'course', label: '과목' },
@@ -64,12 +64,6 @@ const earliestExcuseDate = new Date(today);
 earliestExcuseDate.setDate(earliestExcuseDate.getDate() - 7);
 const minLectureDate = toLocalDateString(earliestExcuseDate);
 const maxLectureDate = toLocalDateString(today);
-
-const selectedDateLabel = computed(() => {
-  if (!form.lectureDate) return '날짜 선택';
-  const date = new Date(`${form.lectureDate}T00:00:00`);
-  return `${form.lectureDate.replaceAll('-', '.')} ${DAY_LABELS[date.getDay()]}`;
-});
 
 const existingRequestKeys = computed(() => new Set(requests.value.map(
   (request) => `${request.lectureDate}:${request.enrollmentId}:${request.period}`,
@@ -299,17 +293,13 @@ onMounted(() => loadRequests());
       <form class="request-form" @submit.prevent="submitRequest">
         <div class="form-field date-field">
           <label for="excuse-date">날짜</label>
-          <div class="date-chip-wrap">
-            <span :class="{ 'placeholder-text': !form.lectureDate }">{{ selectedDateLabel }}</span>
-            <MyInput
-              id="excuse-date"
-              v-model="form.lectureDate"
-              type="date"
-              :min="minLectureDate"
-              :max="maxLectureDate"
-              aria-label="날짜 선택"
-            />
-          </div>
+          <MyDateField
+            id="excuse-date"
+            v-model="form.lectureDate"
+            :min="minLectureDate"
+            :max="maxLectureDate"
+            aria-label="날짜 선택"
+          />
         </div>
 
         <div class="form-field subject-field">
@@ -497,50 +487,6 @@ onMounted(() => loadRequests());
   font-weight: 400;
 }
 
-.date-chip-wrap > .placeholder-text {
-  color: var(--personal-color-text-faint-fog);
-}
-
-.date-chip-wrap {
-  display: grid;
-  grid-template-columns: 1fr 44px;
-  align-items: center;
-  height: 38px;
-  overflow: hidden;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  background: var(--personal-color-white);
-}
-
-.date-chip-wrap > span {
-  padding: 0 8px;
-  color: var(--personal-color-primary-text-navy);
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-.date-chip-wrap :deep(input[type='date']) {
-  justify-self: center;
-  width: 24px;
-  height: 36px;
-  padding: 0;
-  border: 0;
-  color: transparent;
-  background: transparent;
-  cursor: pointer;
-}
-
-.date-chip-wrap :deep(input[type='date']::-webkit-datetime-edit) {
-  color: transparent;
-}
-
-.date-chip-wrap :deep(input[type='date']::-webkit-calendar-picker-indicator) {
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-}
 
 .form-error {
   grid-column: 1 / -1;

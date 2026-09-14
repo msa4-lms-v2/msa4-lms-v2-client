@@ -5,6 +5,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -106,11 +107,11 @@ onMounted(() => load());
       </div>
       <div class="search-group">
         <label for="attendance-from">시작일</label>
-        <MyInput id="attendance-from" v-model="filters.fromDate" type="date" />
+        <MyDateField id="attendance-from" v-model="filters.fromDate" />
       </div>
       <div class="search-group">
         <label for="attendance-to">종료일</label>
-        <MyInput id="attendance-to" v-model="filters.toDate" type="date" />
+        <MyDateField id="attendance-to" v-model="filters.toDate" />
       </div>
       <div class="search-group">
         <label for="attendance-status">출결 상태</label>

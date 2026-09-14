@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -155,9 +156,9 @@ onMounted(async () => {
         <div class="filter-field date-field">
           <span>신청일</span>
           <div class="date-range">
-            <input v-model="filters.requestedFrom" type="date" aria-label="신청일 시작" />
+            <MyDateField v-model="filters.requestedFrom" aria-label="신청일 시작" />
             <span aria-hidden="true">~</span>
-            <input v-model="filters.requestedTo" type="date" aria-label="신청일 종료" />
+            <MyDateField v-model="filters.requestedTo" aria-label="신청일 종료" />
           </div>
         </div>
       </div>
