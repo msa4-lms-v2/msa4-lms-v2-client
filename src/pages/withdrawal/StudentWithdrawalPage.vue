@@ -12,7 +12,7 @@ import MyModal from '../../components/common/MyModal.vue';
 import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { useAuthStore } from '../../store/auth/useAuthStore';
@@ -524,10 +524,12 @@ onMounted(async () => {
           </MyTable>
         </div>
 
-        <PrevNextPagination
-          v-if="requestPage.page > 1 || requestPage.hasNext"
+        <NumberedPagination
+          v-if="requestPage.totalCount > requestPage.size"
           :page="requestPage.page"
-          :has-next="requestPage.hasNext"
+          :total-count="requestPage.totalCount"
+          :size="requestPage.size"
+          color="student-cyan"
           @page-change="loadRequests"
         />
       </section>

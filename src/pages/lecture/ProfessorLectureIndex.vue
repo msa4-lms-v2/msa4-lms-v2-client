@@ -5,7 +5,7 @@ import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 
@@ -143,10 +143,12 @@ onMounted(async () => {
         </tr>
       </MyTable>
 
-      <PrevNextPagination
-        v-if="page.page > 1 || page.hasNext"
+      <NumberedPagination
+        v-if="page.totalCount > page.size"
         :page="page.page"
-        :has-next="page.hasNext"
+        :total-count="page.totalCount"
+        :size="page.size"
+        color="professor-navy"
         @page-change="load"
       />
     </section>

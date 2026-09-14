@@ -8,7 +8,7 @@ import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 
 defineOptions({ name: 'ProfessorGradeCorrection' });
@@ -32,7 +32,7 @@ const rows = ref([]);
 const originalById = ref({});
 const correctionReason = ref('');
 const histories = ref([]);
-const historyPage = ref({ page: 1, hasNext: false });
+const historyPage = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 const isLoadingLectures = ref(true);
 const isLoadingGrades = ref(false);
 const isLoadingHistories = ref(false);
@@ -185,7 +185,7 @@ const loadHistories = async (pageNumber = 1) => {
     const response = await getGradeCorrectionHistories(Number(selectedClassId.value), { page: pageNumber, size: 20 });
     const data = response.data.data;
     histories.value = data.items || [];
-    historyPage.value = { page: data.page, hasNext: data.hasNext };
+    historyPage.value = { page: data.page, size: data.size, totalCount: data.totalCount, hasNext: data.hasNext };
   } catch (error) {
     histories.value = [];
     await notify(error.response?.data?.message || '성적 정정 이력을 불러오지 못했습니다.');
@@ -329,7 +329,7 @@ onMounted(async () => {
           <td class="history-reason">{{ history.reason }}</td>
         </tr>
       </MyTable>
-      <PrevNextPagination v-if="historyPage.page > 1 || historyPage.hasNext" :page="historyPage.page" :has-next="historyPage.hasNext" @page-change="loadHistories" />
+      <NumberedPagination v-if="historyPage.totalCount > historyPage.size" :page="historyPage.page" :total-count="historyPage.totalCount" :size="historyPage.size" color="professor-navy" @page-change="loadHistories" />
     </section>
   </MyPageContainer>
 </template>

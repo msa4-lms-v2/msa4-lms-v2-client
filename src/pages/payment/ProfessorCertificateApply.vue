@@ -8,7 +8,7 @@ import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
-import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 
 defineOptions({ name: 'ProfessorCertificateApply' });
 
@@ -29,6 +29,8 @@ const issuedDocuments = ref([]);
 const historyLoading = ref(false);
 const historyError = ref('');
 const historyPage = ref(1);
+const historySize = ref(10);
+const historyTotalCount = ref(0);
 const historyHasNext = ref(false);
 let historyRevision = 0;
 const loadHistory = async (page = 1) => {
@@ -42,7 +44,7 @@ const loadHistory = async (page = 1) => {
   issuedDocuments.value = result.items.map(item => ({ ...item,
    documentTypeLabel: certificateTypes.find(type => type.value === item.documentType)?.label || item.documentType,
    status: item.revoked ? '폐기' : item.downloadable ? '발급 완료' : '다운로드 불가' }));
-  historyPage.value = result.page; historyHasNext.value = result.hasNext;
+  historyPage.value = result.page; historySize.value = result.size; historyTotalCount.value = result.totalCount; historyHasNext.value = result.hasNext;
  } catch (error) { if (revision !== historyRevision) return; historyError.value = error.response?.data?.message || '발급 내역을 불러오지 못했습니다.'; }
  finally { if (revision === historyRevision) historyLoading.value = false; }
 };
@@ -143,7 +145,7 @@ const downloadAgain = async (item) => {
           </td>
         </tr>
       </MyTable>
-      <PrevNextPagination :page="historyPage" :has-next="historyHasNext" :inert="historyLoading || Boolean(issuingType)" @page-change="loadHistory" />
+      <NumberedPagination v-if="historyTotalCount > historySize" :page="historyPage" :total-count="historyTotalCount" :size="historySize" color="professor-navy" :inert="historyLoading || Boolean(issuingType)" @page-change="loadHistory" />
     </section>
   </MyPageContainer>
 </template>
