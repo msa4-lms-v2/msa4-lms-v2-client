@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { getCreditRequirementDiagnoses, getGraduationCreditRecords } from '../../api/gradeApi';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
@@ -16,6 +17,8 @@ const diagnosis = ref(null);
 const creditRecords = ref([]);
 const isLoading = ref(false);
 const isLoadingRecords = ref(false);
+const recordPage = ref(1);
+const RECORD_PAGE_SIZE = 10;
 const filters = reactive({ academicYear: '', term: '', completionType: '', courseName: '' });
 
 const requirementColumns = [
@@ -65,6 +68,7 @@ const filteredRecords = computed(() => {
     || record.courseCode?.toLowerCase().includes(keyword)
   ));
 });
+const pagedRecords = computed(() => filteredRecords.value.slice((recordPage.value - 1) * RECORD_PAGE_SIZE, recordPage.value * RECORD_PAGE_SIZE));
 
 const earnedPercent = computed(() => {
   const required = Number(diagnosis.value?.requiredTotalCredits || 0);
@@ -108,6 +112,7 @@ const loadCreditRecords = async () => {
       sortDirection: 'desc',
     });
     creditRecords.value = response.data.data.items || [];
+    recordPage.value = 1;
   } catch (error) {
     creditRecords.value = [];
     await notify(error.response?.data?.message || '전체 이수과목을 불러오지 못했습니다.');
@@ -248,7 +253,7 @@ onMounted(loadDiagnosis);
           :empty="!isLoadingRecords && filteredRecords.length === 0"
           empty-message="조회된 이수과목이 없습니다."
         >
-          <tr v-for="record in filteredRecords" :key="record.enrollmentId">
+          <tr v-for="record in pagedRecords" :key="record.enrollmentId">
             <td>{{ semesterLabel(record) }}</td>
             <td>{{ record.courseCode }}</td>
             <td>{{ record.courseName }}</td>
@@ -257,6 +262,14 @@ onMounted(loadDiagnosis);
             <td :class="{ 'excluded-grade': record.result === 'EXCLUDED' }">{{ record.letterGrade || '-' }}</td>
           </tr>
         </MyTable>
+        <NumberedPagination
+          v-if="filteredRecords.length > RECORD_PAGE_SIZE"
+          :page="recordPage"
+          :total-count="filteredRecords.length"
+          :size="RECORD_PAGE_SIZE"
+          color="student-cyan"
+          @page-change="recordPage = $event"
+        />
       </section>
     </template>
 

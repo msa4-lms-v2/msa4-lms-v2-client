@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getMyEnrollments } from '../../api/enrollmentApi';
 import { getMyGrades, submitLectureEvaluation } from '../../api/gradeApi';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -53,6 +54,8 @@ const enrollments = ref([]);
 const submittedEnrollmentIds = ref(new Set());
 const selectedEnrollmentId = ref('');
 const isLoading = ref(false);
+const enrollmentPage = ref(1);
+const ENROLLMENT_PAGE_SIZE = 10;
 const isSubmitting = ref(false);
 const form = reactive({
   ratings: questions.reduce((ratings, question) => {
@@ -65,6 +68,8 @@ const form = reactive({
 const selectedEnrollment = computed(() =>
   enrollments.value.find((item) => String(item.enrollmentId) === String(selectedEnrollmentId.value))
 );
+
+const pagedEnrollments = computed(() => enrollments.value.slice((enrollmentPage.value - 1) * ENROLLMENT_PAGE_SIZE, enrollmentPage.value * ENROLLMENT_PAGE_SIZE));
 
 const selectedSemester = computed(() => semesterStore.semesters.find((semester) => (
   String(semester.academicYear) === String(filters.academicYear)
@@ -156,6 +161,7 @@ const loadEvaluationData = async () => {
       }),
     ]);
     enrollments.value = enrollmentResponse.data.data || [];
+    enrollmentPage.value = 1;
     submittedEnrollmentIds.value = new Set(
       (gradeResponse.data.data?.grades || []).map((grade) => Number(grade.enrollmentId))
     );
@@ -288,7 +294,7 @@ onMounted(async () => {
         :empty="!isLoading && enrollments.length === 0"
         empty-message="조회된 수강 강의가 없습니다."
       >
-        <tr v-for="enrollment in enrollments" :key="enrollment.enrollmentId">
+        <tr v-for="enrollment in pagedEnrollments" :key="enrollment.enrollmentId">
           <td>{{ semesterLabel(enrollment) }}</td>
           <td>{{ enrollment.courseCode }}</td>
           <td>{{ enrollment.courseName }}</td>
@@ -316,6 +322,14 @@ onMounted(async () => {
           </td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="enrollments.length > ENROLLMENT_PAGE_SIZE"
+        :page="enrollmentPage"
+        :total-count="enrollments.length"
+        :size="ENROLLMENT_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="enrollmentPage = $event"
+      />
     </section>
   </MyPageContainer>
 
