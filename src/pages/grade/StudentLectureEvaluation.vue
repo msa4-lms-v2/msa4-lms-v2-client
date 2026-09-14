@@ -621,10 +621,6 @@ onMounted(async () => {
   line-height: 1.5;
 }
 
-.comment-field textarea::placeholder {
-  color: var(--personal-color-text-faint-fog);
-}
-
 .actions {
   display: flex;
   justify-content: flex-end;

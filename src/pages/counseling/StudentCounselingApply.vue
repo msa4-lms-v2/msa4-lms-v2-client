@@ -185,12 +185,6 @@ input:focus,
 textarea:focus {
   border-color: var(--personal-color-primary-navy);
 }
-input::placeholder,
-textarea::placeholder {
-  color: var(--personal-color-text-faint-fog);
-  font-weight: 400;
-  opacity: 0.78;
-}
 .question-field {
   margin-top: 24px;
 }

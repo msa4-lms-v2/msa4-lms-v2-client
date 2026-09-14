@@ -667,7 +667,6 @@ onMounted(async () => {
   background: var(--personal-color-white);
   resize: vertical;
 }
-.reason-field textarea::placeholder { color: var(--personal-color-text-faint-fog); }
 .reason-field textarea:disabled { background: var(--personal-color-bg-surface-frost); }
 .form-error,
 .upload-notice,
