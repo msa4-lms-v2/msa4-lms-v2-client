@@ -89,7 +89,7 @@ const submit = async () => {
 section { margin-top: 30px; }
 h3 { margin: 0 0 12px 6px; font-size: 1.1rem; }
 .content-card, .answer-card { background: white; border: 1px solid var(--personal-color-border-mist); border-radius: 9px; }
-.info-card { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 20px; }
+.info-card { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 20px; padding: 18px 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .info-card div { display: flex; min-width: 0; flex-direction: column; gap: 6px; }
 .info-card .topic { grid-column: span 2; }
 .info-card span, .answer-card label { color: var(--personal-color-text-muted-slate); font-size: .82rem; font-weight: 700; }
