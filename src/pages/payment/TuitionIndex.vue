@@ -1,14 +1,19 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
+import MyTable from '../../components/table/MyTable.vue';
+import MyButton from '../../components/button/MyButton.vue';
+import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
 
+const router = useRouter();
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
 
@@ -50,11 +55,13 @@ onMounted(() => {
   tuitionStore.fetchMyBills();
   semesterStore.fetchSemesters();
 });
+
+const goToDetail = (billId) => router.push(`/tuition/${billId}`);
 </script>
 
 <template>
   <MyPageContainer title="등록금 납부">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+    <MySearchFilter submit-text="조회" submit-at-end @search="applyFilters">
       <div class="search-group">
         <label for="filter-year">연도</label>
         <MySelect id="filter-year" v-model="filters.academicYear">
@@ -96,43 +103,36 @@ onMounted(() => {
 
     <section class="bill-list-section">
       <h3>등록금 고지 목록</h3>
-      <p v-if="tuitionStore.isLoadingMyBills">
-        불러오는 중...
-      </p>
-      <p v-else-if="filteredBills.length === 0">
-        조회된 등록금 고지가 없습니다.
-      </p>
-      <ul v-else class="bill-list">
-        <li v-for="bill in filteredBills" :key="bill.id">
-          <RouterLink :to="`/tuition/${bill.id}`" class="bill-card">
-            <span class="semester">{{ semesterStore.getSemesterLabel(bill.semesterId) }}</span>
-            <span class="amount">{{ formatCurrency(bill.billingAmount) }}</span>
-            <span class="due">{{ formatDate(bill.dueDate) }} 까지</span>
-            <span :class="['status-text', `status-text--${TUITION_BILL_STATUS_VARIANT[bill.status]}`]">{{ TUITION_BILL_STATUS_LABEL[bill.status] }}</span>
-          </RouterLink>
-        </li>
-      </ul>
+      <MyTable
+        :loading="tuitionStore.isLoadingMyBills"
+        :empty="!tuitionStore.isLoadingMyBills && filteredBills.length === 0"
+        empty-message="조회된 등록금 고지가 없습니다."
+        :columns="[
+          { key: 'semester', label: '학기' },
+          { key: 'amount', label: '청구금액' },
+          { key: 'due', label: '납부기한' },
+          { key: 'status', label: '상태' },
+          { key: 'detail', label: '상세' },
+        ]"
+      >
+        <tr v-for="bill in filteredBills" :key="bill.id">
+          <td>{{ semesterStore.getSemesterLabel(bill.semesterId) }}</td>
+          <td>{{ formatCurrency(bill.billingAmount) }}</td>
+          <td>{{ formatDate(bill.dueDate) }}</td>
+          <td>
+            <MyStatusBadge
+              :label="TUITION_BILL_STATUS_LABEL[bill.status]"
+              :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
+            />
+          </td>
+          <td><MyButton color="deep-blue" size="middle" content="상세보기" @click="goToDetail(bill.id)" /></td>
+        </tr>
+      </MyTable>
     </section>
   </MyPageContainer>
 </template>
 
 <style scoped>
-.status-text--success {
-  color: var(--personal-color-status-success-text-forest);
-}
-
-.status-text--processing {
-  color: var(--personal-color-status-processing-text-navy);
-}
-
-.status-text--warning {
-  color: var(--personal-color-status-warning-text-amber);
-}
-
-.status-text--fail {
-  color: var(--personal-color-status-fail-text-maroon);
-}
-
 .summary-bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -142,38 +142,6 @@ onMounted(() => {
 
 .bill-list-section h3 {
   margin: 0 0 12px;
-}
-
-.bill-list {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.bill-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--personal-color-white);
-  border-radius: var(--personal-radius-card);
-  padding: 20px 24px;
-  text-decoration: none;
-  color: inherit;
-}
-
-.semester {
-  font-weight: 700;
-}
-
-.amount {
-  margin-left: auto;
-}
-
-.due {
-  color: var(--personal-color-text-muted-slate);
-  font-size: 0.85rem;
 }
 
 @media (max-width: 640px) {

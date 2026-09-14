@@ -216,7 +216,7 @@ const routes = [
         path: '/payment/health',
         name: 'PaymentHealthIndex',
         component: () => import('../pages/payment/PaymentHealthIndex.vue'),
-        meta: { requiresAuth: true, roles: ['STUDENT', 'ADMIN'] },
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
         path: '/certificates/verify',
