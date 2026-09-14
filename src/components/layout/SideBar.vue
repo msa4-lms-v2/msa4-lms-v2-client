@@ -265,7 +265,6 @@ const toggleMenu = (menuKey) => {
             <router-link to="/tuition/history" class="submenu-item">{{
               getMenuTitle("/tuition/history")
             }}</router-link>
-            <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
           </div>
         </div>
 
