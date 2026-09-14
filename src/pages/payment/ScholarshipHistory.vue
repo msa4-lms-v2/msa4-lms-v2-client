@@ -1,17 +1,11 @@
 <template>
   <MyPageContainer title="장학금 수혜 내역">
     <div v-if="isLoading" class="notice">불러오는 중...</div>
-    <section v-else-if="filteredScholarships.length === 0" class="summary-card empty-summary" aria-label="장학금 수혜 요약">
-      <div class="summary-item emphasis">
-        <span>총 수혜 금액</span>
-        <strong>{{ formatCurrency(0) }}</strong>
-      </div>
-    </section>
-    <div v-else>
+    <div v-else class="scholarship-history-content">
       <section class="summary-card" aria-label="장학금 수혜 요약">
         <div class="summary-item">
           <span>대상 학기</span>
-          <strong>{{ semesterStore.getSemesterLabel(selectedSemester) }}</strong>
+          <strong>{{ semesterLabel }}</strong>
         </div>
         <div class="summary-item">
           <span>총 등록금</span>
@@ -29,12 +23,19 @@
 
       <section class="history-section" aria-labelledby="scholarship-history-title">
         <h3 id="scholarship-history-title">수혜 상세</h3>
-        <MyTable :columns="tableColumns">
+        <MyTable
+          :columns="tableColumns"
+          :empty="filteredScholarships.length === 0"
+          empty-message="장학금 수혜 내역이 없습니다."
+        >
           <tr
             v-for="item in filteredScholarships"
             :key="item.id"
             :class="{ 'is-selected': selectedScholarshipId === item.id }"
+            tabindex="0"
             @click="selectedScholarshipId = item.id"
+            @keydown.enter="selectedScholarshipId = item.id"
+            @keydown.space.prevent="selectedScholarshipId = item.id"
           >
             <td>{{ scholarshipName(item.type) }}</td>
             <td>등록금 감면</td>
@@ -90,7 +91,6 @@ const appStore = useScholarshipApplicationStore();
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
 
-const selectedSemester = ref(null);
 const selectedScholarshipId = ref(null);
 
 const tableColumns = [
@@ -107,19 +107,19 @@ const scholarshipName = (type) => ({
   OTHER: '기타 장학금',
 }[type] || type);
 
-const availableSemesters = computed(() => {
-  const semesters = new Set(appStore.myScholarships.map((item) => item.semesterId));
-  return Array.from(semesters).sort((a, b) => b - a);
+// 요약 카드 기준 등록 고지는 장학금 유무와 상관없이, 납부 기한이 가장 최근인 고지 하나로 정한다.
+const selectedBill = computed(() => {
+  if (tuitionStore.myBills.length === 0) return null;
+  return [...tuitionStore.myBills].sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))[0];
 });
+
+const semesterLabel = computed(() => (
+  selectedBill.value ? semesterStore.getSemesterLabel(selectedBill.value.semesterId) : '-'
+));
 
 const filteredScholarships = computed(() => {
-  if (!selectedSemester.value) return [];
-  return appStore.myScholarships.filter((item) => item.semesterId === selectedSemester.value);
-});
-
-const selectedBill = computed(() => {
-  const tuitionBillId = filteredScholarships.value[0]?.tuitionBillId;
-  return tuitionStore.myBills.find((bill) => bill.id === tuitionBillId) || null;
+  if (!selectedBill.value) return [];
+  return appStore.myScholarships.filter((item) => item.semesterId === selectedBill.value.semesterId);
 });
 
 const totalScholarshipAmount = computed(() =>
@@ -153,83 +153,80 @@ onMounted(async () => {
     tuitionStore.fetchMyBills(),
     semesterStore.fetchSemesters(),
   ]);
-  selectedSemester.value = availableSemesters.value[0] || null;
 });
 </script>
 
 <style scoped>
+:deep(.page-container) {
+  max-width: 1080px;
+}
+
 .summary-card,
 .detail-card {
   border: 1px solid var(--personal-color-border-mist);
-  border-radius: 6px;
+  border-radius: var(--personal-radius);
   background: var(--personal-color-white);
 }
 
 .summary-card {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  min-height: 88px;
-  margin-bottom: 26px;
-  padding: 18px 17px;
+  min-height: 78px;
+  margin-bottom: 22px;
+  padding: 16px;
 }
 
 .summary-item {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .summary-item span,
 .detail-grid dt {
   color: var(--personal-color-text-muted-slate);
-  font-size: 0.69rem;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
 .summary-item strong {
   color: var(--personal-color-primary-text-navy);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
 }
 
 .summary-item.emphasis strong {
-  color: var(--personal-color-primary-navy);
-}
-
-.summary-card.empty-summary {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  text-align: center;
+  color: var(--personal-color-student-primary-cyan);
 }
 
 .history-section,
 .detail-section {
-  margin-top: 26px;
+  margin-top: 30px;
 }
 
 .history-section h3,
 .detail-section h3 {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   color: var(--personal-color-primary-text-navy);
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .history-section :deep(.table-container) {
   border-color: var(--personal-color-border-mist);
-  border-radius: 6px;
+  border-radius: var(--personal-radius);
 }
 
 .history-section :deep(.my-table th) {
-  padding: 11px 16px;
+  padding: 10px 16px;
   border-bottom-width: 1px;
-  font-size: 0.69rem;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
 .history-section :deep(.my-table td) {
-  padding: 10px 16px;
-  border-bottom: 0;
-  font-size: 0.72rem;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--personal-color-table-border-frost);
+  font-size: 0.75rem;
 }
 
 .history-section :deep(.my-table tbody tr) {
@@ -241,19 +238,24 @@ onMounted(async () => {
   background: var(--personal-color-bg-hover-frost);
 }
 
+.history-section :deep(.my-table tbody tr:focus-visible) {
+  outline: 2px solid var(--personal-color-student-primary-cyan);
+  outline-offset: -2px;
+}
+
 .status-cell {
   font-weight: 700;
 }
 
 .detail-card {
-  min-height: 134px;
-  padding: 23px 17px;
+  min-height: 120px;
+  padding: 21px 17px;
 }
 
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 26px 80px;
+  gap: 22px 72px;
   margin: 0;
 }
 
@@ -270,13 +272,13 @@ onMounted(async () => {
 
 .detail-grid dd {
   color: var(--personal-color-primary-text-navy);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
 .detail-divider {
   height: 1px;
-  margin-top: 26px;
+  margin-top: 22px;
   background: var(--personal-color-table-border-frost);
 }
 

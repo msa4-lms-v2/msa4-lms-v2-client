@@ -2,15 +2,19 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createNotice, getNotice, updateNotice } from '../../api/noticeApi';
+import MyAttachmentList from '../../components/common/MyAttachmentList.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { notify } from '../../composables/useDialog';
+import { useAuthStore } from '../../store/auth/useAuthStore';
+import { formatDate, formatFileSize } from '../../util/format';
 
 defineOptions({ name: 'AdminNoticeForm' });
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const noticeId = computed(() => route.params.noticeId);
 const isEdit = computed(() => Boolean(noticeId.value));
 const form = reactive({ title: '', content: '', category: 'NORMAL', normalTransitionDate: '', targetRole: 'ALL' });
@@ -20,10 +24,19 @@ const fileInput = ref(null);
 const isLoading = ref(false);
 const isSaving = ref(false);
 const fileAccept = '.pdf,.jpg,.jpeg,.png,.gif,.webp,.hwp,.hwpx';
+const noticeAuthorName = ref('');
+const noticeCreatedAt = ref('');
 
-const formatDate = (value) => value || '-';
-const fileSize = (value) => `${(value / 1024 / 1024).toFixed(value < 1024 * 1024 ? 1 : 0)}MB`;
+const transitionDateLabel = (value) => value || '-';
+const fileSize = formatFileSize;
 const previewLabel = computed(() => ({ ALL: '전체', STUDENT: '학생', PROFESSOR: '교수' }[form.targetRole]));
+const previewAuthorName = computed(() => (isEdit.value ? (noticeAuthorName.value || '관리자') : (authStore.userInfo?.name || '관리자')));
+const previewCreatedAt = computed(() => formatDate(isEdit.value && noticeCreatedAt.value ? noticeCreatedAt.value : new Date()));
+const previewFiles = computed(() => files.value.map((file) => ({
+  key: `${file.name}-${file.lastModified}`,
+  name: file.name,
+  size: file.size,
+})));
 const openFilePicker = () => fileInput.value?.click();
 
 const selectFiles = async (event) => {
@@ -81,6 +94,8 @@ const load = async () => {
       targetRole: notice.targetRole,
     });
     existingFiles.value = notice.attachments || [];
+    noticeAuthorName.value = notice.authorName || '';
+    noticeCreatedAt.value = notice.createdAt || '';
   } finally {
     isLoading.value = false;
   }
@@ -212,16 +227,15 @@ onMounted(load);
         <h3>실시간 미리보기</h3>
         <span v-if="form.category === 'IMPORTANT'" class="important">중요 공지</span>
         <h2>{{ form.title || '공지 제목' }}</h2>
-        <p class="meta">{{ previewLabel }} · {{ isEdit ? '수정 중' : '게시 전' }}</p>
+        <p class="meta">{{ previewAuthorName }} | {{ previewCreatedAt }}</p>
         <hr />
         <p class="preview-content">{{ form.content || '공지 내용이 여기에 표시됩니다.' }}</p>
 
-        <ul v-if="files.length" class="preview-files">
-          <li v-for="file in files" :key="file.name">📎 {{ file.name }}</li>
-        </ul>
+        <hr v-if="files.length" />
+        <MyAttachmentList v-if="files.length" :files="previewFiles" />
 
         <p v-if="form.category === 'IMPORTANT'" class="transition">
-          일반 공지 전환 예정: {{ formatDate(form.normalTransitionDate) }}
+          일반 공지 전환 예정: {{ transitionDateLabel(form.normalTransitionDate) }}
         </p>
       </aside>
 
@@ -418,12 +432,6 @@ input[type='radio'] {
   min-height: 160px;
   line-height: 1.65;
   white-space: pre-wrap;
-}
-
-.preview-files {
-  padding: 0;
-  font-size: 0.83rem;
-  list-style: none;
 }
 
 .transition {

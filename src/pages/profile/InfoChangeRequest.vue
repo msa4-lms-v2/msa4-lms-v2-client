@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
+import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -346,38 +346,14 @@ onUnmounted(revokePreview);
 
             <div class="field">
               <span>증빙파일 (PDF, JPG/PNG/GIF/WebP, HWP/HWPX 가능)</span>
-              <div class="attachment-picker">
-                <MyFileSelectButton
-                  ref="attachmentFileSelect"
-                  multiple
-                  :accept="ATTACHMENT_ACCEPT"
-                  @change="onAttachmentsChange"
-                />
-                <span
-                  v-if="attachments.length > 0"
-                  class="file-count"
-                >{{ attachments.length }}개 파일 첨부됨</span>
-                <span
-                  v-else
-                  class="file-empty"
-                >선택된 파일 없음</span>
-                <div class="file-chips" aria-live="polite">
-                  <span
-                    v-for="(file, index) in attachments"
-                    :key="`${file.name}-${file.lastModified}`"
-                    class="file-chip"
-                  >
-                    <span class="file-icon" aria-hidden="true">▣</span>
-                    <span class="file-name">{{ file.name }}</span>
-                    <MyButton
-                      btn-type="button"
-                      :content="'×'"
-                      :aria-label="`${file.name} 삭제`"
-                      @click="removeAttachment(index)"
-                    />
-                  </span>
-                </div>
-              </div>
+              <MyFilePickerField
+                ref="attachmentFileSelect"
+                :files="attachments"
+                multiple
+                :accept="ATTACHMENT_ACCEPT"
+                @change="onAttachmentsChange"
+                @remove="removeAttachment"
+              />
             </div>
 
             <label class="field" for="info-change-reason">
@@ -597,60 +573,6 @@ onUnmounted(revokePreview);
   color: var(--personal-color-text-faint-fog);
 }
 
-.attachment-picker {
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 8px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  background: var(--personal-color-white);
-}
-
-.file-chips {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.file-count {
-  flex: none;
-  color: var(--personal-color-primary-navy);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.file-chip {
-  min-width: 0;
-  max-width: 230px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 3px;
-  color: var(--personal-color-primary-navy);
-  background: var(--personal-color-bg-surface-frost);
-  font-size: 0.72rem;
-  font-weight: 500;
-}
-
-.file-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-empty {
-  color: var(--personal-color-text-faint-fog);
-  font-size: 0.75rem;
-  font-weight: 400;
-}
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -726,19 +648,6 @@ onUnmounted(revokePreview);
     padding: 16px;
   }
 
-  .attachment-picker {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .file-chips {
-    justify-content: flex-start;
-    flex-direction: column;
-  }
-
-  .file-chip {
-    max-width: 100%;
-  }
 }
 </style>
 

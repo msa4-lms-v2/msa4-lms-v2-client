@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import MyButton from '../../components/button/MyButton.vue';
 import AcademicChangeGuidelineModal from '../../components/common/AcademicChangeGuidelineModal.vue';
-import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
+import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -403,45 +403,14 @@ onMounted(async () => {
               <span>첨부파일 (hwp, hwpx 가능)</span>
               <span class="required-guide">* 필수 제출 서류 : 자기소개서 / 학업계획서</span>
             </div>
-            <div class="file-picker">
-              <MyFileSelectButton
-                ref="fileSelect"
-                accept=".hwp,.hwpx,application/x-hwp,application/vnd.hancom.hwp,application/vnd.hancom.hwpx"
-                multiple
-                @change="onFileChange"
-              />
-              <span
-                class="file-count"
-                :class="{ 'file-count--attached': attachments.length > 0 }"
-              >
-                {{ attachments.length ? `${attachments.length}개 파일 첨부됨` : '선택된 파일 없음' }}
-              </span>
-              <div
-                v-if="attachments.length"
-                class="file-chips"
-              >
-                <span
-                  v-for="(file, index) in attachments"
-                  :key="`${file.name}-${file.size}-${file.lastModified}`"
-                  class="file-chip"
-                >
-                  <span
-                    class="file-icon"
-                    aria-hidden="true"
-                  >▣</span>
-                  <span
-                    class="file-name"
-                    :title="file.name"
-                  >{{ file.name }}</span>
-                  <MyButton
-                    btn-type="button"
-                    :content="'×'"
-                    :aria-label="`${file.name} 삭제`"
-                    @click="removeAttachment(index)"
-                  />
-                </span>
-              </div>
-            </div>
+            <MyFilePickerField
+              ref="fileSelect"
+              :files="attachments"
+              accept=".hwp,.hwpx,application/x-hwp,application/vnd.hancom.hwp,application/vnd.hancom.hwpx"
+              multiple
+              @change="onFileChange"
+              @remove="removeAttachment"
+            />
           </div>
 
           <p
@@ -607,68 +576,6 @@ onMounted(async () => {
   color: var(--personal-color-danger-coral);
 }
 
-.file-picker {
-  box-sizing: border-box;
-  height: 38px;
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 5px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  background: var(--personal-color-white);
-}
-
-.file-count {
-  flex: 0 0 auto;
-  color: var(--personal-color-text-faint-fog);
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
-.file-count--attached {
-  color: var(--personal-color-login-primary-navy);
-  font-weight: 500;
-}
-
-.file-chips {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.file-chip {
-  min-width: 0;
-  max-width: 230px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 3px;
-  color: var(--personal-color-primary-navy);
-  background: var(--personal-color-bg-surface-frost);
-  font-size: 0.72rem;
-  font-weight: 500;
-}
-
-.file-chip-name {
-  min-width: 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-remove-mark {
-  color: var(--personal-color-text-tertiary-slate);
-  font-size: 0.95rem;
-}
-
 .form-error {
   margin: 8px 0 0;
   font-size: 0.75rem;
@@ -713,26 +620,13 @@ onMounted(async () => {
     flex-wrap: wrap;
   }
 
-  .form-grid,
-  .file-chips {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 
-  .file-picker {
-    height: auto;
-    min-height: 38px;
-  }
-
-  .file-picker,
   .file-label-row {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .file-chips {
-    width: 100%;
-    gap: 6px;
-    margin-left: 0;
   }
 }
 </style>
