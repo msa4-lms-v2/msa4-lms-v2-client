@@ -147,9 +147,9 @@ const downloadFile = async (file) => {
     link.href = url;
     link.download = file.originalName;
     link.click();
-    URL.revokeObjectURL(url);
-  } catch {
-    await notify('제출 문서를 다운로드하지 못했습니다.');
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    await notify(error.response?.data?.message || '제출 문서를 다운로드하지 못했습니다.');
   }
 };
 

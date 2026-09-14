@@ -89,7 +89,9 @@ const displayedPaymentAmount = computed(() => {
 // 이 화면의 결제 금액은 "이미 낸 금액을 뺀 잔액"이 아니라 장학금 차감 후 전체 실납부액이다.
 // PARTIAL(가상계좌 부분입금 등으로 일부만 납부된 상태)에서 전체 금액을 다시 결제하면
 // 서버가 초과납부로 거부하므로, 그 상태에서는 결제 버튼 자체를 막고 안내만 보여준다.
+const isPaid = computed(() => tuitionStore.currentStatus?.status === 'PAID' || currentBill.value?.status === 'PAID');
 const canPay = computed(() => {
+  if (isPaid.value) return false;
   if (paymentType.value === 'INSTALLMENT') {
     return hasActivePlan.value && !!selectedInstallmentItem.value;
   }
@@ -146,7 +148,7 @@ watch(() => props.tuitionBillId, load);
         <div class="form-row">
           <div class="form-group">
             <label for="payment-type">납부방식</label>
-            <MySelect id="payment-type" v-model="paymentType" :disabled="tuitionStore.isPaymentLoading">
+            <MySelect id="payment-type" v-model="paymentType" :disabled="tuitionStore.isPaymentLoading || isPaid">
               <option
                 v-for="option in paymentTypeOptions"
                 :key="option.value"
@@ -160,7 +162,7 @@ watch(() => props.tuitionBillId, load);
 
           <div v-if="paymentType === 'INSTALLMENT'" class="form-group">
             <label for="installment-round">회차 선택</label>
-            <MySelect id="installment-round" v-model="selectedInstallmentItemId" :disabled="tuitionStore.isPaymentLoading">
+            <MySelect id="installment-round" v-model="selectedInstallmentItemId" :disabled="tuitionStore.isPaymentLoading || isPaid">
               <option v-for="item in scheduledPlanItems" :key="item.id" :value="item.id">
                 {{ item.roundNo }}회차
               </option>
@@ -210,7 +212,7 @@ watch(() => props.tuitionBillId, load);
             color="white"
             size="middle"
             content="취소"
-            :disabled="tuitionStore.isPaymentLoading"
+            :disabled="tuitionStore.isPaymentLoading || isPaid"
             @click="handleCancel"
           />
         </div>

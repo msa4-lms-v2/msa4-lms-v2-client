@@ -7,6 +7,7 @@ import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import { useTabStore } from '../../store/tab/useTabStore';
 import { notify } from '../../composables/useDialog';
 
 defineOptions({ name: 'AcademicScheduleForm' });
@@ -60,7 +61,9 @@ const save = async () => {
     const response = isEdit.value ? await updateAcademicSchedule(scheduleId.value, payload()) : await createAcademicSchedule(payload());
     assignment.value = response.data.data;
     await notify(isEdit.value ? '학사일정을 수정했습니다.' : '학사일정을 등록했습니다.');
-    router.replace({ name: 'AcademicScheduleDetail', params: { scheduleId: response.data.data.id } });
+    const previousTab = route.meta?.tabKey || route.path;
+    await router.replace({ name: 'AcademicScheduleIndex' });
+    useTabStore().removeTab(previousTab);
   } catch (error) { await notify(error.response?.data?.message || '학사일정 저장에 실패했습니다.'); }
   finally { saving.value = false; }
 };

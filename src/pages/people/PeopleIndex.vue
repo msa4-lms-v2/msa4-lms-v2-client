@@ -53,10 +53,8 @@ const columns = computed(() => (admission.value
     ]));
 
 const statusVariants = {
-  PROVISIONING: 'processing',
-  REGISTERED: 'warning',
-  CONFIRMED: 'processing',
-  PROVISIONED: 'success',
+  PENDING: 'warning',
+  COMPLETED: 'success',
   CANCELLED: 'fail',
   ACTIVE: 'success',
   INACTIVE: 'warning',
@@ -67,7 +65,7 @@ const statusVariants = {
 const rowId = (row) => row.id ?? row.professorId;
 const numberLabel = (row) => (
   (admission.value ? row.studentNumber : row.professorNumber)
-  || (row.status === 'PROVISIONING' ? '발급 대기' : '-')
+  || (row.status === 'PENDING' ? '발급 대기' : '-')
 );
 
 const load = async (nextPage = 1) => {
