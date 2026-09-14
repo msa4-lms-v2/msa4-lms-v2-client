@@ -88,11 +88,12 @@ const submit = async () => {
 <style scoped>
 section { margin-top: 30px; }
 h3 { margin: 0 0 12px 6px; font-size: 1.1rem; }
-.info-card, .content-card, .answer-card { background: white; border: 1px solid var(--personal-color-border-mist); border-radius: 9px; }
-.info-card { display: grid; grid-template-columns: repeat(4, 1fr); padding: 20px; gap: 14px 20px; }
-.info-card div { min-height: 60px; padding: 10px 14px; border-radius: 5px; background: var(--personal-color-bg-subtle-snow); display: flex; flex-direction: column; gap: 9px; }
+.content-card, .answer-card { background: white; border: 1px solid var(--personal-color-border-mist); border-radius: 9px; }
+.info-card { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 20px; }
+.info-card div { display: flex; min-width: 0; flex-direction: column; gap: 6px; }
 .info-card .topic { grid-column: span 2; }
 .info-card span, .answer-card label { color: var(--personal-color-text-muted-slate); font-size: .82rem; font-weight: 700; }
+.info-card strong { display: flex; align-items: center; min-height: 38px; box-sizing: border-box; padding: 8px 12px; overflow-wrap: anywhere; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: var(--personal-color-bg-subtle-snow); color: var(--personal-color-primary-text-navy); font-size: .9rem; font-weight: 500; }
 .content-card { min-height: 130px; padding: 28px 22px; line-height: 1.8; white-space: pre-wrap; }
 .answer-card { position: relative; padding: 20px 22px 42px; }
 .answer-card label { display: block; margin-bottom: 12px; }

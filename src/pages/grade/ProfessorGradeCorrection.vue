@@ -9,6 +9,7 @@ import MySelect from '../../components/input/MySelect.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
+import MyModal from '../../components/common/MyModal.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 
 defineOptions({ name: 'ProfessorGradeCorrection' });
@@ -25,7 +26,8 @@ const historyFieldLabels = {
 };
 
 const lectures = ref([]);
-const selectedSemesterKey = ref('');
+const isReasonOpen = ref(false);
+const isHistoryOpen = ref(false);
 const selectedClassId = ref('');
 const classInfo = ref(null);
 const rows = ref([]);
@@ -39,24 +41,7 @@ const isLoadingHistories = ref(false);
 const isSaving = ref(false);
 const isBusy = computed(() => isLoadingLectures.value || isLoadingGrades.value || isLoadingHistories.value || isSaving.value);
 
-const semesterKey = (lecture) => `${lecture.academicYear}-${lecture.term}`;
 const semesterLabel = (lecture) => `${lecture.academicYear}학년도 ${termLabels[lecture.term] || lecture.term}`;
-
-const semesterOptions = computed(() => {
-  const seen = new Set();
-  return lectures.value.reduce((options, lecture) => {
-    const value = semesterKey(lecture);
-    if (!seen.has(value)) {
-      seen.add(value);
-      options.push({ value, label: semesterLabel(lecture) });
-    }
-    return options;
-  }, []);
-});
-
-const semesterLectures = computed(() => lectures.value.filter(
-  (lecture) => semesterKey(lecture) === selectedSemesterKey.value,
-));
 
 const selectedLecture = computed(() => lectures.value.find(
   (lecture) => String(lecture.classId) === String(selectedClassId.value),
@@ -142,8 +127,7 @@ const loadLectures = async () => {
   try {
     const response = await getMyLectures({ page: 1, size: 100 });
     lectures.value = response.data.data.items || [];
-    selectedSemesterKey.value = semesterOptions.value[0]?.value || '';
-    selectedClassId.value = String(semesterLectures.value[0]?.classId || '');
+    selectedClassId.value = String(lectures.value[0]?.classId || '');
   } catch (error) {
     lectures.value = [];
     await notify(error.response?.data?.message || '담당 강의 목록을 불러오지 못했습니다.');
@@ -199,11 +183,6 @@ const loadSelectedClass = async () => {
   await Promise.all([loadGrades(), loadHistories(1)]);
 };
 
-const changeSemester = async () => {
-  selectedClassId.value = String(semesterLectures.value[0]?.classId || '');
-  await loadSelectedClass();
-};
-
 const validateCorrection = () => {
   for (const row of changedRows.value) {
     for (const field of SCORE_FIELDS) {
@@ -246,6 +225,7 @@ const saveCorrections = async () => {
     const confirmed = await confirmDialog(`${corrections.length}명의 공개 성적을 정정하시겠습니까? 변경 내용과 사유가 이력에 남습니다.`);
     if (!confirmed) return;
     await correctOpenedGrades(classId, corrections, createIdempotencyKey());
+    isReasonOpen.value = false;
     await notify('성적 정정이 완료되었습니다.');
     correctionReason.value = '';
     await Promise.all([loadGrades(), loadHistories(1)]);
@@ -270,17 +250,11 @@ onMounted(async () => {
 <template>
   <MyPageContainer class="professor-page" title="성적 정정">
     <MySearchFilter :show-submit="false">
-      <div class="search-group">
-        <label for="correction-semester">학기 선택</label>
-        <MySelect id="correction-semester" v-model="selectedSemesterKey" :disabled="isBusy" @change="changeSemester">
-          <option v-for="semester in semesterOptions" :key="semester.value" :value="semester.value">{{ semester.label }}</option>
-        </MySelect>
-      </div>
       <div class="search-group lecture-group">
         <label for="correction-lecture">강의 선택</label>
         <MySelect id="correction-lecture" v-model="selectedClassId" :disabled="isBusy" @change="loadSelectedClass">
-          <option v-for="lecture in semesterLectures" :key="lecture.classId" :value="String(lecture.classId)">
-            [{{ lecture.courseCode }}] {{ lecture.courseName }} ({{ lecture.sectionNo }}분반)
+          <option v-for="lecture in lectures" :key="lecture.classId" :value="String(lecture.classId)">
+            {{ lecture.courseName }} ({{ lecture.sectionNo }}분반 · {{ semesterLabel(lecture) }})
           </option>
         </MySelect>
       </div>
@@ -290,7 +264,10 @@ onMounted(async () => {
       </div>
     </MySearchFilter>
 
-    <h3 class="section-title">성적 정정</h3>
+    <div class="section-heading">
+      <h3 class="section-title">수강생 성적 정정</h3>
+      <button type="button" class="history-link" :disabled="isBusy" @click="isHistoryOpen = true">정정 이력</button>
+    </div>
     <MyTable class="grade-table score-grade-table" :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="정정 가능한 공개 성적이 없습니다.">
       <tr v-for="row in rows" :key="row.enrollmentId" :class="{ 'changed-row': isRowChanged(row) }">
         <td>{{ row.studentName }}</td>
@@ -299,25 +276,32 @@ onMounted(async () => {
         <td><MyInput v-model="row.finalScore" :aria-label="row.studentName + ' 기말고사'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
         <td><MyInput v-model="row.assignmentScore" :aria-label="row.studentName + ' 과제'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
         <td><MyInput v-model="row.attendanceScore" :aria-label="row.studentName + ' 출석'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
-        <td>{{ calculateTotal(row) === null ? '-' : calculateTotal(row).toFixed(2) }}</td>
+        <td>{{ calculateTotal(row) === null ? '-' : `${calculateTotal(row).toFixed(2)}점` }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
         <td><span class="status-text status-text--success">공개됨</span></td>
       </tr>
     </MyTable>
 
     <div class="correction-controls">
+      <div class="save-area">
+        <span v-if="changedRows.length">{{ changedRows.length }}명 변경</span>
+        <MyButton class="professor-primary" color="deep-blue" size="big" content="변경 사항 저장" :disabled="isBusy || !changedRows.length" @click="isReasonOpen = true" />
+      </div>
+    </div>
+
+    <MyModal :is-open="isReasonOpen" title="성적 정정 사유" @close="!isSaving && (isReasonOpen = false)">
       <div class="reason-field">
         <label for="correction-reason">정정 사유 <span>{{ correctionReason.length }}/500</span></label>
         <textarea id="correction-reason" v-model="correctionReason" :disabled="isBusy" maxlength="500" rows="2" placeholder="변경 사유를 입력해 주세요. 변경된 모든 학생의 정정 이력에 기록됩니다."></textarea>
       </div>
-      <div class="save-area">
-        <span v-if="changedRows.length">{{ changedRows.length }}명 변경</span>
-        <MyButton class="professor-primary" color="deep-blue" size="big" :content="isSaving ? '저장 중...' : '변경 사항 저장'" :disabled="isBusy || !changedRows.length" @click="saveCorrections" />
-      </div>
-    </div>
+      <template #footer>
+        <MyButton color="white" size="middle" content="취소" :disabled="isSaving" @click="isReasonOpen = false" />
+        <MyButton color="deep-blue" size="middle" :content="isSaving ? '저장 중...' : '저장'" :disabled="isBusy" @click="saveCorrections" />
+      </template>
+    </MyModal>
 
-    <section class="history-section">
-      <h3 class="section-title">성적 정정 이력</h3>
+    <MyModal :is-open="isHistoryOpen" title="성적 정정 이력" max-width="1100px" @close="isHistoryOpen = false">
+      <section class="history-section">
       <MyTable class="grade-table" :columns="historyColumns" :loading="isLoadingHistories" :empty="!isLoadingHistories && histories.length === 0" empty-message="성적 정정 이력이 없습니다.">
         <tr v-for="history in histories" :key="history.historyId">
           <td>{{ formatDateTime(history.createdAt) }}</td>
@@ -330,28 +314,29 @@ onMounted(async () => {
         </tr>
       </MyTable>
       <NumberedPagination v-if="historyPage.totalCount > historyPage.size" :page="historyPage.page" :total-count="historyPage.totalCount" :size="historyPage.size" color="professor-navy" @page-change="loadHistories" />
-    </section>
+      </section>
+      <template #footer><MyButton color="white" size="middle" content="닫기" @click="isHistoryOpen = false" /></template>
+    </MyModal>
   </MyPageContainer>
 </template>
 
 <style scoped>
-.status-text--success {
-  color: var(--personal-color-status-success-text-forest);
-}
+.status-text--success { color: var(--personal-color-primary-text-navy); font-weight: 600; }
 
-.lecture-group :deep(select) { min-width: 300px; }
+.lecture-group { width: 260px; flex-shrink: 0; }
+.lecture-group :deep(select) { width: 100%; min-width: 0; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
 .lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
 .lecture-summary strong { padding: 8px 0; color: var(--personal-color-professor-primary-navy); font-size: 0.95rem; }
 .section-title { margin: 0 0 14px; font-size: 1rem; }
 .score-input { width: 64px; text-align: center; }
 .changed-row { background: var(--personal-color-sidebar-active-bg-sky); }
-.correction-controls { display: flex; align-items: flex-end; gap: 16px; margin-top: 16px; }
+.correction-controls { display: flex; justify-content: flex-end; gap: 16px; margin-top: 28px; }
 .reason-field { display: flex; flex: 1; flex-direction: column; gap: 6px; }
 .reason-field label { display: flex; justify-content: space-between; color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
 .reason-field textarea { min-height: 58px; padding: 10px 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; box-sizing: border-box; font: inherit; resize: vertical; }
 .save-area { display: flex; align-items: center; gap: 10px; color: var(--personal-color-professor-primary-navy); font-size: 0.85rem; font-weight: 700; }
-.history-section { margin-top: 36px; }
+.history-section { max-height: 60vh; overflow: auto; }
 .history-reason { max-width: 260px; white-space: pre-wrap; text-align: left; }
 .professor-primary { background: var(--personal-color-primary-navy); }
 @media (max-width: 900px) {
@@ -365,10 +350,14 @@ onMounted(async () => {
 .lecture-group { min-width: 0; }
 @media (max-width: 560px) { .lecture-group { width: 100%; } .lecture-group :deep(select) { width: 100%; min-width: 0; } }
 
-.section-title { margin-top: 38px; font-size: 20px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 38px 0 14px; }
+.section-title { margin: 0; font-size: 20px; }
+.history-link { border: 0; background: transparent; color: var(--personal-color-text-secondary-steel); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.history-link:disabled { cursor: default; opacity: .5; }
 .lecture-summary strong { color: var(--personal-color-primary-text-navy); font-size: 18px; }
-.score-grade-table :deep(.my-table th) { height: 48px; padding: 10px 12px; font-size: 13px; border-right: 1px solid var(--personal-color-table-border-frost); }
-.score-grade-table :deep(.my-table td) { height: 90px; padding: 18px 12px; font-size: 14px; border-right: 1px solid var(--personal-color-table-border-frost); }
-.score-input { width: 78px; height: 36px; font-size: 13px; }
+.score-grade-table :deep(.my-table th) { box-sizing: border-box; height: 48px; padding: 10px 12px; font-size: 13px; border-right: 1px solid var(--personal-color-table-border-frost); }
+.score-grade-table :deep(.my-table td) { box-sizing: border-box; height: 90px; padding: 18px 12px; font-size: 14px; border-right: 1px solid var(--personal-color-table-border-frost); }
+.score-input { box-sizing: border-box; width: 78px; height: 36px; font-size: 13px; appearance: textfield; -moz-appearance: textfield; }
+.score-input::-webkit-inner-spin-button, .score-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
 </style>

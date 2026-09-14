@@ -31,7 +31,7 @@ const columns = [
   { key: 'targetSemester', label: '신청 학기' },
   { key: 'createdAt', label: '신청일' },
   { key: 'status', label: '처리 상태' },
-  { key: 'action', label: '확인' },
+  { key: 'action', label: '상세' },
 ];
 
 const requestTypeLabel = {
@@ -219,7 +219,7 @@ onMounted(() => load());
             {{ LEAVE_REQUEST_STATUS_LABEL[item.status] || item.status }}
           </td>
           <td>
-            <MyButton color="deep-blue" size="small" content="확인" @click="openDetail(item.id)" />
+            <MyButton color="deep-blue" size="small" content="상세" @click="openDetail(item.id)" />
           </td>
         </tr>
       </MyTable>
