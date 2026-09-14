@@ -507,9 +507,6 @@ form > label {
   background: transparent;
   font-size: 15px;
 }
-.input-box :deep(input)::placeholder {
-  color: #b4bfcd;
-}
 .password-toggle {
   display: grid;
   place-items: center;

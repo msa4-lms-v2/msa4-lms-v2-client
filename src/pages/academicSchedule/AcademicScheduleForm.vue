@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createAcademicSchedule, getAcademicSchedule, getAcademicScheduleTemplates, updateAcademicSchedule } from '../../api/academicScheduleApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -121,11 +122,11 @@ onMounted(async () => { await loadTemplates(); await loadSchedule(); });
         </div>
         <div class="field">
           <label for="start-date">시작일 <em>*</em></label>
-          <MyInput id="start-date" v-model="form.startDate" type="date" />
+          <MyDateField id="start-date" v-model="form.startDate" />
         </div>
         <div class="field">
           <label for="end-date">종료일</label>
-          <MyInput id="end-date" v-model="form.endDate" type="date" />
+          <MyDateField id="end-date" v-model="form.endDate" />
         </div>
         <div v-if="isEdit" class="field full">
           <label for="reason">수정 사유 <em>*</em></label>

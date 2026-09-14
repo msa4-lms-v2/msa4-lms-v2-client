@@ -571,10 +571,6 @@ onUnmounted(revokePreview);
   resize: vertical;
 }
 
-.field textarea::placeholder {
-  color: var(--personal-color-text-faint-fog);
-}
-
 .form-actions {
   display: flex;
   justify-content: flex-end;

@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { searchAttendanceRecords, updateAttendanceRecord } from '../../api/attendanceApi';
 import { getMyLectures } from '../../api/lectureApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -163,7 +164,7 @@ onMounted(loadLectures);
 
       <div class="search-group date-field">
         <label for="attendance-date">출결 일자</label>
-        <MyInput id="attendance-date" v-model="filters.lectureDate" type="date" :disabled="!filters.classId || isLoading || isSaving" @change="load(1)" />
+        <MyDateField id="attendance-date" v-model="filters.lectureDate" :disabled="!filters.classId || isLoading || isSaving" @change="load(1)" />
       </div>
 
       <div v-if="selectedLecture" class="lecture-info">

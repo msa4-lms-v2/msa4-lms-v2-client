@@ -520,10 +520,6 @@ onMounted(async () => {
   resize: vertical;
 }
 
-.reason-field textarea::placeholder {
-  color: var(--personal-color-text-faint-fog);
-}
-
 .form-error {
   margin: 10px 0 0;
   color: var(--personal-color-red);
