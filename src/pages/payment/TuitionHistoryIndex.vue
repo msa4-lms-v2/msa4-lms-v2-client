@@ -86,7 +86,7 @@ onMounted(() => {
 
 <template>
   <MyPageContainer title="등록금 납부 내역">
-    <MySearchFilter submit-text="조회" @search="applyFilters">
+    <MySearchFilter submit-text="조회" submit-at-end @search="applyFilters">
       <div class="search-group">
         <label for="filter-year">연도</label>
         <MySelect id="filter-year" v-model="filters.academicYear">

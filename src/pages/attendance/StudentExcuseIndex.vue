@@ -8,7 +8,7 @@ import {
   uploadExcuseAttachment,
 } from '../../api/attendanceApi';
 import MyButton from '../../components/button/MyButton.vue';
-import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
+import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -166,6 +166,11 @@ const selectAttachment = async (files) => {
     return;
   }
   form.attachmentFile = file;
+};
+
+const removeAttachment = () => {
+  form.attachmentFile = null;
+  attachmentFileSelect.value?.reset();
 };
 
 const submitRequest = async () => {
@@ -342,18 +347,14 @@ onMounted(() => loadRequests());
         </div>
 
         <div class="form-field attachment-field">
-          <label for="excuse-attachment">첨부파일</label>
-          <div class="attachment-picker">
-            <MyFileSelectButton
-              id="excuse-attachment"
-              ref="attachmentFileSelect"
-              accept=".pdf,application/pdf"
-              @change="selectAttachment"
-            />
-            <span :class="{ 'placeholder-text': !form.attachmentFile }">
-              {{ form.attachmentFile?.name || '선택된 파일 없음' }}
-            </span>
-          </div>
+          <span>첨부파일</span>
+          <MyFilePickerField
+            ref="attachmentFileSelect"
+            :files="form.attachmentFile ? [form.attachmentFile] : []"
+            accept=".pdf,application/pdf"
+            @change="selectAttachment"
+            @remove="removeAttachment"
+          />
         </div>
 
         <div class="button-field">
@@ -451,16 +452,6 @@ onMounted(() => loadRequests());
   background: var(--personal-color-white);
 }
 
-:deep(.page-container) {
-  max-width: 1100px;
-  padding: 18px 18px 40px;
-}
-
-:deep(.page-heading h2) {
-  margin: 0 0 18px;
-  font-size: 1.35rem;
-}
-
 :deep(.my-table th) {
   padding: 11px 10px;
   font-size: 0.76rem;
@@ -475,8 +466,8 @@ onMounted(() => loadRequests());
   display: grid;
   grid-template-columns: 160px minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(210px, 1.1fr) 77px;
   align-items: end;
-  gap: 12px;
-  padding: 15px;
+  gap: 16px;
+  padding: 20px 24px 22px;
 }
 
 .form-field,
@@ -504,28 +495,6 @@ onMounted(() => loadRequests());
   font-weight: 400;
 }
 
-.attachment-picker {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 40px;
-  padding: 0 4px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  background: var(--personal-color-white);
-}
-
-.attachment-picker > span {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--personal-color-primary-text-navy);
-  font-size: 0.8rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.attachment-picker > .placeholder-text,
 .date-chip-wrap > .placeholder-text {
   color: var(--personal-color-text-faint-fog);
 }

@@ -17,3 +17,11 @@ export function formatDeduction(amount) {
   const num = Number(amount);
   return formatCurrency(Number.isFinite(num) && num !== 0 ? -num : 0);
 }
+
+export function formatFileSize(size) {
+  const num = Number(size);
+  if (!Number.isFinite(num) || num < 0) return '-';
+  if (num < 1024) return `${num} B`;
+  if (num < 1024 * 1024) return `${Math.round(num / 1024)} KB`;
+  return `${(num / (1024 * 1024)).toFixed(1)} MB`;
+}

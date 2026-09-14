@@ -97,7 +97,7 @@ onMounted(async () => {
           </button>
         </MyCard>
         <template v-else>
-          <NoticeList :notices="dashboardStore.notices" />
+          <NoticeList :notices="dashboardStore.notices" enable-detail />
         </template>
       </div>
     </div>
