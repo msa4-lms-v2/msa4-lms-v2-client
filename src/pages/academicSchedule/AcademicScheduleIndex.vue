@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onActivated, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getAcademicScheduleTemplates, searchAcademicSchedules } from '../../api/academicScheduleApi';
 import MyButton from '../../components/button/MyButton.vue';
@@ -69,10 +69,13 @@ const resetFilters = () => {
   load(1);
 };
 
+let mounted = false;
 onMounted(async () => {
   await loadTemplates();
   await load();
+  mounted = true;
 });
+onActivated(() => { if (mounted) load(page.value.page); });
 </script>
 
 <template>

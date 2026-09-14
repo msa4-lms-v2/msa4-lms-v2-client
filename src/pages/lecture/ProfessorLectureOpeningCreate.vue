@@ -203,6 +203,7 @@ const validate = () => {
     return '성적 반영 비율은 각각 0~100 사이로 입력해 주세요.';
   }
   if (ratioTotal.value !== 100) return '성적 반영 비율(중간·기말·과제·출석)의 합은 100이어야 합니다.';
+  if ([...form.syllabus.matchAll(/^\[(\d+)주차\]/gm)].some((match) => Number(match[1]) > 15)) return '주차별 강의 내용은 최대 15주까지 입력할 수 있습니다.';
   if (!form.syllabus.trim()) return '강의계획서 내용을 입력해 주세요.';
   if (form.syllabus.trim().length > 65535) return '강의계획서는 65,535자 이하여야 합니다.';
   if (schedules.value.length === 0) return '강의 시간표를 하나 이상 입력해 주세요.';
@@ -234,6 +235,7 @@ const loadHistory = async (pageNumber = 1) => {
     });
     const data = response.data.data;
     history.value = data.items || [];
+    if (!history.value.some((item) => String(item.openingRequestId) === String(importRequestId.value))) importRequestId.value = '';
     historyPage.value = {
       page: data.page,
       size: data.size,
@@ -386,11 +388,11 @@ onMounted(async () => {
               <div class="form-group full-width">
                 <label for="opening-import">기존 신청 불러오기</label>
                 <div class="import-controls">
-                  <MySelect id="opening-import" v-model="importRequestId" :disabled="isLoadingHistory || isLoadingEdit || isSubmitting || Boolean(editingRequestId)">
-                    <option value="">신청 내역에서 선택</option>
+                  <MySelect id="opening-import" v-model="importRequestId" :disabled="isLoadingHistory || !history.length || isLoadingEdit || isSubmitting || Boolean(editingRequestId)">
+                    <option value="">{{ history.length ? '신청 내역에서 선택' : '불러올 신청 내역이 없습니다' }}</option>
                     <option v-for="item in history" :key="item.openingRequestId" :value="String(item.openingRequestId)">{{ item.academicYear }} · {{ item.courseName }} ({{ item.sectionNo }}분반)</option>
                   </MySelect>
-                  <MyButton btn-type="button" color="deep-blue" size="middle" content="불러오기" :disabled="!importRequestId || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
+                  <MyButton btn-type="button" color="deep-blue" size="middle" content="불러오기" :disabled="isLoadingHistory || !history.some((item) => String(item.openingRequestId) === String(importRequestId)) || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
                 </div>
               </div>
               <div class="form-group full-width">

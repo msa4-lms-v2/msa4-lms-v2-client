@@ -6,6 +6,8 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
   // 1. State (ref)
   const applicationPeriod = ref(null);
   const myScholarships = ref([]);
+  const myApplications = ref([]);
+  let periodVersion = 0;
   const isLoadingPeriod = ref(false);
   const isSubmittingApplication = ref(false);
   const isLoadingMyScholarships = ref(false);
@@ -14,20 +16,22 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
 
   // 3. Actions (function)
   const fetchApplicationPeriod = async (semesterId) => {
+    const version = ++periodVersion;
+    applicationPeriod.value = null;
     isLoadingPeriod.value = true;
     try {
       const res = await myAxios.get('/api/payment/scholarship-application-periods', {
         params: { semesterId },
       });
-      applicationPeriod.value = res.data.data;
+      if (version === periodVersion) applicationPeriod.value = res.data.data;
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        applicationPeriod.value = null;
+        if (version === periodVersion) applicationPeriod.value = null;
       } else {
         throw error;
       }
     } finally {
-      isLoadingPeriod.value = false;
+      if (version === periodVersion) isLoadingPeriod.value = false;
     }
   };
 
@@ -62,7 +66,13 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
     }
   };
 
+  const fetchMyApplications = async () => {
+    const res = await myAxios.get('/api/payment/me/scholarship-applications');
+    myApplications.value = res.data.data;
+  };
+
   return {
+    myApplications, fetchMyApplications,
     applicationPeriod,
     myScholarships,
     isLoadingPeriod,

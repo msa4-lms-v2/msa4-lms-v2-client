@@ -71,6 +71,7 @@ const activeMenus = ref({
 });
 
 watch(() => route.path, path => {
+  if (path === '/graduation-diagnosis') activeMenus.value.studentAcademic = true;
   if (path.startsWith('/professor/certificates')) activeMenus.value.professorCertificate = true;
   if (path.startsWith('/certificates')) activeMenus.value.studentCertificate = true;
   if (path.startsWith('/admin/admissions')) activeMenus.value.adminAdmission = true;
@@ -114,8 +115,8 @@ watch([() => route.path, () => authStore.userInfo?.role], ([path, role]) => {
   const groups = [
     ['professorTeacher', ['/profile', '/professor/profile']],
     ['professorStudent', ['/professor/leave-return', '/professor/withdrawals', '/professor/academic-change-requests']],
-    ['professorCourse', ['/professor/lectures', '/lectures']],
-    ['professorGrade', ['/professor/grades', '/professor/evaluations']],
+    ['professorCourse', ['/professor/lectures', '/lectures', '/professor/evaluations']],
+    ['professorGrade', ['/professor/grades']],
     ['professorAttendance', ['/professor/attendance']],
     ['professorCounseling', ['/professor/counseling']],
     ['professorCertificate', ['/professor/certificates']],
@@ -142,7 +143,7 @@ const toggleMenu = (menuKey) => {
         <!-- 학사관리 -->
         <div class="menu-group">
           <button type="button" class="menu-header" @click="toggleMenu('studentAcademic')">
-            <span>학사 관리</span>
+            <span>학적 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentAcademic }"
@@ -150,6 +151,9 @@ const toggleMenu = (menuKey) => {
             >
           </button>
           <div class="submenu-list" v-show="activeMenus.studentAcademic">
+            <router-link to="/graduation-diagnosis" class="submenu-item">{{
+              getMenuTitle("/graduation-diagnosis")
+            }}</router-link>
             <router-link to="/profile" class="submenu-item">{{
               getMenuTitle("/profile", "STUDENT")
             }}</router-link>
@@ -217,9 +221,6 @@ const toggleMenu = (menuKey) => {
           <div class="submenu-list" v-show="activeMenus.studentGrade">
             <router-link to="/grade" class="submenu-item">{{
               getMenuTitle("/grade")
-            }}</router-link>
-            <router-link to="/graduation-diagnosis" class="submenu-item">{{
-              getMenuTitle("/graduation-diagnosis")
             }}</router-link>
             <router-link to="/evaluations" class="submenu-item">{{
               getMenuTitle("/evaluations")
@@ -376,6 +377,9 @@ const toggleMenu = (menuKey) => {
             >
           </button>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
+            <router-link to="/professor/evaluations" class="submenu-item">{{
+              getMenuTitle("/professor/evaluations")
+            }}</router-link>
             <router-link to="/professor/lectures/create" class="submenu-item">{{
               getMenuTitle("/professor/lectures/create")
             }}</router-link>
@@ -401,9 +405,6 @@ const toggleMenu = (menuKey) => {
             }}</router-link>
             <router-link to="/professor/grades/correct" class="submenu-item">{{
               getMenuTitle("/professor/grades/correct")
-            }}</router-link>
-            <router-link to="/professor/evaluations" class="submenu-item">{{
-              getMenuTitle("/professor/evaluations")
             }}</router-link>
           </div>
         </div>

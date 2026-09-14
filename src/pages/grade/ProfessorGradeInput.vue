@@ -96,7 +96,8 @@ const isRowChanged = (row) => {
 
 
 const hasUnsavedChanges = computed(() => rows.value.some(isRowChanged));
-const canFinalize = computed(() => rows.value.length > 0
+const entryAllowed = computed(() => classInfo.value?.entryWindow?.allowed === true);
+const canFinalize = computed(() => entryAllowed.value && rows.value.length > 0
   && rows.value.every((row) => row.gradeStatus === 'DRAFT' && hasCompleteScores(row))
   && !hasUnsavedChanges.value);
 
@@ -204,7 +205,7 @@ const validateScores = () => {
 };
 
 const saveGrades = async () => {
-  if (isBusy.value || !classInfo.value) return;
+  if (isBusy.value || !classInfo.value || !entryAllowed.value) return;
   const editableRows = rows.value.filter((row) => row.gradeStatus !== 'OPENED' && isRowChanged(row));
   if (!editableRows.length) {
     await notify('저장할 변경 내용이 없습니다.');
@@ -293,14 +294,16 @@ onMounted(async () => {
     </MySearchFilter>
 
     <h3 class="section-title">수강생 성적 입력</h3>
+    <p v-if="classInfo">입력 기간: {{ classInfo.entryWindow?.startDate || '미설정' }} ~ {{ classInfo.entryWindow?.endDate || '미설정' }}. {{ entryAllowed ? '현재 입력 가능합니다.' : '현재 입력 기간이 아닙니다.' }}</p>
+    <p>각 항목에 0~100점을 입력하세요. 총점은 각 점수 × 반영 비율(%)의 합계이며, 반영 비율은 항목 제목에 표시됩니다.</p>
     <MyTable class="grade-table" :columns="columns" :loading="isLoadingGrades" :empty="!isLoadingGrades && rows.length === 0" empty-message="활성 수강생이 없습니다.">
       <tr v-for="row in rows" :key="row.enrollmentId">
         <td>{{ row.studentName }}</td>
         <td>{{ row.studentNumber || '-' }}</td>
-        <td><MyInput v-model="row.midtermScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 중간고사`" class="score-input" /></td>
-        <td><MyInput v-model="row.finalScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 기말고사`" class="score-input" /></td>
-        <td><MyInput v-model="row.assignmentScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 과제`" class="score-input" /></td>
-        <td><MyInput v-model="row.attendanceScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 출석`" class="score-input" /></td>
+        <td><MyInput v-model="row.midtermScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || !entryAllowed || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 중간고사`" class="score-input" /></td>
+        <td><MyInput v-model="row.finalScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || !entryAllowed || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 기말고사`" class="score-input" /></td>
+        <td><MyInput v-model="row.assignmentScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || !entryAllowed || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 과제`" class="score-input" /></td>
+        <td><MyInput v-model="row.attendanceScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || !entryAllowed || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 출석`" class="score-input" /></td>
         <td>{{ displayedTotal(row) }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
         <td>
@@ -312,7 +315,7 @@ onMounted(async () => {
     </MyTable>
 
     <div class="form-actions">
-      <MyButton :color="canFinalize ? 'white' : 'deep-blue'" :size="canFinalize ? 'middle' : 'big'" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isBusy || !hasUnsavedChanges" @click="saveGrades" />
+      <MyButton :color="canFinalize ? 'white' : 'deep-blue'" :size="canFinalize ? 'middle' : 'big'" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isBusy || !entryAllowed || !hasUnsavedChanges" @click="saveGrades" />
       <MyButton v-if="canFinalize" color="deep-blue" size="big" :content="isFinalizing ? '처리 중...' : '성적 일괄 제출'" :disabled="isBusy" @click="finalizeClassGrades" />
     </div>
   </MyPageContainer>

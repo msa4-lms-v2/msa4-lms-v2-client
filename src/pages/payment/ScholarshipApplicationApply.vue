@@ -1,7 +1,7 @@
 <template>
   <MyPageContainer title="장학금 신청">
     <article class="scholarship-page">
-      <div v-if="tuitionStore.isLoadingMyBills || appStore.isLoadingPeriod">
+      <div v-if="tuitionStore.isLoadingMyBills">
         <p class="notice">불러오는 중...</p>
       </div>
       <div v-else-if="!tuitionStore.myBills || tuitionStore.myBills.length === 0">
@@ -13,7 +13,26 @@
           <strong>성적우수 장학금 · 가계곤란장학금 · 기타 장학금</strong>
         </section>
 
-        <div v-if="!appStore.applicationPeriod || !appStore.applicationPeriod.open">
+              <label class="form-group" for="scholarship-semester">
+                <span>신청 학기 및 금액</span>
+                <MySelect
+                  id="scholarship-semester"
+                  v-model="selectedBillId"
+                  :disabled="appStore.isSubmittingApplication"
+                  @change="onBillChange"
+                >
+                  <option
+                    v-for="bill in tuitionStore.myBills"
+                    :key="bill.id"
+                    :value="bill.id"
+                  >
+                    {{ semesterStore.getSemesterLabel(bill.semesterId) }} | {{ formatCurrency(bill.billingAmount) }}
+                  </option>
+                </MySelect>
+              </label>
+
+        <p v-if="appStore.isLoadingPeriod" class="notice">신청 기간을 확인하고 있습니다.</p>
+        <div v-else-if="!appStore.applicationPeriod || !appStore.applicationPeriod.open">
           <p class="notice">
             현재 장학금 신청기간이 아닙니다.
             <span v-if="appStore.applicationPeriod">
@@ -32,22 +51,6 @@
           <h3 id="application-form-title">장학금 신청서</h3>
           <form class="application-form" @submit.prevent="onSubmit">
             <div class="form-row">
-              <label class="form-group" for="scholarship-semester">
-                <span>신청 학기 및 금액</span>
-                <MySelect
-                  id="scholarship-semester"
-                  v-model="selectedBillId"
-                  @change="onBillChange"
-                >
-                  <option
-                    v-for="bill in tuitionStore.myBills"
-                    :key="bill.id"
-                    :value="bill.id"
-                  >
-                    {{ semesterStore.getSemesterLabel(bill.semesterId) }} | {{ formatCurrency(bill.billingAmount) }}
-                  </option>
-                </MySelect>
-              </label>
               <label class="form-group" for="scholarship-type">
                 <span>장학금 명칭</span>
                 <MySelect id="scholarship-type" v-model="form.type">
@@ -122,6 +125,17 @@
           </form>
         </section>
       </div>
+      <section aria-label="장학금 신청 내역">
+        <h3>신청 내역</h3>
+        <p v-if="historyError" role="alert">{{ historyError }}</p>
+        <p v-else-if="!appStore.myApplications.length">신청 내역이 없습니다.</p>
+        <ul v-else>
+          <li v-for="item in appStore.myApplications" :key="item.id">
+            {{ semesterStore.getSemesterLabel(item.semesterId || tuitionStore.myBills.find(b => b.id === item.tuitionBillId)?.semesterId) }} ·
+            {{ formatCurrency(item.requestedAmount) }} · {{ SCHOLARSHIP_APPLICATION_STATUS_LABEL[item.status] || item.status }}
+          </li>
+        </ul>
+      </section>
     </article>
   </MyPageContainer>
 </template>
@@ -136,6 +150,7 @@ import MyButton from '../../components/button/MyButton.vue';
 import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import { notify } from '../../composables/useDialog';
+import { SCHOLARSHIP_APPLICATION_STATUS_LABEL } from '../../util/payment/enumLabels';
 import { formatCurrency } from '../../util/format';
 
 const tuitionStore = useTuitionStore();
@@ -154,6 +169,11 @@ const form = ref({
   files: [],
 });
 const fileSelect = ref(null);
+const historyError = ref('');
+const loadHistory = async () => {
+  try { await appStore.fetchMyApplications(); historyError.value = ''; }
+  catch { historyError.value = '신청 내역을 불러오지 못했습니다. 새로고침해 주세요.'; }
+};
 const submitSuccess = ref(false);
 const submitConflict = ref(false);
 
@@ -162,10 +182,12 @@ const selectedBill = computed(() =>
 );
 
 onMounted(async () => {
-  await Promise.all([tuitionStore.fetchMyBills(), semesterStore.fetchSemesters()]);
+  await Promise.all([tuitionStore.fetchMyBills(), semesterStore.fetchSemesters(), loadHistory()]);
   if (tuitionStore.myBills?.length) {
-    selectedBillId.value = tuitionStore.myBills[0].id;
-    form.value.requestedAmount = String(tuitionStore.myBills[0].billingAmount);
+    const currentSemester = semesterStore.semesters.find(item => item.isCurrent);
+    const bill = tuitionStore.myBills.find(item => item.semesterId === currentSemester?.id) || tuitionStore.myBills[0];
+    selectedBillId.value = bill.id;
+    form.value.requestedAmount = String(bill.billingAmount);
     await fetchPeriod();
   }
 });
@@ -179,7 +201,8 @@ const onBillChange = async () => {
 
 const fetchPeriod = async () => {
   if (selectedBill.value) {
-    await appStore.fetchApplicationPeriod(selectedBill.value.semesterId);
+    try { await appStore.fetchApplicationPeriod(selectedBill.value.semesterId); }
+    catch { await notify('신청 기간을 확인하지 못했습니다. 다시 시도해 주세요.'); }
   }
 };
 
@@ -218,8 +241,9 @@ const onFilesSelected = async (files) => {
 const removeFile = (index) => form.value.files.splice(index, 1);
 
 const onSubmit = async () => {
+  if (appStore.isSubmittingApplication || appStore.isLoadingPeriod || !appStore.applicationPeriod?.open) return;
   submitConflict.value = false;
-  if (!form.value.requestedAmount || !form.value.reason) {
+  if (!form.value.requestedAmount || !form.value.reason.trim()) {
     await notify('모든 항목을 입력해주세요.');
     return;
   }
@@ -232,6 +256,7 @@ const onSubmit = async () => {
       files: form.value.files,
     });
     submitSuccess.value = true;
+    await loadHistory();
   } catch (error) {
     if (error.response?.status === 409) {
       submitConflict.value = true;

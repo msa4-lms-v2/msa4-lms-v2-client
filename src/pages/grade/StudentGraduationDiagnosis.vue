@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { getCreditRequirementDiagnoses, getGraduationCreditRecords } from '../../api/gradeApi';
 import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -8,11 +8,15 @@ import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
+import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 
 defineOptions({ name: 'StudentGraduationDiagnosis' });
 
 const profileStore = useProfileStore();
+const semesterStore = useSemesterStore();
+let recordsVersion = 0;
+onUnmounted(() => { recordsVersion += 1; });
 const diagnosis = ref(null);
 const creditRecords = ref([]);
 const isLoading = ref(false);
@@ -94,30 +98,36 @@ const diagnosisStatusLabel = computed(() => {
 
 const creditText = (value) => (value === null || value === undefined ? '-' : `${value}`);
 const completionTypeLabel = (value) => completionTypeLabels[value] || value || '-';
-const semesterLabel = (record) => `${record.academicYear}-${record.term === 'FIRST' ? 1 : 2}`;
+const semesterLabel = (record) => record.academicYear && termLabels[record.term] ? `${record.academicYear}년 ${termLabels[record.term]}` : '-';
 
 const loadCreditRecords = async () => {
   if (!diagnosis.value?.studentId) {
     creditRecords.value = [];
     return;
   }
+  const requestVersion = ++recordsVersion;
+  const params = { academicYear: filters.academicYear || undefined, term: filters.term || undefined, completionType: filters.completionType || undefined };
   isLoadingRecords.value = true;
   try {
-    const response = await getGraduationCreditRecords(diagnosis.value.studentId, {
-      page: 1,
-      size: 100,
-      academicYear: filters.academicYear || undefined,
-      term: filters.term || undefined,
-      completionType: filters.completionType || undefined,
-      sortDirection: 'desc',
-    });
-    creditRecords.value = response.data.data.items || [];
+    const records = [];
+    let page = 1;
+    while (true) {
+      const response = await getGraduationCreditRecords(diagnosis.value.studentId, { ...params, page, size: 100, sortDirection: 'desc' });
+      if (requestVersion !== recordsVersion) return;
+      const data = response.data.data;
+      const items = data.items || [];
+      records.push(...items);
+      if (!data.hasNext || !items.length) break;
+      page += 1;
+    }
+    creditRecords.value = records;
     recordPage.value = 1;
   } catch (error) {
+    if (requestVersion !== recordsVersion) return;
     creditRecords.value = [];
     await notify(error.response?.data?.message || '전체 이수과목을 불러오지 못했습니다.');
   } finally {
-    isLoadingRecords.value = false;
+    if (requestVersion === recordsVersion) isLoadingRecords.value = false;
   }
 };
 
@@ -127,6 +137,7 @@ const loadDiagnosis = async () => {
     const [diagnosisResponse] = await Promise.all([
       getCreditRequirementDiagnoses({ page: 1, size: 1 }, { pageLoad: true }),
       profileStore.fetchStudentProfile(),
+      semesterStore.fetchSemesters(),
     ]);
     diagnosis.value = diagnosisResponse.data.data.items?.[0] || null;
     await loadCreditRecords();
@@ -221,7 +232,7 @@ onMounted(loadDiagnosis);
             <label for="graduation-year">연도</label>
             <MySelect id="graduation-year" v-model="filters.academicYear">
               <option value="">전체</option>
-              <option v-for="year in [...new Set(creditRecords.map((item) => item.academicYear))]" :key="year" :value="year">
+              <option v-for="year in semesterStore.academicYears" :key="year" :value="year">
                 {{ year }}년
               </option>
             </MySelect>

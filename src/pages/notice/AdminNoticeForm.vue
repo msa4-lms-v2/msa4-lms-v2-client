@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createNotice, getNotice, updateNotice } from '../../api/noticeApi';
 import MyAttachmentList from '../../components/common/MyAttachmentList.vue';
@@ -18,6 +18,15 @@ const router = useRouter();
 const authStore = useAuthStore();
 const noticeId = computed(() => route.params.noticeId);
 const isEdit = computed(() => Boolean(noticeId.value));
+const tomorrow = ref('');
+const refreshTomorrow = () => {
+  const date = new Date(); date.setDate(date.getDate() + 1);
+  tomorrow.value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+refreshTomorrow();
+let dateTimer;
+onMounted(() => { dateTimer = setInterval(refreshTomorrow, 30000); });
+onUnmounted(() => clearInterval(dateTimer));
 const form = reactive({ title: '', content: '', category: 'NORMAL', normalTransitionDate: '', targetRole: 'ALL' });
 const files = ref([]);
 const existingFiles = ref([]);
@@ -168,7 +177,7 @@ onMounted(load);
             <label for="notice-transition">일반 공지 전환일</label>
             <span class="transition-guide">선택한 날짜 00:00부터 서버가 중요 공지를 일반 공지로 자동 전환합니다.</span>
           </div>
-          <MyDateField id="notice-transition" v-model="form.normalTransitionDate" />
+          <MyDateField id="notice-transition" v-model="form.normalTransitionDate" :min="tomorrow" @focusin="refreshTomorrow" />
         </div>
 
         <div class="field full">

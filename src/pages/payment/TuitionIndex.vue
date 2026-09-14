@@ -1,9 +1,8 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
-import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import TuitionPaymentPanel from '../../components/payment/TuitionPaymentPanel.vue';
@@ -13,35 +12,9 @@ import { TUITION_BILL_STATUS_LABEL } from '../../util/payment/enumLabels';
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
 
-const filters = reactive({
-  academicYear: '',
-  term: '',
-});
-const appliedFilters = ref({ ...filters });
-
-const applyFilters = () => {
-  appliedFilters.value = { ...filters };
-};
-
-const semesterMatches = (semesterId) => {
-  const semester = semesterStore.semesters.find((item) => item.id === semesterId);
-  if (!semester) return true;
-  if (appliedFilters.value.academicYear && semester.academicYear !== Number(appliedFilters.value.academicYear)) {
-    return false;
-  }
-  if (appliedFilters.value.term && semester.term !== appliedFilters.value.term) {
-    return false;
-  }
-  return true;
-};
-
-const filteredBills = computed(() => tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId)));
-
-// 필터링된 고지 중 납부 기한이 가장 최근인 고지 하나를 기준으로 요약 카드와 납부 화면을 보여준다.
-const latestBill = computed(() => {
-  if (filteredBills.value.length === 0) return null;
-  return [...filteredBills.value].sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))[0];
-});
+const selectedBillId = ref(null);
+const unpaidBills = computed(() => tuitionStore.myBills.filter(bill => ['UNPAID', 'PARTIAL', 'OVERDUE'].includes(bill.status)));
+const latestBill = computed(() => unpaidBills.value.find(bill => bill.id === selectedBillId.value) || unpaidBills.value[0] || null);
 
 onMounted(() => {
   tuitionStore.fetchMyBills();
@@ -51,25 +24,11 @@ onMounted(() => {
 
 <template>
   <MyPageContainer title="등록금 납부">
-    <MySearchFilter submit-text="조회" submit-at-end @search="applyFilters">
-      <div class="search-group">
-        <label for="filter-year">연도</label>
-        <MySelect id="filter-year" v-model="filters.academicYear">
-          <option value="">전체</option>
-          <option v-for="year in semesterStore.academicYears" :key="year" :value="year">
-            {{ year }}학년도
-          </option>
-        </MySelect>
-      </div>
-      <div class="search-group">
-        <label for="filter-term">학기</label>
-        <MySelect id="filter-term" v-model="filters.term">
-          <option value="">전체</option>
-          <option value="FIRST">1학기</option>
-          <option value="SECOND">2학기</option>
-        </MySelect>
-      </div>
-    </MySearchFilter>
+    <label v-if="unpaidBills.length > 1">납부할 고지
+      <MySelect v-model="selectedBillId">
+        <option v-for="bill in unpaidBills" :key="bill.id" :value="bill.id">{{ semesterStore.getSemesterLabel(bill.semesterId) }} · {{ formatCurrency(bill.billingAmount) }}</option>
+      </MySelect>
+    </label>
 
     <section v-if="latestBill" class="summary-bar">
       <SummaryStatCard
@@ -94,7 +53,7 @@ onMounted(() => {
       불러오는 중...
     </p>
     <p v-else>
-      조회된 등록금 고지가 없습니다.
+      납부할 등록금 고지가 없습니다.
     </p>
 
     <TuitionPaymentPanel v-if="latestBill" :tuition-bill-id="latestBill.id" />

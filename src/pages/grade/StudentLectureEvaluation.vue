@@ -299,7 +299,7 @@ onMounted(async () => {
           <td>{{ enrollment.courseCode }}</td>
           <td>{{ enrollment.courseName }}</td>
           <td>{{ completionTypeLabel(enrollment.completionType) }}</td>
-          <td :class="{ 'status-incomplete': enrollment.status !== 'CLOSED' }">
+          <td class="lecture-status">
             {{ lectureStatusLabel(enrollment) }}
           </td>
           <td>
@@ -485,11 +485,11 @@ onMounted(async () => {
 .lecture-list-section :deep(.my-table th:nth-child(6)) { width: 20%; }
 
 .lecture-list-section :deep(.my-table button) {
-  margin: 0 auto;
+  margin-left: auto;
 }
 
-.status-incomplete {
-  color: var(--personal-color-danger-coral);
+.lecture-status {
+  color: var(--personal-color-black);
   font-weight: 700;
 }
 

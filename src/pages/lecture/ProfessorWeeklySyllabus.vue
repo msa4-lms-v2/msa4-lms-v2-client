@@ -14,6 +14,9 @@ watch(() => props.modelValue, (value) => {
   legacy.value = parsed === null;
   weeks.value = parsed || ['', '', ''];
 }, { immediate: true });
+const addWeek = () => {
+  if (weeks.value.length < 15) weeks.value.push('');
+};
 const update = () => {
   lastEmitted = serializeWeeks(weeks.value);
   emit('update:modelValue', lastEmitted);
@@ -27,17 +30,19 @@ const update = () => {
       <textarea :value="modelValue" maxlength="65535" rows="12" @input="$emit('update:modelValue', $event.target.value)"></textarea>
     </label>
     <template v-else>
+      <p v-if="weeks.length > 15" role="alert">기존 문서가 15주를 초과합니다. 내용을 확인한 후 초과 주차를 정리해 주세요.</p>
       <div v-for="(_, index) in weeks" :key="index" class="week-row">
         <label :for="`syllabus-week-${index + 1}`">{{ index + 1 }}주차</label>
         <textarea :id="`syllabus-week-${index + 1}`" v-model="weeks[index]" :placeholder="`${index + 1}주차 강의 내용을 입력하세요.`" maxlength="65535" rows="2" @input="update"></textarea>
       </div>
-      <MyButton class="add-week" color="white" content="+ 주차 입력란 추가" :disabled="weeks.length >= 100" @click="weeks.push('')" />
+      <MyButton v-if="weeks.length > 15" color="white" content="비어 있는 마지막 주차 제거" :disabled="Boolean(weeks[weeks.length - 1]?.trim())" @click="weeks.pop(); update()" />
+      <MyButton class="add-week" color="white" content="+ 주차 입력란 추가" :disabled="weeks.length >= 15" @click="addWeek" />
     </template>
   </div>
 </template>
 
 <style scoped>
-.weekly-syllabus { border: 1px solid var(--personal-color-border-mist); border-radius: 4px; padding: 16px; min-height: 360px; overflow-y: auto; }
+.weekly-syllabus { border: 1px solid var(--personal-color-border-mist); border-radius: 4px; padding: 16px; height: 520px; max-height: 65vh; overflow-y: auto; }
 .week-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 12px; align-items: start; margin-bottom: 12px; }
 .week-row label { padding: 10px 8px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: var(--personal-color-bg-surface-frost); text-align: center; font-size: 13px; }
 textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; font: inherit; font-size: 13px; color: var(--personal-color-primary-text-navy); background: var(--personal-color-white); resize: vertical; }

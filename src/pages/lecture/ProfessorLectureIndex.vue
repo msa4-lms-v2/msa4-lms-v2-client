@@ -25,6 +25,7 @@ const STATUS_LABELS = {
 };
 
 const columns = [
+  { key: 'semester', label: '연도 / 학기' },
   { key: 'courseCode', label: '과목코드' },
   { key: 'department', label: '학과' },
   { key: 'courseName', label: '강의명' },
@@ -40,7 +41,7 @@ const semesterStore = useSemesterStore();
 const filters = reactive({
   academicYear: '',
   term: '',
-  status: 'OPEN',
+  status: '',
 });
 const lectures = ref([]);
 const page = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
@@ -80,6 +81,8 @@ const load = async (pageNumber = 1) => {
 onMounted(async () => {
   try {
     await semesterStore.fetchSemesters();
+    const current = semesterStore.semesters.find((semester) => semester.isCurrent ?? semester.current);
+    if (current) { filters.academicYear = current.academicYear; filters.term = current.term; }
   } catch {
     // 학년도 선택지는 불러오지 못해도 강의 목록을 조회한다.
   }
@@ -128,6 +131,7 @@ onMounted(async () => {
         empty-message="조회된 강의가 없습니다."
       >
         <tr v-for="lecture in lectures" :key="lecture.classId">
+          <td>{{ lecture.academicYear }}년 {{ lecture.term === 'FIRST' ? '1학기' : lecture.term === 'SECOND' ? '2학기' : '-' }}</td>
           <td>{{ lecture.courseCode }}</td>
           <td>{{ lecture.departmentName }}</td>
           <td>

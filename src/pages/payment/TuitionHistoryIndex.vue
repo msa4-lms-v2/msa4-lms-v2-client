@@ -28,11 +28,12 @@ const filters = reactive({
 });
 const appliedFilters = ref({ ...filters });
 const historyPage = ref(1);
+const billPage = ref(1);
 const HISTORY_PAGE_SIZE = 10;
 
 const applyFilters = () => {
   appliedFilters.value = { ...filters };
-  historyPage.value = 1;
+  historyPage.value = 1; billPage.value = 1;
 };
 
 const semesterMatches = (semesterId) => {
@@ -47,7 +48,11 @@ const semesterMatches = (semesterId) => {
   return true;
 };
 
+const paidBills = computed(() => tuitionStore.myBills.filter(bill => bill.status === 'PAID'));
+const filteredPaidBills = computed(() => paidBills.value.filter(bill => semesterMatches(bill.semesterId)));
+const pagedPaidBills = computed(() => filteredPaidBills.value.slice((billPage.value-1)*HISTORY_PAGE_SIZE,billPage.value*HISTORY_PAGE_SIZE));
 const filteredHistory = computed(() => tuitionStore.paymentHistory.filter((row) => {
+  if (!paidBills.value.some(bill => bill.id === row.tuitionBillId)) return false;
   if (!semesterMatches(row.semesterId)) return false;
   if (appliedFilters.value.paymentType && row.paymentType !== appliedFilters.value.paymentType) return false;
   if (appliedFilters.value.status && row.status !== appliedFilters.value.status) return false;
@@ -57,7 +62,7 @@ const pagedHistory = computed(() => filteredHistory.value.slice((historyPage.val
 
 // 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급을 한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
 const resolveTargetBill = () => {
-  const matches = tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId));
+  const matches = paidBills.value.filter((bill) => semesterMatches(bill.semesterId));
   return matches[0] || null;
 };
 
@@ -151,6 +156,12 @@ onMounted(() => {
         <MyButton btn-type="button" color="white" size="big" content="납부확인서" :disabled="documentStore.isIssuing" @click="handleIssueReceipt" />
       </div>
     </div>
+    <h3>완납 고지 내역</h3>
+    <MyTable :loading="tuitionStore.isLoadingMyBills" :empty="!filteredPaidBills.length" empty-message="완납한 고지가 없습니다." :columns="[{key:'semester',label:'학기'},{key:'amount',label:'고지 금액'},{key:'date',label:'납부 기한'},{key:'detail',label:'상세'}]">
+      <tr v-for="bill in pagedPaidBills" :key="bill.id"><td>{{ semesterStore.getSemesterLabel(bill.semesterId) }}</td><td>{{ formatCurrency(bill.billingAmount) }}</td><td>{{ formatDate(bill.dueDate) }}</td><td><MyButton color="deep-blue" size="middle" content="상세보기" @click="showBillDetail(bill.id)" /></td></tr>
+    </MyTable>
+    <NumberedPagination v-if="filteredPaidBills.length>HISTORY_PAGE_SIZE" :page="billPage" :total-count="filteredPaidBills.length" :size="HISTORY_PAGE_SIZE" @page-change="billPage=$event" />
+    <h3>결제 내역</h3>
     <MyTable
       :loading="tuitionStore.isLoadingPaymentHistory"
       :empty="!tuitionStore.isLoadingPaymentHistory && filteredHistory.length === 0"
