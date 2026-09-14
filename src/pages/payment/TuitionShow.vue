@@ -6,7 +6,6 @@ import { useInstallmentStore } from '../../store/payment/useInstallmentStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyTable from '../../components/table/MyTable.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { notify } from '../../composables/useDialog';
@@ -51,6 +50,19 @@ const sortedPlanItems = computed(() => {
 });
 
 const scheduledPlanItems = computed(() => sortedPlanItems.value.filter((item) => item.status === 'SCHEDULED'));
+
+// 일시납은 실제 분할 회차가 없으므로, 전체 금액을 1회차로 보여주는 가상 회차 하나만 구성한다.
+const displayedRounds = computed(() => {
+  if (paymentType.value === 'INSTALLMENT') return sortedPlanItems.value;
+  if (!currentBill.value) return [];
+  return [{
+    id: 'lump-sum',
+    roundNo: 1,
+    amount: tuitionStore.currentAllocation?.actualPaymentAmount ?? currentBill.value.billingAmount,
+    dueDate: currentBill.value.dueDate,
+    status: tuitionStore.currentStatus?.status === 'PAID' ? 'PAID' : 'SCHEDULED',
+  }];
+});
 
 const selectedInstallmentItem = computed(() => (
   scheduledPlanItems.value.find((item) => item.id === selectedInstallmentItemId.value)
@@ -109,7 +121,6 @@ onMounted(async () => {
   tuitionStore.fetchMyBills();
   tuitionStore.fetchStatus(tuitionBillId);
   tuitionStore.fetchAllocation(tuitionBillId);
-  tuitionStore.fetchBillItems(tuitionBillId);
   semesterStore.fetchSemesters();
 
   try {
@@ -146,109 +157,85 @@ onMounted(async () => {
       </p>
 
       <section class="bill-section">
-        <h3>등록금 고지 목록</h3>
-        <div class="bill-grid">
-          <div class="bill-detail">
-            <MyTable
-              :loading="tuitionStore.isLoadingBillItems"
-              :empty="!tuitionStore.isLoadingBillItems && tuitionStore.billItems.length === 0"
-              empty-message="등록된 항목이 없습니다."
-              :columns="[
-                { key: 'itemName', label: '수급자금명' },
-                { key: 'amount', label: '수납금액' },
-                { key: 'paid', label: '납입여부' },
-              ]"
-            >
-              <tr v-for="item in tuitionStore.billItems" :key="item.id">
-                <td>{{ item.itemName }}</td>
-                <td>{{ formatCurrency(item.amount) }}</td>
-                <td>
-                  <input type="checkbox" :checked="item.paid" disabled>
-                </td>
-              </tr>
-            </MyTable>
+        <form class="payment-form" @submit.prevent="handlePayment">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="payment-type">납부방식</label>
+              <MySelect id="payment-type" v-model="paymentType" :disabled="tuitionStore.isPaymentLoading">
+                <option
+                  v-for="option in paymentTypeOptions"
+                  :key="option.value"
+                  :value="option.value"
+                  :disabled="option.value === 'INSTALLMENT' && !hasActivePlan"
+                >
+                  {{ option.label }}
+                </option>
+              </MySelect>
+            </div>
+
+            <div v-if="paymentType === 'INSTALLMENT'" class="form-group">
+              <label for="installment-round">회차 선택</label>
+              <MySelect id="installment-round" v-model="selectedInstallmentItemId" :disabled="tuitionStore.isPaymentLoading">
+                <option v-for="item in scheduledPlanItems" :key="item.id" :value="item.id">
+                  {{ item.roundNo }}회차
+                </option>
+              </MySelect>
+            </div>
           </div>
 
-          <form class="payment-form" @submit.prevent="handlePayment">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="payment-type">납부방식</label>
-                <MySelect id="payment-type" v-model="paymentType" :disabled="tuitionStore.isPaymentLoading">
-                  <option
-                    v-for="option in paymentTypeOptions"
-                    :key="option.value"
-                    :value="option.value"
-                    :disabled="option.value === 'INSTALLMENT' && !hasActivePlan"
-                  >
-                    {{ option.label }}
-                  </option>
-                </MySelect>
-              </div>
+          <p
+            v-if="paymentType === 'INSTALLMENT' && !hasActivePlan"
+            class="notice"
+            role="status"
+          >
+            승인된 분할납부 계획이 없습니다. 분할납부 신청 화면에서 먼저 신청해 주세요.
+          </p>
 
-              <div v-if="paymentType === 'INSTALLMENT'" class="form-group">
-                <label for="installment-round">회차 선택</label>
-                <MySelect id="installment-round" v-model="selectedInstallmentItemId" :disabled="tuitionStore.isPaymentLoading">
-                  <option v-for="item in scheduledPlanItems" :key="item.id" :value="item.id">
-                    {{ item.roundNo }}회차
-                  </option>
-                </MySelect>
-              </div>
-            </div>
+          <div class="form-group">
+            <label for="payment-method">수납방식</label>
+            <MySelect id="payment-method" v-model="selectedMethod" :options="methodOptions" :disabled="tuitionStore.isPaymentLoading || !canPay" />
+          </div>
 
-            <p
-              v-if="paymentType === 'INSTALLMENT' && !hasActivePlan"
-              class="notice"
-              role="status"
+          <p
+            v-if="tuitionStore.currentStatus?.status === 'PARTIAL'"
+            class="notice notice--warning"
+            role="status"
+          >
+            이미 일부 금액이 납부돼 있어 전체 금액 재결제는 제한됩니다. 잔여 납부는 관리자에게 문의해 주세요.
+          </p>
+          <p
+            v-if="tuitionStore.isPaymentError && paymentErrorMessage"
+            class="notice notice--error"
+            role="alert"
+          >
+            {{ paymentErrorMessage }}
+          </p>
+
+          <div class="form-actions">
+            <MyButton
+              btn-type="submit"
+              color="deep-blue"
+              size="middle"
+              :disabled="!canPay || tuitionStore.isPaymentLoading"
             >
-              승인된 분할납부 계획이 없습니다. 분할납부 신청 화면에서 먼저 신청해 주세요.
-            </p>
-
-            <div class="form-group">
-              <label for="payment-method">수납방식</label>
-              <MySelect id="payment-method" v-model="selectedMethod" :options="methodOptions" :disabled="tuitionStore.isPaymentLoading || !canPay" />
-            </div>
-
-            <p
-              v-if="tuitionStore.currentStatus?.status === 'PARTIAL'"
-              class="notice notice--warning"
-              role="status"
-            >
-              이미 일부 금액이 납부돼 있어 전체 금액 재결제는 제한됩니다. 잔여 납부는 관리자에게 문의해 주세요.
-            </p>
-            <p
-              v-if="tuitionStore.isPaymentError && paymentErrorMessage"
-              class="notice notice--error"
-              role="alert"
-            >
-              {{ paymentErrorMessage }}
-            </p>
-
-            <div class="form-actions">
-              <MyButton
-                btn-type="submit"
-                color="deep-blue"
-                size="middle"
-                :disabled="!canPay || tuitionStore.isPaymentLoading"
-              >
-                {{ tuitionStore.isPaymentLoading ? '처리 중...' : '납부' }}
-              </MyButton>
-              <MyButton
-                btn-type="button"
-                color="white"
-                size="middle"
-                content="취소"
-                :disabled="tuitionStore.isPaymentLoading"
-                @click="handleCancel"
-              />
-            </div>
-          </form>
-        </div>
+              {{ tuitionStore.isPaymentLoading ? '처리 중...' : '납부' }}
+            </MyButton>
+            <MyButton
+              btn-type="button"
+              color="white"
+              size="middle"
+              content="취소"
+              :disabled="tuitionStore.isPaymentLoading"
+              @click="handleCancel"
+            />
+          </div>
+        </form>
       </section>
 
-      <section v-if="sortedPlanItems.length > 0" class="rounds-section">
+      <section v-if="displayedRounds.length > 0" class="rounds-section">
         <h3>{{ semesterLabel }} · 납부 회차 안내</h3>
         <div class="rounds-grid">
-          <div v-for="item in sortedPlanItems" :key="item.id" class="round-card">
+          <div v-for="item in displayedRounds" :key="item.id" class="round-card">
             <div class="round-header">
               <span class="round-no">{{ item.roundNo }}회</span>
               <span :class="['status-text', `status-text--${INSTALLMENT_ITEM_STATUS_VARIANT[item.status]}`]">{{ INSTALLMENT_ITEM_STATUS_LABEL[item.status] }}</span>
@@ -304,28 +291,8 @@ onMounted(async () => {
   gap: 16px;
 }
 
-.bill-section h3,
 .rounds-section h3 {
   margin: 0;
-}
-
-.bill-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 16px;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .bill-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.bill-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .payment-form {
