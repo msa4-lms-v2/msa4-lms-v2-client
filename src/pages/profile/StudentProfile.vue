@@ -3,10 +3,10 @@ import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
+import MyProfileDetails from '../../components/profile/MyProfileDetails.vue';
 import PasswordChange from './PasswordChange.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/academic/enumLabels';
 
 const profileStore = useProfileStore();
@@ -57,34 +57,14 @@ const academicRows = computed(() => [
 
 <template>
   <MyPageContainer title="내 정보">
-    <article class="profile-hero">
-      <div class="student-intro">
-        <div class="profile-image" aria-hidden="true"></div>
-
-        <div class="student-main">
-          <div class="name-row">
-            <h2>{{ student.name }}</h2>
-            <MyStatusBadge
-              :label="student.status"
-              :variant="statusVariant"
-            />
-          </div>
-
-          <ul class="quick-list" aria-label="학생 기본 요약">
-            <li>
-              <span>{{ student.department }} {{ student.grade }}</span>
-            </li>
-            <li>
-              <span>학번 {{ student.studentNo }}</span>
-            </li>
-            <li>
-              <span>{{ student.email }}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="profile-actions">
+    <MyProfileDetails
+      :profile="student"
+      :status-variant="statusVariant"
+      :summary="[student.department + ' ' + student.grade, '학번 ' + student.studentNo, student.email]"
+      summary-label="학생 기본 요약"
+      :sections="[{ title: '기본 정보', rows: basicRows }, { title: '학적 정보', rows: academicRows }]"
+    >
+      <template #actions>
         <PasswordChange />
         <MyButton
           btn-type="button"
@@ -94,166 +74,7 @@ const academicRows = computed(() => [
           content="정보 변경 신청"
           @click="router.push('/profile/info-change')"
         />
-      </div>
-    </article>
-
-    <div class="info-grid">
-      <article class="info-card">
-        <div class="common-section-header">
-          <h3>기본 정보</h3>
-        </div>
-
-        <dl class="info-list">
-          <div v-for="row in basicRows" :key="row.label" class="info-row">
-            <dt>{{ row.label }}</dt>
-            <dd>{{ row.value }}</dd>
-          </div>
-        </dl>
-      </article>
-
-      <article class="info-card">
-        <div class="common-section-header">
-          <h3>학적 정보</h3>
-        </div>
-
-        <dl class="info-list">
-          <div v-for="row in academicRows" :key="row.label" class="info-row">
-            <dt>{{ row.label }}</dt>
-            <dd>{{ row.value }}</dd>
-          </div>
-        </dl>
-      </article>
-    </div>
+      </template>
+    </MyProfileDetails>
   </MyPageContainer>
 </template>
-
-<style scoped>
-.profile-hero,
-.info-card {
-  background: var(--personal-color-white);
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-}
-
-.profile-hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 28px;
-  padding: 28px 50px;
-}
-
-.profile-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 0 0 auto;
-}
-
-.student-intro {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  min-width: 0;
-}
-
-.profile-image {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: var(--personal-color-bg-surface-frost);
-  flex: 0 0 96px;
-}
-
-.student-main {
-  min-width: 0;
-}
-
-.name-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
-  margin-bottom: 18px;
-}
-
-.name-row h2 {
-  color: var(--personal-color-primary-text-navy);
-  font-size: 1.5rem;
-}
-
-.quick-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  list-style: none;
-  padding: 0;
-}
-
-.quick-list li {
-  color: var(--personal-color-primary-text-navy);
-  font-size: 0.95rem;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 26px;
-  margin-bottom: 30px;
-}
-
-.info-card {
-  padding: 26px 30px;
-}
-
-.info-card h3 {
-  color: var(--personal-color-primary-text-navy);
-  font-size: 1.1rem;
-  margin: 0 0 16px;
-}
-
-.info-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.info-row {
-  display: grid;
-  grid-template-columns: minmax(92px, 0.36fr) minmax(0, 1fr);
-  min-height: 44px;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--personal-color-border-mist);
-}
-
-.info-row:last-child {
-  border-bottom: 0;
-}
-
-.info-row dt {
-  color: var(--personal-color-text-muted-slate);
-}
-
-.info-row dd {
-  min-width: 0;
-  margin: 0;
-  color: var(--personal-color-primary-text-navy);
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 720px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-hero {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .profile-actions {
-    flex-wrap: wrap;
-  }
-}
-</style>
