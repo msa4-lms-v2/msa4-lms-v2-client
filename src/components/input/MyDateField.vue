@@ -20,6 +20,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  required: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);
@@ -43,6 +47,7 @@ const onInput = (event) => emit('update:modelValue', event.target.value);
       :min="min"
       :max="max"
       :disabled="disabled"
+      :required="required"
       :aria-label="ariaLabel"
       @input="onInput"
       @change="emit('change', $event)"

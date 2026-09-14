@@ -21,14 +21,14 @@ export const currentPassword = (val) => {
 };
 
 export const password = (val) => {
-  const regex = /^[0-9a-zA-Z!@#$%^&*()]{8,20}$/;
+  const regex = /^[0-9a-zA-Z!@#$%^&*()]{6,20}$/;
 
   if (!val) {
     return "비밀번호는 필수입니다.";
   }
 
   if (!regex.test(val)) {
-    return "비밀번호 양식이 올바르지 않습니다.";
+    return "비밀번호는 6~20자로 입력해 주세요.";
   }
 
   return "";

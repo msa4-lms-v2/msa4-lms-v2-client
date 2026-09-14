@@ -14,6 +14,7 @@ import {
   updatePerson,
 } from '../../api/peopleManagementApi';
 import MyButton from '../../components/button/MyButton.vue';
+import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -52,9 +53,9 @@ const form = reactive({
 });
 const changeReason = ref('');
 const departments = ref([]);
+const selectedCollegeId = ref('');
 const professors = ref([]);
 const professorsLoading = ref(false);
-const departmentQuery = ref('');
 const departmentName = ref('');
 const loading = ref(false);
 const saving = ref(false);
@@ -71,15 +72,26 @@ const confirmCancellation = ref(false);
 
 const fields = computed(() => [
   { key: 'name', label: '이름', type: 'text', max: 50, required: true },
-  ...(admission.value ? [{ key: 'birthDate', label: '생년월일', type: 'date', required: true }] : []),
+  { key: 'birthDate', label: '생년월일', type: 'date', required: !detail.value },
   { key: 'email', label: '이메일', type: 'email', max: 100, required: !detail.value },
   { key: 'phoneNumber', label: '연락처', type: 'tel', max: 20 },
   { key: 'address', label: '주소', type: 'text', max: 255 },
 ]);
 
+const colleges = computed(() => {
+  const uniqueColleges = new Map();
+  departments.value.forEach((department) => {
+    if (department.college) uniqueColleges.set(department.college.id, department.college);
+  });
+  return [...uniqueColleges.values()].sort((first, second) => first.name.localeCompare(second.name, 'ko'));
+});
 const filteredDepartments = computed(() => departments.value.filter((department) => (
-  department.name.includes(departmentQuery.value.trim()) || department.id === Number(form.departmentId)
+  selectedCollegeId.value
+  && String(department.college?.id) === String(selectedCollegeId.value)
 )));
+const selectedCollegeName = computed(() => (
+  colleges.value.find((college) => String(college.id) === String(selectedCollegeId.value))?.name || '-'
+));
 
 const canEditDetail = computed(() => (
   detail.value && (!admission.value || status.value === 'REGISTERED')
@@ -91,6 +103,7 @@ const canManageProvisioning = computed(() => (
 const preview = computed(() => [
   ...(issuedNumber.value ? [{ label: admission.value ? '학번' : '교번', value: issuedNumber.value }] : []),
   ...fields.value.map((field) => ({ label: field.label, value: form[field.key] })),
+  { label: '소속 단과대', value: selectedCollegeName.value },
   {
     label: '소속 학과',
     value: departments.value.find((department) => department.id === Number(form.departmentId))?.name || departmentName.value,
@@ -115,9 +128,13 @@ let checkTimer;
 const applyDetailData = (data) => {
   Object.keys(form).forEach((key) => {
     if (data[key] !== undefined && data[key] !== null) form[key] = data[key];
-    else if (['email', 'phoneNumber', 'address'].includes(key)) form[key] = '';
+    else if (['birthDate', 'email', 'phoneNumber', 'address'].includes(key)) form[key] = '';
   });
   departmentName.value = data.departmentName || '';
+  const selectedDepartment = departments.value.find((department) => (
+    String(department.id) === String(data.departmentId)
+  ));
+  selectedCollegeId.value = data.collegeId || selectedDepartment?.college?.id || '';
   status.value = data.status || '';
   issuedNumber.value = data.studentNumber || data.professorNumber || '';
 };
@@ -170,6 +187,9 @@ const manageProvisioning = async (cancel) => {
   }
 };
 
+const REGISTRATION_POLL_INTERVAL_MS = 2000;
+const REGISTRATION_MAX_ATTEMPTS = 90;
+
 const checkRegistration = async (attempt = 0) => {
   if (disposed || !registration.value) return;
   checking.value = true;
@@ -190,10 +210,14 @@ const checkRegistration = async (attempt = 0) => {
       checking.value = false;
       return;
     }
-    if (attempt < 10 && !disposed) {
-      checkTimer = setTimeout(() => checkRegistration(attempt + 1), 2000);
+    if (attempt < REGISTRATION_MAX_ATTEMPTS && !disposed) {
+      checkTimer = setTimeout(
+        () => checkRegistration(attempt + 1),
+        REGISTRATION_POLL_INTERVAL_MS,
+      );
       return;
     }
+    error.value = '계정 생성이 예상보다 오래 걸리고 있습니다. 발급 상태 확인을 눌러 다시 확인해 주세요.';
   } catch {
     error.value = '등록 요청은 저장되었습니다. 계정 생성 상태를 다시 확인해 주세요.';
   }
@@ -227,8 +251,8 @@ const create = async () => {
     error.value = '필수 항목을 입력해 주세요.';
     return;
   }
-  if (!form.departmentId || (admission.value && !form.advisorProfessorId)) {
-    error.value = '소속 학과와 지도교수를 확인해 주세요.';
+  if (!selectedCollegeId.value || !form.departmentId || (admission.value && !form.advisorProfessorId)) {
+    error.value = '소속 단과대와 학과, 지도교수를 확인해 주세요.';
     return;
   }
   payload.departmentId = Number(form.departmentId);
@@ -290,6 +314,10 @@ const submit = async () => {
 };
 
 watch(() => form.departmentId, async (departmentId) => {
+  const selectedDepartment = departments.value.find((department) => (
+    String(department.id) === String(departmentId)
+  ));
+  if (selectedDepartment?.college?.id) selectedCollegeId.value = selectedDepartment.college.id;
   if (!admission.value || detail.value) return;
   form.advisorProfessorId = '';
   professors.value = [];
@@ -301,6 +329,15 @@ watch(() => form.departmentId, async (departmentId) => {
     error.value = '해당 학과의 교수 목록을 불러오지 못했습니다.';
   } finally {
     professorsLoading.value = false;
+  }
+});
+
+watch(selectedCollegeId, (collegeId) => {
+  const currentDepartment = departments.value.find((department) => (
+    String(department.id) === String(form.departmentId)
+  ));
+  if (!currentDepartment || String(currentDepartment.college?.id) !== String(collegeId)) {
+    form.departmentId = '';
   }
 });
 
@@ -366,12 +403,20 @@ onUnmounted(() => {
             <span class="field-label">
               {{ field.label }} <em v-if="field.required && !detail">*</em>
             </span>
+            <MyDateField
+              v-if="field.type === 'date'"
+              v-model="form[field.key]"
+              :max="maxBirth"
+              :required="field.required"
+              :disabled="detail && (!admission || !canEditDetail)"
+              :placeholder="`${field.label} 선택`"
+            />
             <MyInput
+              v-else
               v-model="form[field.key]"
               :type="field.type"
               :maxlength="field.max"
               :required="field.required"
-              :max="field.type === 'date' ? maxBirth : undefined"
               :disabled="detail && (!admission || !canEditDetail)"
               :placeholder="`${field.label}을 입력해 주세요.`"
             />
@@ -379,13 +424,20 @@ onUnmounted(() => {
 
           <div v-if="!detail" class="people-two-fields">
             <label>
-              학과 검색
-              <MyInput v-model="departmentQuery" placeholder="학과를 검색해 주세요." />
+              <span class="field-label">단과대 선택 <em>*</em></span>
+              <MySelect v-model="selectedCollegeId" required>
+                <option value="" disabled>단과대를 선택해 주세요.</option>
+                <option v-for="college in colleges" :key="college.id" :value="college.id">
+                  {{ college.name }}
+                </option>
+              </MySelect>
             </label>
             <label>
               <span class="field-label">학과 선택 <em>*</em></span>
-              <MySelect v-model="form.departmentId" required>
-                <option value="" disabled>학과를 선택해 주세요.</option>
+              <MySelect v-model="form.departmentId" :disabled="!selectedCollegeId" required>
+                <option value="" disabled>
+                  {{ selectedCollegeId ? '학과를 선택해 주세요.' : '단과대를 먼저 선택해 주세요.' }}
+                </option>
                 <option v-for="department in filteredDepartments" :key="department.id" :value="department.id">
                   {{ department.name }}
                 </option>
@@ -393,14 +445,20 @@ onUnmounted(() => {
             </label>
           </div>
 
-          <label v-else>
-            소속 학과
-            <MySelect v-model="form.departmentId" :disabled="!canEditDetail">
-              <option v-for="department in departments" :key="department.id" :value="department.id">
-                {{ department.name }}
-              </option>
-            </MySelect>
-          </label>
+          <div v-else class="people-two-fields">
+            <label>
+              소속 단과대
+              <MyInput :model-value="selectedCollegeName" disabled />
+            </label>
+            <label>
+              소속 학과
+              <MySelect v-model="form.departmentId" :disabled="!canEditDetail">
+                <option v-for="department in departments" :key="department.id" :value="department.id">
+                  {{ department.name }}
+                </option>
+              </MySelect>
+            </label>
+          </div>
 
           <label v-if="admission && !detail">
             <span class="field-label">지도교수 <em>*</em></span>

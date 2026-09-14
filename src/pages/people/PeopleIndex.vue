@@ -43,7 +43,9 @@ const columns = computed(() => (admission.value
   : [
       { key: 'professorNumber', label: '교번' },
       { key: 'name', label: '이름' },
+      { key: 'birthDate', label: '생년월일' },
       { key: 'email', label: '이메일' },
+      { key: 'college', label: '소속 단과대' },
       { key: 'department', label: '소속 학과' },
       { key: 'hireYear', label: '임용 연도' },
       { key: 'status', label: '계정 상태' },
@@ -186,7 +188,9 @@ onMounted(async () => {
         <tr v-for="row in rows" :key="rowId(row)">
           <td>{{ numberLabel(row) }}</td>
           <td>{{ row.name }}</td>
+          <td v-if="!admission">{{ row.birthDate ? formatDate(row.birthDate) : '-' }}</td>
           <td v-if="!admission">{{ row.email || '-' }}</td>
+          <td v-if="!admission">{{ row.collegeName || '-' }}</td>
           <td>{{ row.departmentName || '-' }}</td>
           <td>{{ admission ? formatDate(row.createdAt) : (row.hireYear || '-') }}</td>
           <td>
