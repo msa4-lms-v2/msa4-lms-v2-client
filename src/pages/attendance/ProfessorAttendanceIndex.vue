@@ -242,7 +242,8 @@ onMounted(loadLectures);
 </template>
 
 <style scoped>
-.class-field { flex: 1 1 300px; min-width: 0; }
+.class-field { flex: 1; max-width: 360px; min-width: 0; }
+.class-field :deep(select) { width: 100%; min-width: 0; }
 .date-field { flex: 0 1 190px; min-width: 0; }
 .attendance-filter :deep(.search-row) { gap: 24px; }
 .lecture-info {
