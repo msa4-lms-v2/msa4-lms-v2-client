@@ -16,6 +16,8 @@ defineOptions({ name: 'AdminStudentIndex' });
 
 const columns = [
   { key: 'name', label: '이름' },
+  { key: 'birthDate', label: '생년월일' },
+  { key: 'college', label: '소속 단과대' },
   { key: 'department', label: '소속 학과' },
   { key: 'gradeLevel', label: '학년' },
   { key: 'admissionYear', label: '입학년도' },
@@ -123,6 +125,8 @@ onMounted(async () => {
     >
       <tr v-for="student in students" :key="student.studentId">
         <td>{{ student.name }}</td>
+        <td>{{ student.birthDate || '-' }}</td>
+        <td>{{ student.collegeName || '-' }}</td>
         <td>{{ student.departmentName }}</td>
         <td>{{ student.gradeLevel }}학년</td>
         <td>{{ student.admissionYear }}</td>
