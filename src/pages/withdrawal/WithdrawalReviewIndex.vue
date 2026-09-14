@@ -497,6 +497,12 @@ onMounted(loadRequests);
 
 <style scoped>
 .professor-review .review-grid { grid-template-columns: minmax(0, 1fr); }
+.professor-review .list-card {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
 .filter-card {
   display: grid;
   grid-template-columns: 1.2fr 1fr auto;
@@ -510,6 +516,11 @@ onMounted(loadRequests);
 .filter-card label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; font-weight: 600; }
 .filter-card input { height: 38px; padding: 0 12px; border: 1px solid var(--personal-color-border-mist); border-radius: 4px; background: var(--personal-color-white); }
 .filter-actions { display: flex; gap: 8px; }
+.professor-review .filter-card { grid-template-columns: repeat(2, minmax(140px, 220px)) 1fr; }
+.professor-review .filter-actions { justify-content: flex-end; }
+@media (max-width: 620px) {
+  .professor-review .filter-card { grid-template-columns: 1fr; }
+}
 .professor-primary { background: var(--personal-color-primary-navy); }
 .admin-primary { background: var(--personal-color-admin-secondary-indigo); }
 .professor-text { color: var(--personal-color-professor-primary-navy); }

@@ -40,10 +40,10 @@ defineEmits(['update:reviewReason', 'approve', 'reject', 'back']);
     </section>
     <div class="actions">
       <MyButton color="white" size="middle" content="목록" :disabled="busy" @click="$emit('back')" />
-      <template v-if="reviewable">
+      <div v-if="reviewable" class="review-actions">
         <MyButton color="red" size="middle" content="반려" :disabled="busy" @click="$emit('reject')" />
         <MyButton color="deep-blue" size="middle" content="승인" :disabled="busy" @click="$emit('approve')" />
-      </template>
+      </div>
     </div>
   </div>
 </template>
@@ -59,7 +59,8 @@ dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
 textarea { display: block; box-sizing: border-box; width: 100%; min-height: 60px; padding: 18px; border: 1px solid transparent; border-radius: 0; background: var(--personal-color-white); font: inherit; font-size: 14px; resize: vertical; }
 textarea:focus { outline: 2px solid var(--personal-color-primary-navy); }
 textarea::placeholder { color: var(--personal-color-text-muted-slate); }
-.actions { display: flex; justify-content: flex-end; gap: 12px; }
+.actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.review-actions { display: flex; justify-content: flex-end; gap: 12px; margin-left: auto; }
 .error { color: var(--personal-color-danger-coral); font-size: 13px; }
 @media (max-width: 760px) { .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .field-grid { grid-template-columns: 1fr; } }
