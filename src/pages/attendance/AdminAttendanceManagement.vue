@@ -95,7 +95,7 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer title="출결 관리">
-    <MySearchFilter class="admin-search" submit-text="조회" @search="applyFilters">
+    <MySearchFilter class="admin-search" submit-text="조회" submit-at-end @search="applyFilters">
       <div class="search-group">
         <label for="attendance-class">강의 ID</label>
         <MyInput id="attendance-class" v-model="filters.classId" numeric-only placeholder="전체" />

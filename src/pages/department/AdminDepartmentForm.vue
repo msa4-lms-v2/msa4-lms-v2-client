@@ -315,16 +315,18 @@ onMounted(async () => {
 .summary-card dd {
   margin: 0;
   overflow-wrap: anywhere;
-  font-weight: 600;
+  font-weight: 400;
   text-align: right;
 }
 
 .status-active {
   color: var(--personal-color-status-success-text-forest);
+  font-weight: 400;
 }
 
 .status-inactive {
   color: var(--personal-color-text-tertiary-slate);
+  font-weight: 400;
 }
 
 .actions {

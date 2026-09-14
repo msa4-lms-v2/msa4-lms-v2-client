@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { getMyTimetable } from '../../api/enrollmentApi';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
@@ -58,8 +59,11 @@ const items = ref([]);
 const totalCredits = ref(0);
 const isLoading = ref(false);
 const loadError = ref('');
+const listPage = ref(1);
+const LIST_PAGE_SIZE = 10;
 
 const academicYearOptions = computed(() => semesterStore.academicYears);
+const pagedItems = computed(() => items.value.slice((listPage.value - 1) * LIST_PAGE_SIZE, listPage.value * LIST_PAGE_SIZE));
 const maxPeriod = computed(() => Math.max(
   9,
   ...items.value.flatMap((item) => (item.schedules || []).map((schedule) => Number(schedule.endPeriod) || 0)),
@@ -113,6 +117,7 @@ const loadTimetable = async () => {
     const response = await getMyTimetable(Number(selectedAcademicYear.value), selectedTerm.value);
     items.value = response.data.data?.items || [];
     totalCredits.value = response.data.data?.totalCredits || 0;
+    listPage.value = 1;
   } catch (error) {
     items.value = [];
     totalCredits.value = 0;
@@ -136,7 +141,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="내 수강 내역 및 시간표">
-    <MySearchFilter submit-text="조회" @search="loadTimetable">
+    <MySearchFilter submit-text="조회" submit-at-end @search="loadTimetable">
       <div class="search-group compact">
         <label for="timetable-year">학년도</label>
         <MySelect
@@ -270,7 +275,7 @@ onMounted(async () => {
         empty-message="선택한 학기의 수강 과목이 없습니다."
       >
         <tr
-          v-for="item in items"
+          v-for="item in pagedItems"
           :key="item.enrollmentId"
         >
           <td>{{ item.courseCode }}</td>
@@ -281,6 +286,14 @@ onMounted(async () => {
           <td>{{ item.credits }}학점</td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="items.length > LIST_PAGE_SIZE"
+        :page="listPage"
+        :total-count="items.length"
+        :size="LIST_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="listPage = $event"
+      />
     </section>
   </MyPageContainer>
 </template>
