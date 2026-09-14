@@ -149,7 +149,6 @@ const downloadAgain = async (item) => {
 </template>
 
 <style scoped>
-.certificate-page { max-width: 1048px; margin-left: 0; }
 .history-actions { display:flex; justify-content:flex-end; margin-bottom:12px; }
 .certificate-grid {
   display: grid;

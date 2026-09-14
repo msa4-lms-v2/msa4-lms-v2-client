@@ -77,16 +77,8 @@ const logout = async () => {
 
 .header.role-professor {
   background-color: var(--personal-color-professor-primary-navy);
-  padding-left: 4px;
-  padding-right: 16px;
-  flex-shrink: 0;
 }
 
-.role-professor .logo { height: 56px; margin-right: 10px; }
-.role-professor .logo-name { width: 153px; height: auto; }
-.role-professor .user-info { font-size: 13px; gap: 2px; }
-.role-professor .user-name strong, .role-professor .user-role { font-weight: 400; }
-.role-professor :deep(.logout-btn) { width: 57px; padding: 0; }
 
 .header.role-admin {
   background-color: var(--personal-color-admin-primary-slate);
