@@ -442,6 +442,7 @@ onBeforeUnmount(stopLiveUpdates);
 }
 .lecture-controls > :first-child {
   min-width: 0;
+  max-width: 360px;
   flex: 1;
 }
 .current-section,

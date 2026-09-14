@@ -85,7 +85,6 @@ watch(() => route.path, path => {
     activeMenus.value.adminApplicationManagement = true;
   }
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
-  if (path.startsWith('/graduation-diagnoses')) activeMenus.value.professorStudent = true;
   if (
     path.startsWith('/admin/graduation-requirements')
     || path.startsWith('/graduation-diagnoses')
@@ -114,7 +113,7 @@ watch([() => route.path, () => authStore.userInfo?.role], ([path, role]) => {
   if (role !== 'PROFESSOR') return;
   const groups = [
     ['professorTeacher', ['/profile', '/professor/profile']],
-    ['professorStudent', ['/professor/leave-return', '/professor/withdrawals', '/professor/academic-change-requests', '/graduation-diagnoses']],
+    ['professorStudent', ['/professor/leave-return', '/professor/withdrawals', '/professor/academic-change-requests']],
     ['professorCourse', ['/professor/lectures', '/lectures']],
     ['professorGrade', ['/professor/grades', '/professor/evaluations']],
     ['professorAttendance', ['/professor/attendance']],
@@ -362,9 +361,6 @@ const toggleMenu = (menuKey) => {
               class="submenu-item"
             >
               {{ getMenuTitle("/professor/academic-change-requests/double-major") }}
-            </router-link>
-            <router-link to="/graduation-diagnoses" class="submenu-item">
-              {{ getMenuTitle("/graduation-diagnoses", "PROFESSOR") }}
             </router-link>
           </div>
         </div>

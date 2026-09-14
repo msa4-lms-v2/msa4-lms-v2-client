@@ -507,7 +507,7 @@ onMounted(async () => {
 
         <div class="form-actions full-width">
           <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장 복원" :disabled="isSubmitting || isLoadingEdit" @click="restoreDraft" />
-          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="middle" content="임시저장" :disabled="isSubmitting || isLoadingEdit" @click="saveDraft" />
+          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장" :disabled="isSubmitting || isLoadingEdit" @click="saveDraft" />
           <MyButton
             v-if="editingRequestId"
             btn-type="button"

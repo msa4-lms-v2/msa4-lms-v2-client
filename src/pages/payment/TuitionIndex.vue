@@ -8,10 +8,9 @@ import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
 import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
-import { TUITION_BILL_STATUS_LABEL, TUITION_BILL_STATUS_VARIANT } from '../../util/payment/enumLabels';
+import { TUITION_BILL_STATUS_LABEL } from '../../util/payment/enumLabels';
 
 const router = useRouter();
 const tuitionStore = useTuitionStore();
@@ -120,10 +119,7 @@ const goToDetail = (billId) => router.push(`/tuition/${billId}`);
           <td>{{ formatCurrency(bill.billingAmount) }}</td>
           <td>{{ formatDate(bill.dueDate) }}</td>
           <td>
-            <MyStatusBadge
-              :label="TUITION_BILL_STATUS_LABEL[bill.status]"
-              :variant="TUITION_BILL_STATUS_VARIANT[bill.status]"
-            />
+            <span :class="{ 'status-unpaid': bill.status === 'UNPAID' }">{{ TUITION_BILL_STATUS_LABEL[bill.status] }}</span>
           </td>
           <td><MyButton color="deep-blue" size="middle" content="상세보기" @click="goToDetail(bill.id)" /></td>
         </tr>
@@ -142,6 +138,10 @@ const goToDetail = (billId) => router.push(`/tuition/${billId}`);
 
 .bill-list-section h3 {
   margin: 0 0 12px;
+}
+
+.status-unpaid {
+  color: var(--personal-color-danger-coral);
 }
 
 @media (max-width: 640px) {

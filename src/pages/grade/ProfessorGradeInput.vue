@@ -297,10 +297,10 @@ onMounted(async () => {
       <tr v-for="row in rows" :key="row.enrollmentId">
         <td>{{ row.studentName }}</td>
         <td>{{ row.studentNumber || '-' }}</td>
-        <td><MyInput v-model="row.midtermScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 중간고사`" class="score-input" /></td>
-        <td><MyInput v-model="row.finalScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 기말고사`" class="score-input" /></td>
-        <td><MyInput v-model="row.assignmentScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 과제`" class="score-input" /></td>
-        <td><MyInput v-model="row.attendanceScore" type="number" min="0" max="100" step="0.01" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 출석`" class="score-input" /></td>
+        <td><MyInput v-model="row.midtermScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 중간고사`" class="score-input" /></td>
+        <td><MyInput v-model="row.finalScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 기말고사`" class="score-input" /></td>
+        <td><MyInput v-model="row.assignmentScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 과제`" class="score-input" /></td>
+        <td><MyInput v-model="row.attendanceScore" numeric-only :max-number="100" inputmode="numeric" maxlength="3" :disabled="isBusy || row.gradeStatus === 'OPENED'" :aria-label="`${row.studentName} 출석`" class="score-input" /></td>
         <td>{{ displayedTotal(row) }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
         <td>

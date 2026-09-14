@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue';
 import { downloadExcuseAttachment, reviewExcuseRequest, searchExcuseRequests } from '../../api/attendanceApi';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
@@ -23,10 +22,17 @@ const columns = [
 const requests = ref([]);
 const activeTab = ref('PENDING');
 const statusFilter = ref('PENDING');
-const keyword = ref('');
-const appliedKeyword = ref('');
-const applyFilters = () => { activeTab.value = statusFilter.value; appliedKeyword.value = keyword.value.trim().toLowerCase(); };
-const resetFilters = () => { keyword.value = ''; statusFilter.value = 'PENDING'; applyFilters(); };
+const classFilter = ref('');
+const appliedClassId = ref('');
+const applyFilters = () => {
+  activeTab.value = statusFilter.value;
+  appliedClassId.value = classFilter.value;
+};
+const resetFilters = () => {
+  classFilter.value = '';
+  statusFilter.value = 'PENDING';
+  applyFilters();
+};
 const isLoading = ref(false);
 const rejectTarget = ref(null);
 const rejectReason = ref('');
@@ -39,9 +45,21 @@ const tabOptions = [
   { value: 'ALL', label: '전체' },
 ];
 const statusLabels = { PENDING: '대기', APPROVED: '승인', REJECTED: '반려' };
+const courseOptions = computed(() => {
+  const courses = new Map();
+  requests.value.forEach((request) => {
+    const value = String(request.classId || '');
+    if (!value || courses.has(value)) return;
+    courses.set(value, {
+      value,
+      label: `[${request.courseCode}] ${request.courseName} (${request.sectionNo}분반)`,
+    });
+  });
+  return [...courses.values()].sort((left, right) => left.label.localeCompare(right.label, 'ko'));
+});
 const visibleRequests = computed(() => requests.value.filter((request) => (
   (activeTab.value === 'ALL' || (activeTab.value === 'PENDING' ? request.status === 'PENDING' : request.status !== 'PENDING'))
-  && (!appliedKeyword.value || [request.studentName, request.studentNumber].some(value => String(value || '').toLowerCase().includes(appliedKeyword.value)))
+  && (!appliedClassId.value || String(request.classId) === appliedClassId.value)
 )));
 const emptyMessage = computed(() => (
   activeTab.value === 'PENDING'
@@ -153,7 +171,16 @@ onMounted(() => load());
 
 <template>
   <MyPageContainer class="professor-page" title="출결 승인">
-    <section class="approval-filters"><MyInput v-model="keyword" aria-label="학번 또는 이름" placeholder="학번 / 이름" @keyup-enter="applyFilters" /><MySelect v-model="statusFilter" aria-label="처리 상태" :options="tabOptions" /><div class="filter-actions"><MyButton color="deep-blue" size="middle" content="조회" :disabled="isLoading" @click="applyFilters" /><MyButton color="white" size="middle" content="초기화" :disabled="isLoading" @click="resetFilters" /></div></section>
+    <section class="approval-filters">
+      <MySelect v-model="classFilter" aria-label="과목 선택">
+        <option value="">전체 과목</option>
+        <option v-for="course in courseOptions" :key="course.value" :value="course.value">
+          {{ course.label }}
+        </option>
+      </MySelect>
+      <MySelect v-model="statusFilter" aria-label="처리 상태" :options="tabOptions" />
+      <div class="filter-actions"><MyButton color="deep-blue" size="middle" content="조회" :disabled="isLoading" @click="applyFilters" /><MyButton color="white" size="middle" content="초기화" :disabled="isLoading" @click="resetFilters" /></div>
+    </section>
     <section class="attendance-section">
       <div class="common-section-header">
         <h3>{{ activeTab === 'PENDING' ? '확인 대기 공결 신청' : activeTab === 'ALL' ? '전체 공결 신청' : '처리 완료 내역' }}</h3>
@@ -252,7 +279,7 @@ onMounted(() => load());
 </template>
 
 <style scoped>
-.approval-filters { display: flex; gap: 16px; padding: 24px; background: white; align-items: center; }
+.approval-filters { display: flex; gap: 16px; padding: 24px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: white; align-items: center; }
 .approval-filters > :first-child, .approval-filters > select { width: 220px; }
 .filter-actions { display: flex; justify-content: flex-end; gap: 12px; margin-left: auto; }
 .reject-panel { margin-top: 32px; }
@@ -293,7 +320,7 @@ onMounted(() => load());
 
 .reason-cell {
   min-width: 220px;
-  text-align: left;
+  text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
 }
