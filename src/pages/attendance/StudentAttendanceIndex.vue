@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { searchAttendanceRecords } from '../../api/attendanceApi';
 import MyButton from '../../components/button/MyButton.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -30,6 +31,8 @@ const router = useRouter();
 const selectedAcademicYear = ref('');
 const selectedTerm = ref('');
 const records = ref([]);
+const ratePage = ref(1);
+const RATE_PAGE_SIZE = 10;
 const isLoading = ref(false);
 
 const academicYearOptions = computed(() => semesterStore.academicYears);
@@ -79,6 +82,8 @@ const attendanceRates = computed(() => {
       || String(left.sectionNo).localeCompare(String(right.sectionNo), 'ko')
     ));
 });
+
+const pagedAttendanceRates = computed(() => attendanceRates.value.slice((ratePage.value - 1) * RATE_PAGE_SIZE, ratePage.value * RATE_PAGE_SIZE));
 
 const formatRate = (rate) => `${Number(rate || 0).toFixed(1)}%`;
 
@@ -148,6 +153,7 @@ const load = async () => {
       String(record.academicYear) === String(selectedAcademicYear.value)
       && record.term === selectedTerm.value
     ));
+    ratePage.value = 1;
   } catch (error) {
     records.value = [];
     await notify(error.response?.data?.message || '출결 기록을 불러오지 못했습니다.');
@@ -198,7 +204,7 @@ onMounted(async () => {
         :empty="!isLoading && attendanceRates.length === 0"
         empty-message="출석률 데이터가 없습니다."
       >
-        <tr v-for="rate in attendanceRates" :key="rate.enrollmentId">
+        <tr v-for="rate in pagedAttendanceRates" :key="rate.enrollmentId">
           <td>
             <div class="course-name">{{ rate.courseName }}</div>
             <div class="course-code">{{ rate.courseCode }} · {{ rate.sectionNo }}분반</div>
@@ -217,6 +223,14 @@ onMounted(async () => {
           </td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="attendanceRates.length > RATE_PAGE_SIZE"
+        :page="ratePage"
+        :total-count="attendanceRates.length"
+        :size="RATE_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="ratePage = $event"
+      />
     </section>
   </MyPageContainer>
 </template>

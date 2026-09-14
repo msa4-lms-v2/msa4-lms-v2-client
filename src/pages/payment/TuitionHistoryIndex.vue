@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { useDocumentStore } from '../../store/payment/useDocumentStore';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
@@ -24,9 +25,12 @@ const filters = reactive({
   status: '',
 });
 const appliedFilters = ref({ ...filters });
+const historyPage = ref(1);
+const HISTORY_PAGE_SIZE = 10;
 
 const applyFilters = () => {
   appliedFilters.value = { ...filters };
+  historyPage.value = 1;
 };
 
 const semesterMatches = (semesterId) => {
@@ -47,6 +51,7 @@ const filteredHistory = computed(() => tuitionStore.paymentHistory.filter((row) 
   if (appliedFilters.value.status && row.status !== appliedFilters.value.status) return false;
   return true;
 }));
+const pagedHistory = computed(() => filteredHistory.value.slice((historyPage.value - 1) * HISTORY_PAGE_SIZE, historyPage.value * HISTORY_PAGE_SIZE));
 
 // 필터에 지정된 연도·학기의 고지 건을 찾아 그 고지에 대해 인쇄/발급한다. 필터가 비어 있으면 가장 최근 고지를 쓴다.
 const resolveTargetBill = () => {
@@ -142,7 +147,7 @@ onMounted(() => {
         { key: 'status', label: '상태' },
       ]"
     >
-      <tr v-for="row in filteredHistory" :key="`${row.tuitionBillId}-${row.paymentDate}-${row.amount}`">
+      <tr v-for="row in pagedHistory" :key="`${row.tuitionBillId}-${row.paymentDate}-${row.amount}`">
         <td>{{ semesterStore.getSemesterLabel(row.semesterId) }}</td>
         <td>{{ PAYMENT_TYPE_LABEL[row.paymentType] || row.paymentType }}</td>
         <td>{{ row.paymentDate ? formatDate(row.paymentDate) : '-' }}</td>
@@ -155,6 +160,14 @@ onMounted(() => {
         </td>
       </tr>
     </MyTable>
+    <NumberedPagination
+      v-if="filteredHistory.length > HISTORY_PAGE_SIZE"
+      :page="historyPage"
+      :total-count="filteredHistory.length"
+      :size="HISTORY_PAGE_SIZE"
+      color="student-cyan"
+      @page-change="historyPage = $event"
+    />
   </MyPageContainer>
 </template>
 

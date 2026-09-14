@@ -187,8 +187,10 @@ onMounted(() => load());
       <div class="search-group"><label for="dismissal-department-id">학과 ID</label><MyInput id="dismissal-department-id" v-model="filters.departmentId" numeric-only placeholder="예: 130" /></div>
       <div class="search-group"><label for="dismissal-reason-type">제적 종류</label><MySelect id="dismissal-reason-type" v-model="filters.reasonType"><option value="">전체</option><option v-for="(label, value) in reasonTypeLabel" :key="value" :value="value">{{ label }}</option></MySelect></div>
       <div class="search-group"><label for="dismissal-status">상태</label><MySelect id="dismissal-status" v-model="filters.status"><option value="">전체</option><option value="PENDING">대기</option><option value="CONFIRMED">확정</option><option value="CANCELLED">취소</option></MySelect></div>
-      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
-      <MyButton btn-type="button" class="secondary-button" color="white" size="middle" content="초기화" @click="resetFilters" />
+      <div class="search-actions">
+        <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
+        <MyButton btn-type="button" class="secondary-button" color="white" size="middle" content="초기화" @click="resetFilters" />
+      </div>
     </MySearchFilter>
 
     <section class="dismissal-layout">
@@ -253,5 +255,6 @@ textarea:focus { outline:none; border-color:var(--personal-color-admin-secondary
 .detail-box p { margin:4px 0; color:var(--personal-color-text-secondary-steel); }
 .button-row { display:flex; justify-content:flex-end; }
 .admin-search :deep(.deep-blue) { background:var(--personal-color-admin-secondary-indigo); }
+.search-actions { display:flex; gap:8px; margin-left:auto; }
 @media (max-width: 1180px) { .dismissal-layout { grid-template-columns:1fr; } }
 </style>

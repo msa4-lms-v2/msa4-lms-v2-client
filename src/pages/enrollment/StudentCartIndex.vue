@@ -4,6 +4,7 @@ import { addCartItem, getAvailableLectures, getMyCart, removeCartItem } from '..
 import { getDepartments } from '../../api/peopleManagementApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyInput from '../../components/input/MyInput.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -43,6 +44,9 @@ const addingLectureId = ref(null);
 const removingCartItemId = ref(null);
 const lectureLoadError = ref('');
 const showTimetable = ref(false);
+const cartPage = ref(1);
+const lecturePage = ref(1);
+const LIST_PAGE_SIZE = 10;
 
 const semesterKey = semester => `${semester.academicYear}:${semester.term}`;
 const selectedSemester = computed(() => semesterStore.semesters.find(item => semesterKey(item) === selectedSemesterKey.value));
@@ -62,6 +66,8 @@ const filteredDepartments = computed(() => departments.value.filter(
   department => !filters.collegeId || String(department.college?.id) === String(filters.collegeId),
 ));
 const isMutating = computed(() => addingLectureId.value !== null || removingCartItemId.value !== null);
+const pagedCartItems = computed(() => cartItems.value.slice((cartPage.value - 1) * LIST_PAGE_SIZE, cartPage.value * LIST_PAGE_SIZE));
+const pagedLectures = computed(() => lectures.value.slice((lecturePage.value - 1) * LIST_PAGE_SIZE, lecturePage.value * LIST_PAGE_SIZE));
 const isInCart = lecture => cartItems.value.some(item => Number(item.lectureId) === Number(lecture.classId));
 const normalizeItems = data => (Array.isArray(data) ? data : data?.items || []);
 const errorMessage = (error, fallback) => error.response?.data?.data?.reasons?.[0]?.message || error.response?.data?.message || fallback;
@@ -101,6 +107,7 @@ const loadLectures = async ({ showError = true } = {}) => {
   try {
     const response = await getAvailableLectures(queryParams());
     lectures.value = normalizeItems(response.data.data);
+    lecturePage.value = 1;
   } catch (error) {
     lectures.value = [];
     lectureLoadError.value = errorMessage(error, '개설 강의를 불러오지 못했습니다.');
@@ -113,6 +120,7 @@ const loadCart = async ({ showError = true, pageLoad = false } = {}) => {
   try {
     const response = await getMyCart(semesterParams(), { pageLoad });
     cartItems.value = response.data.data?.items || [];
+    cartPage.value = 1;
   } catch (error) {
     cartItems.value = [];
     if (showError && !pageLoad) await notify(errorMessage(error, '장바구니를 불러오지 못했습니다.'));
@@ -176,11 +184,19 @@ onMounted(async () => {
     <section class="section-block">
       <h3>담은 강의</h3>
       <MyTable :columns="cartColumns" :loading="isLoadingCart" :empty="!isLoadingCart && cartItems.length === 0" empty-message="장바구니에 담은 강의가 없습니다.">
-        <tr v-for="item in cartItems" :key="item.cartItemId">
+        <tr v-for="item in pagedCartItems" :key="item.cartItemId">
           <td>{{ item.courseCode }}</td><td>{{ item.courseName }}</td><td>{{ item.credits }}</td><td>{{ item.professorName || '-' }}</td><td>{{ formatSchedule(item) }}</td>
           <td><MyButton btn-type="button" color="red" size="small" :content="removingCartItemId === item.cartItemId ? '처리 중' : '취소'" :disabled="isMutating" @click="remove(item)" /></td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="cartItems.length > LIST_PAGE_SIZE"
+        :page="cartPage"
+        :total-count="cartItems.length"
+        :size="LIST_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="cartPage = $event"
+      />
       <div class="timetable-button-row"><MyButton btn-type="button" color="deep-blue" size="big" content="예상 시간표" @click="showTimetable = true" /></div>
     </section>
 
@@ -188,11 +204,19 @@ onMounted(async () => {
       <h3>강의 조회</h3>
       <p v-if="lectureLoadError" class="inline-error">{{ lectureLoadError }}</p>
       <MyTable :columns="lectureColumns" :loading="isLoadingLectures" :empty="!isLoadingLectures && lectures.length === 0" empty-message="조회된 강의가 없습니다.">
-        <tr v-for="lecture in lectures" :key="lecture.classId">
+        <tr v-for="lecture in pagedLectures" :key="lecture.classId">
           <td>{{ lecture.courseCode }}</td><td>{{ lecture.departmentName }}</td><td>{{ lecture.courseName }}</td><td>{{ lecture.credits }}</td><td>{{ lecture.professorName || '-' }}</td><td>{{ lecture.classroom || '-' }}</td><td>{{ formatSchedule(lecture) }}</td><td>{{ lecture.currentEnrollmentCount ?? 0 }} / {{ lecture.capacity }}명</td>
           <td><MyButton btn-type="button" color="deep-blue" size="small" :content="isInCart(lecture) ? '완료' : '신청'" :disabled="isInCart(lecture) || isMutating" @click="add(lecture)" /></td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="lectures.length > LIST_PAGE_SIZE"
+        :page="lecturePage"
+        :total-count="lectures.length"
+        :size="LIST_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="lecturePage = $event"
+      />
     </section>
 
     <div v-if="showTimetable" class="modal-backdrop" role="presentation" @click.self="showTimetable = false">

@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
@@ -19,6 +20,8 @@ const modalOpen = ref(false);
 const selectedYear = ref(String(new Date().getFullYear()));
 const selectedTerm = ref('');
 const selectedStatus = ref('');
+const historyPage = ref(1);
+const HISTORY_PAGE_SIZE = 10;
 
 const columns = [
   { key: 'createdAt', label: '신청일' },
@@ -48,11 +51,13 @@ const filtered = computed(() => store.counselings.filter((item) => {
     && (!selectedTerm.value || term === selectedTerm.value)
     && (!selectedStatus.value || item.status === selectedStatus.value);
 }));
+const pagedFiltered = computed(() => filtered.value.slice((historyPage.value - 1) * HISTORY_PAGE_SIZE, historyPage.value * HISTORY_PAGE_SIZE));
 
 const load = async () => {
   loading.value = true;
   try {
     await store.fetchCounselings();
+    historyPage.value = 1;
   } catch (error) {
     await notify(error.response?.data?.message || '상담 내역을 불러오지 못했습니다.');
   } finally {
@@ -100,7 +105,7 @@ const statusLabel = (status) => status === 'ANSWERED' ? '답변완료' : '대기
     <section class="history-section">
       <h3>나의 상담 신청</h3>
       <MyTable :columns="columns" :loading="loading" :empty="!filtered.length" empty-message="상담 신청 내역이 없습니다.">
-        <tr v-for="item in filtered" :key="item.id">
+        <tr v-for="item in pagedFiltered" :key="item.id">
           <td>{{ dayjs(item.createdAt).format('YYYY-MM-DD') }}</td>
           <td>{{ item.professorName }} 교수</td>
           <td class="title-cell">{{ item.title }}</td>
@@ -108,6 +113,14 @@ const statusLabel = (status) => status === 'ANSWERED' ? '답변완료' : '대기
           <td><MyButton color="deep-blue" size="middle" content="상세보기" @click="showDetail(item)" /></td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="filtered.length > HISTORY_PAGE_SIZE"
+        :page="historyPage"
+        :total-count="filtered.length"
+        :size="HISTORY_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="historyPage = $event"
+      />
     </section>
 
     <MyModal :is-open="modalOpen" title="상담 신청 상세" max-width="900px" @close="modalOpen = false">

@@ -20,8 +20,6 @@ const filters = reactive({
   category: '',
   targetRole: '',
   active: '',
-  createdFrom: '',
-  createdTo: '',
 });
 const notices = ref([]);
 const page = ref({ page: 1, totalCount: 0, hasNext: false });
@@ -31,7 +29,6 @@ const columns = [
   { key: 'category', label: '분류' },
   { key: 'title', label: '제목' },
   { key: 'targetRole', label: '게시 대상' },
-  { key: 'authorName', label: '작성자' },
   { key: 'createdAt', label: '작성일' },
   { key: 'normalTransitionDate', label: '일반 공지 전환일' },
   { key: 'active', label: '게시 상태' },
@@ -49,10 +46,6 @@ const formatDateTime = (value) => value ? value.replace('T', ' ').slice(0, 16) :
 const formatDate = (value) => value || '-';
 
 const load = async (pageNumber = 1) => {
-  if (filters.createdFrom && filters.createdTo && filters.createdFrom > filters.createdTo) {
-    await notify('작성 기간의 시작일은 종료일보다 늦을 수 없습니다.');
-    return;
-  }
   isLoading.value = true;
   try {
     const { data } = await searchNotices({
@@ -63,8 +56,6 @@ const load = async (pageNumber = 1) => {
       category: filters.category || undefined,
       targetRole: filters.targetRole || undefined,
       active: filters.active === '' ? undefined : filters.active === 'true',
-      createdFrom: filters.createdFrom || undefined,
-      createdTo: filters.createdTo || undefined,
     });
     notices.value = data.data.items || [];
     page.value = data.data;
@@ -78,7 +69,7 @@ const load = async (pageNumber = 1) => {
 
 const resetFilters = () => {
   Object.assign(filters, {
-    keyword: '', authorKeyword: '', category: '', targetRole: '', active: '', createdFrom: '', createdTo: '',
+    keyword: '', authorKeyword: '', category: '', targetRole: '', active: '',
   });
   load(1);
 };
@@ -139,18 +130,23 @@ onMounted(() => load());
         </MySelect>
       </div>
 
-      <div class="search-group">
-        <label for="notice-created-from">작성 시작일</label>
-        <MyInput id="notice-created-from" v-model="filters.createdFrom" type="date" />
+      <div class="search-actions">
+        <MyButton
+          btn-type="button"
+          color="deep-blue"
+          size="middle"
+          content="조회"
+          @click="load(1)"
+        />
+        <MyButton
+          btn-type="button"
+          class="secondary-button"
+          color="white"
+          size="middle"
+          content="초기화"
+          @click="resetFilters"
+        />
       </div>
-
-      <div class="search-group">
-        <label for="notice-created-to">작성 종료일</label>
-        <MyInput id="notice-created-to" v-model="filters.createdTo" type="date" />
-      </div>
-
-      <MyButton btn-type="button" color="deep-blue" size="middle" content="조회" @click="load(1)" />
-      <MyButton btn-type="button" class="secondary-button" color="white" size="middle" content="초기화" @click="resetFilters" />
     </MySearchFilter>
 
     <div class="list-heading">
@@ -182,7 +178,6 @@ onMounted(() => load());
         </td>
         <td class="title-cell">{{ notice.title }}</td>
         <td>{{ labels[notice.targetRole] || notice.targetRole }}</td>
-        <td>{{ notice.authorName || '-' }}</td>
         <td>{{ formatDateTime(notice.createdAt) }}</td>
         <td>{{ formatDate(notice.normalTransitionDate) }}</td>
         <td>
@@ -264,11 +259,12 @@ onMounted(() => load());
        
 .active-status { 
   color: var(--personal-color-status-success-text-forest);
-  font-weight: 700;
+  font-weight: 400;
 }
        
 .inactive-status { 
   color: var(--personal-color-text-tertiary-slate);
+  font-weight: 400;
 }
         
 .management { 
@@ -280,5 +276,11 @@ onMounted(() => load());
 
 .admin-search :deep(.deep-blue) {
   background: var(--personal-color-admin-secondary-indigo);
+}
+
+.search-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
 }
 </style>

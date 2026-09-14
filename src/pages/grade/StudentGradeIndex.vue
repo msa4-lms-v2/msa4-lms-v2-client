@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { getMyEnrollments } from '../../api/enrollmentApi';
 import { getMyGrades } from '../../api/gradeApi';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MySelect from '../../components/input/MySelect.vue';
@@ -19,6 +20,8 @@ const enrollments = ref([]);
 const courseOptions = ref([]);
 const summary = ref({ totalGpa: 0, totalCredits: 0, queryGpa: 0, queryCredits: 0 });
 const isLoading = ref(false);
+const gradePage = ref(1);
+const GRADE_PAGE_SIZE = 10;
 
 const columns = [
   { key: 'semester', label: '연도/학기' },
@@ -41,6 +44,7 @@ const termLabels = { FIRST: '1학기', SECOND: '2학기' };
 const enrollmentById = computed(() => new Map(
   enrollments.value.map((enrollment) => [Number(enrollment.enrollmentId), enrollment])
 ));
+const pagedGrades = computed(() => grades.value.slice((gradePage.value - 1) * GRADE_PAGE_SIZE, gradePage.value * GRADE_PAGE_SIZE));
 
 const targetSemesterLabel = computed(() => {
   if (!filters.academicYear && !filters.term) return '전체';
@@ -64,6 +68,7 @@ const loadGrades = async () => {
     });
     const data = response.data.data;
     grades.value = data.grades || [];
+    gradePage.value = 1;
     summary.value = {
       totalGpa: data.totalGpa ?? 0,
       totalCredits: data.totalCredits ?? 0,
@@ -149,7 +154,7 @@ onMounted(async () => {
         :empty="!isLoading && grades.length === 0"
         empty-message="조회된 성적이 없습니다."
       >
-        <tr v-for="grade in grades" :key="grade.enrollmentId">
+        <tr v-for="grade in pagedGrades" :key="grade.enrollmentId">
           <td>{{ grade.academicYear }}년 {{ termLabels[grade.term] || grade.term }}</td>
           <td>{{ grade.courseCode }}</td>
           <td>{{ grade.courseName }}</td>
@@ -158,6 +163,14 @@ onMounted(async () => {
           <td>{{ grade.letterGrade || '-' }}</td>
         </tr>
       </MyTable>
+      <NumberedPagination
+        v-if="grades.length > GRADE_PAGE_SIZE"
+        :page="gradePage"
+        :total-count="grades.length"
+        :size="GRADE_PAGE_SIZE"
+        color="student-cyan"
+        @page-change="gradePage = $event"
+      />
     </section>
   </MyPageContainer>
 </template>

@@ -128,7 +128,7 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer title="졸업요건 관리">
-    <MySearchFilter class="admin-search" submit-text="조회" @search="applyFilters">
+    <MySearchFilter class="admin-search" submit-text="조회" submit-at-end @search="applyFilters">
       <div class="search-group"><label for="requirement-keyword">학과명/코드</label><MyInput id="requirement-keyword" v-model="filters.keyword" placeholder="컴퓨터공학과" /></div>
       <div class="search-group"><label for="requirement-department-filter">학과</label><MySelect id="requirement-department-filter" v-model="filters.departmentId"><option value="">전체</option><option v-for="department in departments" :key="department.id" :value="department.id">{{ department.name }}</option></MySelect></div>
       <div class="search-group"><label for="requirement-year-filter">입학연도</label><MyInput id="requirement-year-filter" v-model="filters.admissionYear" numeric-only placeholder="예: 2024" /></div>
