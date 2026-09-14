@@ -1,18 +1,15 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useTuitionStore } from '../../store/payment/useTuitionStore';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MySelect from '../../components/input/MySelect.vue';
-import MyTable from '../../components/table/MyTable.vue';
-import MyButton from '../../components/button/MyButton.vue';
 import SummaryStatCard from '../../components/payment/SummaryStatCard.vue';
-import { formatCurrency, formatDate, formatDeduction } from '../../util/format';
+import TuitionPaymentPanel from '../../components/payment/TuitionPaymentPanel.vue';
+import { formatCurrency, formatDeduction } from '../../util/format';
 import { TUITION_BILL_STATUS_LABEL } from '../../util/payment/enumLabels';
 
-const router = useRouter();
 const tuitionStore = useTuitionStore();
 const semesterStore = useSemesterStore();
 
@@ -40,22 +37,16 @@ const semesterMatches = (semesterId) => {
 
 const filteredBills = computed(() => tuitionStore.myBills.filter((bill) => semesterMatches(bill.semesterId)));
 
-// 요약 카드는 필터링된 고지 중 납부 기한이 가장 최근인 고지 하나를 기준으로 보여준다.
+// 필터링된 고지 중 납부 기한이 가장 최근인 고지 하나를 기준으로 요약 카드와 납부 화면을 보여준다.
 const latestBill = computed(() => {
   if (filteredBills.value.length === 0) return null;
   return [...filteredBills.value].sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))[0];
-});
-
-watch(latestBill, (bill) => {
-  if (bill) tuitionStore.fetchAllocation(bill.id);
 });
 
 onMounted(() => {
   tuitionStore.fetchMyBills();
   semesterStore.fetchSemesters();
 });
-
-const goToDetail = (billId) => router.push(`/tuition/${billId}`);
 </script>
 
 <template>
@@ -99,32 +90,14 @@ const goToDetail = (billId) => router.push(`/tuition/${billId}`);
         :value="TUITION_BILL_STATUS_LABEL[latestBill.status]"
       />
     </section>
+    <p v-else-if="tuitionStore.isLoadingMyBills">
+      불러오는 중...
+    </p>
+    <p v-else>
+      조회된 등록금 고지가 없습니다.
+    </p>
 
-    <section class="bill-list-section">
-      <h3>등록금 고지 목록</h3>
-      <MyTable
-        :loading="tuitionStore.isLoadingMyBills"
-        :empty="!tuitionStore.isLoadingMyBills && filteredBills.length === 0"
-        empty-message="조회된 등록금 고지가 없습니다."
-        :columns="[
-          { key: 'semester', label: '학기' },
-          { key: 'amount', label: '청구금액' },
-          { key: 'due', label: '납부기한' },
-          { key: 'status', label: '상태' },
-          { key: 'detail', label: '상세' },
-        ]"
-      >
-        <tr v-for="bill in filteredBills" :key="bill.id">
-          <td>{{ semesterStore.getSemesterLabel(bill.semesterId) }}</td>
-          <td>{{ formatCurrency(bill.billingAmount) }}</td>
-          <td>{{ formatDate(bill.dueDate) }}</td>
-          <td>
-            <span :class="{ 'status-unpaid': bill.status === 'UNPAID' }">{{ TUITION_BILL_STATUS_LABEL[bill.status] }}</span>
-          </td>
-          <td><MyButton color="deep-blue" size="middle" content="상세보기" @click="goToDetail(bill.id)" /></td>
-        </tr>
-      </MyTable>
-    </section>
+    <TuitionPaymentPanel v-if="latestBill" :tuition-bill-id="latestBill.id" />
   </MyPageContainer>
 </template>
 
@@ -134,14 +107,6 @@ const goToDetail = (billId) => router.push(`/tuition/${billId}`);
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 24px;
-}
-
-.bill-list-section h3 {
-  margin: 0 0 12px;
-}
-
-.status-unpaid {
-  color: var(--personal-color-danger-coral);
 }
 
 @media (max-width: 640px) {
