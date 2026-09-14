@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyStatusBadge from '../../components/common/MyStatusBadge.vue';
-import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
+import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -273,44 +273,13 @@ onMounted(async () => {
 
         <div class="form-field file-field">
           <span>입영통지서 첨부 (PDF, HWP/HWPX, 이미지 가능)</span>
-          <div class="file-picker">
-            <MyFileSelectButton
-              ref="fileSelect"
-              :accept="LEAVE_ATTACHMENT_ACCEPT"
-              @change="onFileChange"
-            />
-            <span
-              class="file-count"
-              :class="{ 'file-count--attached': attachments.length > 0 }"
-            >
-              {{ attachments.length ? `${attachments.length}개 파일 첨부됨` : '선택된 파일 없음' }}
-            </span>
-            <div
-              v-if="attachments.length"
-              class="file-chips"
-            >
-              <span
-                v-for="(file, index) in attachments"
-                :key="`${file.name}-${file.size}-${file.lastModified}`"
-                class="file-chip"
-              >
-                <span
-                  class="file-icon"
-                  aria-hidden="true"
-                >▣</span>
-                <span
-                  class="file-name"
-                  :title="file.name"
-                >{{ file.name }}</span>
-                <MyButton
-                  btn-type="button"
-                  :content="'×'"
-                  :aria-label="`${file.name} 삭제`"
-                  @click="removeAttachment(index)"
-                />
-              </span>
-            </div>
-          </div>
+          <MyFilePickerField
+            ref="fileSelect"
+            :files="attachments"
+            :accept="LEAVE_ATTACHMENT_ACCEPT"
+            @change="onFileChange"
+            @remove="removeAttachment"
+          />
           <span class="file-required">* 군휴학 신청 시 지원 형식의 입영통지서 1개 첨부는 필수입니다.</span>
         </div>
 
@@ -446,67 +415,6 @@ onMounted(async () => {
 
 .file-field {
   margin-top: 14px;
-}
-
-.file-picker {
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 8px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  background: var(--personal-color-white);
-}
-
-.file-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-count {
-  flex: 0 0 auto;
-  color: var(--personal-color-text-faint-fog);
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
-.file-count--attached {
-  color: var(--personal-color-login-primary-navy);
-  font-weight: 500;
-}
-
-.file-chips {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.file-chip {
-  min-width: 0;
-  max-width: 230px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 3px;
-  color: var(--personal-color-primary-navy);
-  background: var(--personal-color-bg-surface-frost);
-  font-size: 0.72rem;
-  font-weight: 500;
-}
-
-.file-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .file-required {

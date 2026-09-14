@@ -9,7 +9,7 @@ import {
 } from '../../api/withdrawalApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyModal from '../../components/common/MyModal.vue';
-import MyFileSelectButton from '../../components/input/MyFileSelectButton.vue';
+import MyFilePickerField from '../../components/input/MyFilePickerField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import PrevNextPagination from '../../components/pagination/PrevNextPagination.vue';
@@ -415,32 +415,13 @@ onMounted(async () => {
 
           <div class="form-field file-field">
             <span>증빙 파일 (PDF, HWP/HWPX, 이미지 가능)</span>
-            <div class="file-picker">
-              <MyFileSelectButton
-                ref="fileSelect"
-                :accept="WITHDRAWAL_ATTACHMENT_ACCEPT"
-                @change="onFileChange"
-              />
-              <span
-                v-if="!attachment"
-                class="file-placeholder"
-              >선택된 파일 없음</span>
-              <span
-                v-else
-                class="file-chip"
-              >
-                <span
-                  class="file-name"
-                  :title="attachment.name"
-                >{{ attachment.name }}</span>
-                <MyButton
-                  btn-type="button"
-                  content="×"
-                  :aria-label="`${attachment.name} 삭제`"
-                  @click="removeAttachment"
-                />
-              </span>
-            </div>
+            <MyFilePickerField
+              ref="fileSelect"
+              :files="attachment ? [attachment] : []"
+              :accept="WITHDRAWAL_ATTACHMENT_ACCEPT"
+              @change="onFileChange"
+              @remove="removeAttachment"
+            />
           </div>
 
           <label
@@ -674,41 +655,6 @@ onMounted(async () => {
 }
 .file-field,
 .reason-field { margin-top: 16px; }
-.file-picker {
-  box-sizing: border-box;
-  height: 38px;
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 5px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 4px;
-  background: var(--personal-color-white);
-}
-.file-placeholder {
-  color: var(--personal-color-text-faint-fog);
-  font-weight: 400 !important;
-}
-.file-chip {
-  min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 3px;
-  color: var(--personal-color-primary-navy);
-  background: var(--personal-color-bg-surface-frost);
-  font-weight: 500 !important;
-}
-.file-name {
-  min-width: 0;
-  max-width: 620px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .reason-field textarea {
   width: 100%;
   min-height: 72px;
@@ -822,11 +768,6 @@ onMounted(async () => {
 }
 @media (max-width: 640px) {
   .application-card { padding: 22px 18px; }
-  .file-picker {
-    height: auto;
-    min-height: 38px;
-    flex-wrap: wrap;
-  }
   .form-actions > * { width: 100%; }
   .detail-grid { grid-template-columns: 1fr; }
   .detail-wide { grid-column: auto; }
