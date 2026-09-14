@@ -439,6 +439,7 @@ onBeforeUnmount(stopLiveUpdates);
 .lecture-controls {
   display: flex;
   gap: 12px;
+  justify-content: space-between;
 }
 .lecture-controls > :first-child {
   min-width: 0;
