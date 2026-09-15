@@ -5,6 +5,7 @@ import myAxios from '../../api/myAxios';
 export const useScholarshipApplicationStore = defineStore('scholarshipApplicationStore', () => {
   // 1. State (ref)
   const applicationPeriod = ref(null);
+  const applicationPeriodError = ref('');
   const myScholarships = ref([]);
   const myApplications = ref([]);
   let periodVersion = 0;
@@ -18,6 +19,7 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
   const fetchApplicationPeriod = async (semesterId) => {
     const version = ++periodVersion;
     applicationPeriod.value = null;
+    applicationPeriodError.value = '';
     isLoadingPeriod.value = true;
     try {
       const res = await myAxios.get('/api/payment/scholarship-application-periods', {
@@ -25,10 +27,8 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
       });
       if (version === periodVersion) applicationPeriod.value = res.data.data;
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        if (version === periodVersion) applicationPeriod.value = null;
-      } else {
-        throw error;
+      if (version === periodVersion && error.response?.status !== 404) {
+        applicationPeriodError.value = '신청 기간을 확인하지 못했습니다. 다시 시도해 주세요.';
       }
     } finally {
       if (version === periodVersion) isLoadingPeriod.value = false;
@@ -74,6 +74,7 @@ export const useScholarshipApplicationStore = defineStore('scholarshipApplicatio
   return {
     myApplications, fetchMyApplications,
     applicationPeriod,
+    applicationPeriodError,
     myScholarships,
     isLoadingPeriod,
     isSubmittingApplication,
