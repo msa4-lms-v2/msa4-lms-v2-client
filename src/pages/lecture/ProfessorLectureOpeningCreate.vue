@@ -399,7 +399,7 @@ const importExcelFile = async (event) => {
 const submitRequest = async () => {
   if (isSubmitting.value || isLoadingEdit.value) return;
   formError.value = validate();
-  if (formError.value) return;
+  if (formError.value) { await notify(formError.value); return; }
 
   const isEditing = Boolean(editingRequestId.value);
   const requestId = editingRequestId.value;
@@ -472,7 +472,7 @@ onMounted(async () => {
       <h3>선택한 교과목</h3>
       <dl v-if="pendingCourse" class="course-picker-selection"><div><dt>교과목</dt><dd>{{ pendingCourse.name }}</dd></div><div><dt>교과목 코드</dt><dd>{{ pendingCourse.code }}</dd></div><div><dt>학점</dt><dd>{{ pendingCourse.credits }}학점</dd></div></dl>
       <p v-else>교과목을 선택해 주세요.</p>
-      <div class="picker-actions"><MyButton content="닫기" color="white" size="middle" @click="showCoursePicker = false" /><MyButton content="선택 완료" color="deep-blue" size="middle" :disabled="!pendingCourse" @click="confirmCourse" /></div>
+      <div class="picker-actions"><MyButton content="닫기" color="white" size="middle" @click="showCoursePicker = false" /><MyButton content="선택 완료" color="deep-blue" size="middle" :blocked-reason="!pendingCourse ? '교과목을 먼저 선택해 주세요.' : ''" @click="confirmCourse" /></div>
     </section>
     <template v-else>
     <div class="excel-toolbar">
@@ -500,7 +500,7 @@ onMounted(async () => {
                     <option value="">{{ history.length ? '신청 내역에서 선택' : '불러올 신청 내역이 없습니다' }}</option>
                     <option v-for="item in history" :key="item.openingRequestId" :value="String(item.openingRequestId)">{{ item.academicYear }} · {{ item.courseName }} ({{ item.sectionNo }}분반)</option>
                   </MySelect>
-                  <MyButton btn-type="button" color="deep-blue" size="middle" content="신청 내역 불러오기" :disabled="isLoadingHistory || !history.some((item) => String(item.openingRequestId) === String(importRequestId)) || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
+                  <MyButton btn-type="button" color="deep-blue" size="middle" content="신청 내역 불러오기" :disabled="isLoadingHistory || isLoadingEdit || isSubmitting" :blocked-reason="editingRequestId ? '수정 중인 신청을 완료하거나 취소한 후 불러와 주세요.' : !history.some((item) => String(item.openingRequestId) === String(importRequestId)) ? '불러올 신청 내역을 선택해 주세요.' : ''" @click="importRequest" />
                 </div>
               </div>
               <div class="form-group full-width">
@@ -545,7 +545,7 @@ onMounted(async () => {
                 color="deep-blue"
                 size="small"
                 content="추가"
-                :disabled="schedules.length >= 10"
+                :blocked-reason="schedules.length >= 10 ? '강의 시간표는 최대 10개까지 등록할 수 있습니다.' : ''"
                 @click="addScheduleRow"
               />
             </div>
@@ -633,7 +633,7 @@ onMounted(async () => {
             :content="isSubmitting
               ? (editingRequestId ? '수정 중...' : '신청 중...')
               : (editingRequestId ? '신청 수정' : '강의 개설 신청')"
-            :disabled="isSubmitting || ratioTotal !== 100 || schedules.length === 0"
+            :disabled="isSubmitting || isLoadingEdit"
           />
         </div>
       </form>

@@ -14,12 +14,18 @@ const semesterStore = useSemesterStore();
 
 const selectedBillId = ref(null);
 const paymentDetails = ref(null);
+const loadError = ref('');
 const unpaidBills = computed(() => tuitionStore.myBills.filter(bill => ['UNPAID', 'PARTIAL', 'OVERDUE'].includes(bill.status)));
 const latestBill = computed(() => unpaidBills.value.find(bill => bill.id === selectedBillId.value) || unpaidBills.value[0] || null);
 
+const loadBills = async () => {
+  loadError.value = '';
+  try { await tuitionStore.fetchMyBills(); }
+  catch { loadError.value = '등록금 고지를 불러오지 못했습니다. 다시 시도해 주세요.'; }
+};
 onMounted(() => {
-  tuitionStore.fetchMyBills();
-  semesterStore.fetchSemesters();
+  loadBills();
+  semesterStore.fetchSemesters().catch(() => {});
 });
 </script>
 
@@ -60,9 +66,18 @@ onMounted(() => {
     <p v-else-if="tuitionStore.isLoadingMyBills">
       불러오는 중...
     </p>
-    <p v-else>
-      납부할 등록금 고지가 없습니다.
-    </p>
+    <section v-else class="empty-state" role="status">
+      <template v-if="loadError">
+        <h2>등록금 고지를 확인하지 못했습니다.</h2>
+        <p>{{ loadError }}</p>
+        <button type="button" @click="loadBills">다시 조회</button>
+      </template>
+      <template v-else>
+        <h2>납부할 등록금 고지가 없습니다.</h2>
+        <p>등록금 고지가 발행되면 이곳에서 확인하고 납부할 수 있습니다.</p>
+        <RouterLink to="/tuition/history">납부 내역 확인</RouterLink>
+      </template>
+    </section>
 
     <TuitionPaymentPanel
       v-if="latestBill"
@@ -73,6 +88,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.empty-state { padding: 3rem 1.5rem; text-align: center; background: var(--personal-color-white); border: 1px solid var(--personal-color-border-mist); border-radius: .5rem; }
+.empty-state h2 { font-size: 1rem; }
+.empty-state p { color: var(--personal-color-text-secondary-steel); font-size: .875rem; }
 .summary-bar {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

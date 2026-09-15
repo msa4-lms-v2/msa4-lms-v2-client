@@ -3,6 +3,7 @@ import { onMounted, ref, computed, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { formatCurrency, formatDate } from '../../util/format';
+import { notify } from '../../composables/useDialog';
 const props=defineProps({ candidateId:{type:Number,required:true}, admissionYear:{type:Number,required:true}, status:{type:String,required:true}, tuitionPaid:Boolean, disabled:Boolean });
 const emit=defineEmits(['refresh']);
 const semesters=useSemesterStore();
@@ -27,18 +28,23 @@ const load=async({preserveError=false}={})=>{
   finally{loading.value=false;}
 };
 const issue=async()=>{
-  if(busy.value || loading.value || props.disabled || props.status!=='PENDING' || props.tuitionPaid)return;
+  if(busy.value || loading.value)return;
+  if(props.disabled){await notify('입학 정보의 수정 사항을 먼저 저장해 주세요.');return;}
+  if(props.status!=='PENDING' || props.tuitionPaid){await notify('입학 대기 상태이고 완납하지 않은 예정자만 고지를 발급할 수 있습니다.');return;}
+  if(!semesterId.value || !Number.isSafeInteger(Number(amount.value)) || Number(amount.value)<=0 || !dueDate.value || !bankCode.value){await notify('입학 학기, 0원보다 큰 정수 금액, 납부 기한과 은행을 입력해 주세요.');return;}
   busy.value=true;error.value='';
   try {
     const r=await myAxios.post('/api/payment/admission-candidates/'+props.candidateId+'/tuition',{semesterId:Number(semesterId.value),billingAmount:Number(amount.value),dueDate:dueDate.value,bankCode:bankCode.value});
     detail.value=r.data.data; emit('refresh');
-  } catch(e){error.value=e.response?.data?.message || '발급 결과를 확인하지 못했습니다. 같은 고지로 다시 요청해 주세요.';await load({preserveError:true});emit('refresh');}
+  } catch(e){error.value=e.response?.data?.message || '발급 결과를 확인하지 못했습니다. 같은 고지로 다시 요청해 주세요.';await load({preserveError:true});emit('refresh');await notify(error.value);}
   finally{busy.value=false;}
 };
 onMounted(load);
 const reissue=async()=>{
-  if(busy.value || loading.value || props.disabled || props.status!=='PENDING' || props.tuitionPaid
-      || !detail.value?.canReissue || !reissueDueDate.value || (!detail.value.reissuePending && reissueDueDate.value<today()))return;
+  if(busy.value || loading.value)return;
+  if(props.disabled){await notify('입학 정보의 수정 사항을 먼저 저장해 주세요.');return;}
+  if(props.status!=='PENDING' || props.tuitionPaid || !detail.value?.canReissue){await notify('현재 상태에서는 가상계좌를 재발급할 수 없습니다. 납부 정보를 새로고침해 확인해 주세요.');return;}
+  if(!reissueDueDate.value || (!detail.value.reissuePending && reissueDueDate.value<today())){await notify('새 납부 기한을 오늘 이후로 선택해 주세요.');return;}
   busy.value=true;error.value='';
   try{
     const r=await myAxios.post(`/api/payment/admission-candidates/${props.candidateId}/tuition/reissue`,{
@@ -48,6 +54,7 @@ const reissue=async()=>{
   }catch(e){
     error.value=e.response?.data?.message || '재발급 결과를 확인하지 못했습니다. 같은 요청으로 다시 시도해 주세요.';
     await load({preserveError:true});
+    await notify(error.value);
   }finally{busy.value=false;}
 };
 </script>
@@ -70,13 +77,13 @@ const reissue=async()=>{
       <label>등록금 금액<input v-model="amount" type="number" min="1" step="1" :disabled="busy || !!detail?.bill"></label>
       <label>납부 기한<input v-model="dueDate" type="date" :disabled="busy || !!detail?.bill"></label>
       <label>은행<select v-model="bankCode" :disabled="busy || !!detail?.bill"><option value="">은행 선택</option><option value="04">국민은행</option><option value="88">신한은행</option><option value="20">우리은행</option><option value="11">농협은행</option><option value="81">하나은행</option></select></label>
-      <button type="button" :disabled="busy || loading || disabled || !semesterId || !amount || !dueDate || !bankCode" @click="issue">{{ busy ? '발급 중…' : '고지 및 가상계좌 발급' }}</button>
+      <button type="button" :disabled="busy || loading" @click="issue">{{ busy ? '발급 중…' : '고지 및 가상계좌 발급' }}</button>
     </div>
     <div v-if="status==='PENDING' && !tuitionPaid && detail?.canReissue" class="reissue-fields">
       <p>기존 고지의 금액과 은행을 유지하고 미입금 만료 계좌를 재발급합니다. 이전 계좌의 입금이 확인되면 재발급이 중단됩니다.</p>
       <p v-if="detail.reissuePending">재발급 요청이 저장되었습니다. 동일한 기한으로 이어서 처리합니다.</p>
       <label>새 납부 기한<input v-model="reissueDueDate" type="date" :min="today()" :disabled="busy || loading || detail.reissuePending"></label>
-      <button type="button" :disabled="busy || loading || disabled || !reissueDueDate || (!detail.reissuePending && reissueDueDate<today())" @click="reissue">
+      <button type="button" :disabled="busy || loading" @click="reissue">
         {{ busy ? '재발급 중…' : detail.reissuePending ? '재발급 이어서 처리' : '만료 계좌 재발급' }}
       </button>
     </div>

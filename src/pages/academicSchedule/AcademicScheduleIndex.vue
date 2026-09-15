@@ -108,7 +108,7 @@ onActivated(() => { if (mounted) load(page.value.page); });
             :key="template.category"
             :value="template.category"
           >
-            {{ template.label }}
+            {{ template.categoryLabel }}
           </option>
         </MySelect>
       </div>

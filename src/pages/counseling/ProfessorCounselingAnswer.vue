@@ -29,6 +29,7 @@ const submit = async () => {
   errorMessage.value = '';
   if (!answer.value.trim()) {
     errorMessage.value = '답변 내용을 입력해 주세요.';
+    await notify(errorMessage.value);
     return;
   }
   if (submitting.value) return;
@@ -40,6 +41,7 @@ const submit = async () => {
     await router.push({ name: 'ProfessorCounselingList' });
   } catch (error) {
     errorMessage.value = error.response?.data?.message || '상담 답변 저장에 실패했습니다.';
+    await notify(errorMessage.value);
   } finally {
     submitting.value = false;
   }

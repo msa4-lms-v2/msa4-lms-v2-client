@@ -161,7 +161,14 @@ const submitExecute = async () => {
     });
     await notify('환불을 실행했습니다.');
     executeTarget.value = null;
-    await refundStore.fetchRefunds(tuitionBillId);
+    const refreshResults = await Promise.allSettled([
+      refundStore.fetchRefunds(tuitionBillId),
+      tuitionStore.fetchStatus(tuitionBillId),
+      tuitionStore.fetchAllocation(tuitionBillId),
+    ]);
+    if (refreshResults.some((result) => result.status === 'rejected')) {
+      await notify('환불 실행은 완료됐지만 최신 내역을 불러오지 못했습니다. 화면을 새로고침해 확인해 주세요.');
+    }
   } catch (error) {
     await notify(error.response?.data?.message || '환불 실행 중 오류가 발생했습니다.');
   }
@@ -241,7 +248,7 @@ onMounted(() => {
 
           <MyButton
             v-if="installmentStore.installmentPlan.status === 'REQUESTED'"
-            color="deep-blue"
+            color="admin-indigo"
             size="middle"
             content="심사하기"
             @click="openReview"
@@ -252,7 +259,7 @@ onMounted(() => {
       <section class="admin-panel" aria-labelledby="refund-management-title">
         <div class="panel-header">
           <h3 id="refund-management-title">환불·취소·재시도 관리</h3>
-          <MyButton color="deep-blue" size="middle" content="PG 취소 신청" @click="openPgCancel" />
+          <MyButton color="admin-indigo" size="middle" content="결제 취소 신청" @click="openPgCancel" />
         </div>
 
         <MyTable
@@ -291,7 +298,7 @@ onMounted(() => {
               />
               <MyButton
                 v-if="['REQUESTED', 'RETRYING'].includes(refund.status)"
-                color="deep-blue"
+                color="admin-indigo"
                 size="small"
                 content="실행"
                 @click="openExecute(refund)"
@@ -310,11 +317,11 @@ onMounted(() => {
       <template #footer>
         <MyButton color="gray" size="small" content="닫기" :disabled="installmentStore.isReviewingPlan" @click="closeReview" />
         <MyButton color="red" size="small" content="반려" :disabled="installmentStore.isReviewingPlan" @click="reviewPlan('REJECT')" />
-        <MyButton color="deep-blue" size="small" content="승인" :disabled="installmentStore.isReviewingPlan" @click="reviewPlan('APPROVE')" />
+        <MyButton color="admin-indigo" size="small" content="승인" :disabled="installmentStore.isReviewingPlan" @click="reviewPlan('APPROVE')" />
       </template>
     </MyModal>
 
-    <MyModal :is-open="isPgCancelOpen" title="PG 취소 신청" max-width="480px" @close="closePgCancel">
+    <MyModal :is-open="isPgCancelOpen" title="결제 취소 신청" max-width="480px" @close="closePgCancel">
       <div class="form-grid">
         <label for="pg-cancel-payment">취소할 결제</label>
         <MySelect
@@ -335,7 +342,7 @@ onMounted(() => {
       </div>
       <template #footer>
         <MyButton color="gray" size="small" content="닫기" :disabled="refundStore.isCreatingPgCancel" @click="closePgCancel" />
-        <MyButton color="deep-blue" size="small" content="신청" :disabled="refundStore.isCreatingPgCancel" @click="submitPgCancel" />
+        <MyButton color="admin-indigo" size="small" content="신청" :disabled="refundStore.isCreatingPgCancel" @click="submitPgCancel" />
       </template>
     </MyModal>
 
@@ -360,7 +367,7 @@ onMounted(() => {
       </template>
       <template #footer>
         <MyButton color="gray" size="small" content="닫기" :disabled="refundStore.isExecuting" @click="closeExecute" />
-        <MyButton color="deep-blue" size="small" content="실행" :disabled="refundStore.isExecuting" @click="submitExecute" />
+        <MyButton color="admin-indigo" size="small" content="실행" :disabled="refundStore.isExecuting" @click="submitExecute" />
       </template>
     </MyModal>
   </MyPageContainer>
@@ -371,7 +378,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 900px;
+  min-width: 0;
+}
+
+.panels > :deep(section) {
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
 }
 
 .admin-panel {
@@ -387,6 +399,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .panel-header h3 {
@@ -411,9 +425,8 @@ onMounted(() => {
 }
 
 .action-cell {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .review-area textarea,

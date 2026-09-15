@@ -223,7 +223,7 @@ onMounted(() => load());
           <p v-if="selected.processedAt"><strong>처리일</strong> {{ formatDateTime(selected.processedAt) }}</p>
         </div>
         <div class="form-group"><label for="dismissal-reason">상세 근거 <span>{{ reasonLength }}/500</span></label><textarea id="dismissal-reason" v-model="form.reason" rows="7" :disabled="isEditing && selected?.status !== 'PENDING'" placeholder="관리자용 상세 근거를 입력해 주세요."></textarea></div>
-        <div class="button-row"><MyButton btn-type="submit" color="admin-indigo" size="middle" :content="saving ? '저장 중...' : (isEditing ? '근거 수정' : '후보 등록')" :disabled="saving || (isEditing && selected?.status !== 'PENDING')" /></div>
+        <div class="button-row"><MyButton btn-type="submit" color="admin-indigo" size="middle" :content="saving ? '저장 중...' : (isEditing ? '근거 수정' : '후보 등록')" :disabled="saving" :blocked-reason="isEditing && selected?.status !== 'PENDING' ? '대기 상태의 제적 후보만 근거를 수정할 수 있습니다.' : ''" /></div>
 
         <div v-if="isEditing && selected?.status === 'PENDING'" class="cancel-box">
           <div class="form-group"><label for="dismissal-cancel-reason">취소 사유 <span>{{ cancelReasonLength }}/500</span></label><textarea id="dismissal-cancel-reason" v-model="cancelReason" rows="4" placeholder="취소 사유를 입력해 주세요."></textarea></div>

@@ -124,7 +124,7 @@ const buildPayload = () => ({
 const validatePayload = (payload) => {
   const changedValues = [payload.newName, payload.newPhoneNumber, payload.newEmail, payload.newAddress];
   if (!changedValues.some((value) => value !== null) && !payload.profileImage) {
-    return '현재 정보와 다른 항목을 하나 이상 입력해 주세요.';
+    return '변경할 정보를 하나 이상 입력해 주세요. 증빙파일과 사유만으로는 신청할 수 없습니다.';
   }
   if (payload.newName === '') return '이름은 공백일 수 없습니다.';
   if (payload.newPhoneNumber === '') return '전화번호는 공백일 수 없습니다.';
@@ -208,7 +208,10 @@ const submitRequest = async () => {
   if (infoChangeStore.isSubmitting) return;
   const payload = buildPayload();
   errorMessage.value = validatePayload(payload);
-  if (errorMessage.value) return;
+  if (errorMessage.value) {
+    await notify(errorMessage.value);
+    return;
+  }
 
   try {
     await infoChangeStore.submitRequest(payload);

@@ -1,4 +1,5 @@
 <script setup>
+import { notify } from '../../composables/useDialog';
 defineOptions({
   inheritAttrs: false,
 });
@@ -16,11 +17,18 @@ const props = defineProps({
   color: String,
   content: String,
   disabled: Boolean,
+  blockedReason: { type: String, default: '' },
 });
 
 const emit = defineEmits(['click']);
 
-const handleClick = (event) => {
+const handleClick = async (event) => {
+  if (props.disabled) return;
+  if (props.blockedReason) {
+    event.preventDefault();
+    await notify(props.blockedReason);
+    return;
+  }
   emit('click', event);
 };
 </script>
@@ -31,6 +39,8 @@ const handleClick = (event) => {
     :type="props.type || props.btnType"
     :class="[props.color, props.size]"
     :disabled="props.disabled"
+    :aria-disabled="props.disabled || Boolean(props.blockedReason)"
+    :title="props.blockedReason || undefined"
     @click="handleClick"
   >
     <slot>{{ props.content }}</slot>

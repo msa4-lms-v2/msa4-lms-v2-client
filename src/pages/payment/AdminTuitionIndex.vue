@@ -27,9 +27,9 @@ onMounted(() => load());
 </script>
 
 <template>
-  <MyPageContainer title="관리자 등록금 목록">
+  <MyPageContainer title="등록금 관리" class="admin-tuition-page">
     <div class="filter">
-      <label for="status-filter">상태</label>
+      <label for="status-filter">조회 상태</label>
       <MySelect id="status-filter" v-model="statusFilter" @change="load()">
         <option :value="null">전체</option>
         <option v-for="(label, value) in TUITION_BILL_STATUS_LABEL" :key="value" :value="value">
@@ -37,6 +37,7 @@ onMounted(() => load());
         </option>
       </MySelect>
     </div>
+    <p class="status-guide">상태는 조회 조건입니다. 결제 취소는 고지 상세의 취소·환불 절차가 완료되면 자동 반영됩니다.</p>
 
     <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
@@ -76,6 +77,9 @@ onMounted(() => load());
 </template>
 
 <style scoped>
+.filter { padding: 1.25rem; background: var(--personal-color-white); border: 1px solid var(--personal-color-border-mist); border-radius: .5rem; }
+.status-guide { font-size: .8125rem; color: var(--personal-color-text-secondary-steel); }
+.admin-tuition-page :deep(.my-table) { background: var(--personal-color-white); }
 .filter {
   display: flex;
   align-items: center;

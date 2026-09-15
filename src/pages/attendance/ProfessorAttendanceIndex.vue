@@ -187,7 +187,7 @@ onMounted(loadLectures);
           color="deep-blue"
           size="big"
           :content="isSaving ? '저장 중...' : '출결 일괄 저장'"
-          :disabled="isLoading || isSaving || changedRecords.length === 0"
+          :disabled="isLoading || isSaving" :blocked-reason="changedRecords.length === 0 ? '변경된 출결 내용이 없습니다.' : ''"
           @click="requestSave"
         />
       </div>

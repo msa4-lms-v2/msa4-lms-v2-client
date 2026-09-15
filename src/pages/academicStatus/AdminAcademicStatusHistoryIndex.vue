@@ -153,7 +153,8 @@ onMounted(async () => {
 .section-title h3 { margin: 0; font-size: 1rem; }
 .section-title span { color: var(--personal-color-admin-secondary-indigo); font-size: .8rem; font-weight: 700; }
 .table-scroll { overflow-x: auto; }
-.transition-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.transition-cell { white-space: nowrap; vertical-align: middle; }
+.transition-cell .arrow { display: inline-block; margin: 0 .5rem; }
 .transition-cell .arrow { color: var(--personal-color-text-muted-slate); }
 @media (max-width: 900px) {
   .filter-card { grid-template-columns: repeat(2, 1fr); }
