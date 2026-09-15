@@ -106,6 +106,8 @@ const canReview = computed(() => {
     : selectedRequest.value.status === 'PENDING';
 });
 
+const getWithdrawalId = (request) => request?.id ?? request?.withdrawalId ?? request?.withdrawalRequestId;
+
 const createIdempotencyKey = (prefix) => {
   const suffix = globalThis.crypto?.randomUUID?.()
     || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -186,9 +188,10 @@ const selectRequest = async (withdrawalId) => {
 };
 
 const downloadAttachment = async () => {
-  if (!selectedRequest.value?.attachmentOriginalName) return;
+  const requestId = getWithdrawalId(selectedRequest.value);
+  if (!requestId || !selectedRequest.value?.attachmentOriginalName) return;
   try {
-    const response = await downloadWithdrawalAttachment(selectedRequest.value.id);
+    const response = await downloadWithdrawalAttachment(requestId);
     const url = URL.createObjectURL(response.data);
     const link = document.createElement('a');
     link.href = url;
@@ -203,14 +206,20 @@ const downloadAttachment = async () => {
 };
 
 const updateLocalRequest = (updated) => {
-  const index = requests.value.findIndex((item) => item.id === updated.id);
+  const updatedId = getWithdrawalId(updated);
+  const index = requests.value.findIndex((item) => getWithdrawalId(item) === updatedId);
   if (index >= 0) requests.value.splice(index, 1, updated);
-  if (selectedRequest.value?.id === updated.id) selectedRequest.value = updated;
+  if (getWithdrawalId(selectedRequest.value) === updatedId) selectedRequest.value = updated;
 };
 
 const processReview = async (approved) => {
   if (!selectedRequest.value || isProcessing.value) return;
-  const requestId = selectedRequest.value.id;
+  const requestId = getWithdrawalId(selectedRequest.value);
+  if (!requestId) {
+    formError.value = '신청 번호를 확인할 수 없습니다. 목록에서 다시 선택해 주세요.';
+    await notify(formError.value);
+    return;
+  }
 
   const reason = rejectReason.value.trim();
   if (!approved && !reason) {
@@ -228,8 +237,9 @@ const processReview = async (approved) => {
   const targetName = isAdmin.value ? '최종 처리' : '지도교수 검토';
   if (!await confirmDialog(`이 자퇴 신청을 ${actionName}하시겠습니까?`)) return;
   if (isProcessing.value) return;
-  if (selectedRequest.value?.id !== requestId || !canReview.value) {
+  if (getWithdrawalId(selectedRequest.value) !== requestId || !canReview.value) {
     await notify('검토 대상 또는 상태가 변경되었습니다. 신청 상세를 다시 확인해 주세요.');
+
     return;
   }
 
@@ -483,7 +493,7 @@ onMounted(loadRequests);
               color="deep-blue"
               size="big"
               content="승인"
-              :disabled="isProcessing || (isAdmin && !canApproveToday)"
+              :disabled="isProcessing" :blocked-reason="isAdmin && !canApproveToday ? `희망 처리일인 ${selectedRequest.requestedEffectiveDate}부터 승인할 수 있습니다.` : ''"
               @click="processReview(true)"
             />
           </div>

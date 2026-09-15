@@ -315,7 +315,7 @@ onMounted(async () => {
     </MyTable>
 
     <div class="form-actions">
-      <MyButton :color="canFinalize ? 'white' : 'deep-blue'" :size="canFinalize ? 'middle' : 'big'" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isBusy || !entryAllowed || !hasUnsavedChanges" @click="saveGrades" />
+      <MyButton :color="canFinalize ? 'white' : 'deep-blue'" :size="canFinalize ? 'middle' : 'big'" :content="isSaving ? '저장 중...' : '임시저장'" :disabled="isBusy" :blocked-reason="!entryAllowed ? (classInfo?.entryWindow?.message || '현재 성적 입력 기간이 아닙니다.') : !hasUnsavedChanges ? '저장할 변경 내용이 없습니다.' : ''" @click="saveGrades" />
       <MyButton v-if="canFinalize" color="deep-blue" size="big" :content="isFinalizing ? '처리 중...' : '성적 일괄 제출'" :disabled="isBusy" @click="finalizeClassGrades" />
     </div>
   </MyPageContainer>
@@ -336,8 +336,8 @@ onMounted(async () => {
 
 .lecture-group :deep(select) { min-width: 300px; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
-.lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
-.lecture-summary strong { padding: 8px 0; color: var(--personal-color-professor-primary-navy); font-size: 0.95rem; }
+.lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 12px; font-weight: 600; }
+.lecture-summary strong { padding: 4px 0; color: var(--personal-color-professor-primary-navy); font-size: 14px; }
 .section-title { margin: 0 0 14px; font-size: 1rem; }
 .score-input { width: 64px; text-align: center; }
 .score-input:disabled { background: var(--personal-color-table-header-smoke); color: var(--personal-color-text-muted-slate); }
@@ -355,6 +355,7 @@ onMounted(async () => {
 .lecture-summary strong { color: var(--personal-color-primary-text-navy); font-size: .875rem; }
 .grade-table :deep(.my-table th) { height: 48px; padding: 10px 12px; font-size: 13px; border-right: 1px solid var(--personal-color-table-border-frost); }
 .grade-table :deep(.my-table td) { height: 64px; padding: 12px; font-size: .8125rem; border-right: 1px solid var(--personal-color-table-border-frost); }
+
 .score-input { width: 78px; height: 36px; font-size: 13px; }
 
 </style>

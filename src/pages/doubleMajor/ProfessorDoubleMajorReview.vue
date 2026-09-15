@@ -119,6 +119,7 @@ const review = async (approved) => {
   const reason = rejectReason.value.trim();
   if (!approved && !reason) {
     formError.value = '반려 사유를 입력해 주세요.';
+    await notify(formError.value);
     return;
   }
 
@@ -128,7 +129,11 @@ const review = async (approved) => {
       ? '복수전공 신청을 승인하시겠습니까? 승인 후 두 문서를 학장에게 전달해 주세요.'
       : '이 복수전공 신청을 반려하시겠습니까?',
   );
-  if (!confirmed || isReviewing.value || selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') return;
+  if (!confirmed || isReviewing.value) return;
+  if (selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') {
+    await notify('검토 대상 또는 상태가 변경되었습니다. 신청 상세를 다시 확인해 주세요.');
+    return;
+  }
 
   isReviewing.value = true;
   try {

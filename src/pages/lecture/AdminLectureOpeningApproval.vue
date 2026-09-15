@@ -209,7 +209,7 @@ const correctionPayload = () => ({
 const approve = async () => {
   if (!isPending.value || isProcessing.value) return;
   formError.value = validateCorrection();
-  if (formError.value) return;
+  if (formError.value) { await notify(formError.value); return; }
   const confirmed = await confirmDialog('검토한 내용으로 강의 개설을 승인하시겠습니까? 승인 즉시 강의와 시간표가 생성됩니다.');
   if (!confirmed) return;
 
@@ -237,10 +237,12 @@ const reject = async () => {
   const reason = rejectReason.value.trim();
   if (!reason) {
     formError.value = '반려 사유를 입력해 주세요.';
+    await notify(formError.value);
     return;
   }
   if (reason.length > 500) {
     formError.value = '반려 사유는 500자 이하여야 합니다.';
+    await notify(formError.value);
     return;
   }
   const confirmed = await confirmDialog('입력한 사유로 강의 개설 신청을 반려하시겠습니까?');
@@ -458,7 +460,7 @@ onMounted(async () => {
                 color="white"
                 size="small"
                 content="추가"
-                :disabled="schedules.length >= 10"
+                :blocked-reason="schedules.length >= 10 ? '강의 시간표는 최대 10개까지 등록할 수 있습니다.' : ''"
                 @click="addSchedule"
               />
             </div>
@@ -490,7 +492,7 @@ onMounted(async () => {
                 color="white"
                 size="small"
                 content="삭제"
-                :disabled="schedules.length <= 1"
+                :blocked-reason="schedules.length <= 1 ? '강의 시간표는 최소 1개가 필요합니다.' : ''"
                 @click="removeSchedule(index)"
               />
             </div>

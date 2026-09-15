@@ -153,16 +153,18 @@ const downloadFile = async (file) => {
   }
 };
 
-const onFileChange = (event) => {
+const onFileChange = async (event) => {
   const files = Array.from(event.target.files || []);
   event.target.value = '';
   if (files.length !== 2) {
     formError.value = '학장 날인이 포함된 HWP/HWPX 파일을 정확히 2개 선택해 주세요.';
+    await notify(formError.value);
     return;
   }
   const invalidFile = files.find((file) => !/\.(hwp|hwpx)$/i.test(file.name) || file.size > FILE_MAX_SIZE);
   if (invalidFile) {
     formError.value = 'HWP/HWPX 파일만 가능하며 파일당 10MB 이하여야 합니다.';
+    await notify(formError.value);
     return;
   }
   selectedFiles.value = files;
@@ -172,10 +174,12 @@ const onFileChange = (event) => {
 const applyRequest = async () => {
   if (!deanStampConfirmed.value) {
     formError.value = '두 문서의 학장 날인을 확인해 주세요.';
+    await notify(formError.value);
     return;
   }
   if (selectedFiles.value.length !== 2) {
     formError.value = '학장 날인본 HWP/HWPX 파일 2개를 선택해 주세요.';
+    await notify(formError.value);
     return;
   }
   const confirmed = await confirmDialog('학장 날인본으로 교체하고 전과를 학적에 반영하시겠습니까?');
@@ -204,6 +208,7 @@ const rejectRequest = async () => {
   const reason = rejectReason.value.trim();
   if (!reason) {
     formError.value = '학장 날인 미확인 사유를 입력해 주세요.';
+    await notify(formError.value);
     return;
   }
   const confirmed = await confirmDialog('학장 날인 미확인으로 이 전과 신청을 반려하시겠습니까?');

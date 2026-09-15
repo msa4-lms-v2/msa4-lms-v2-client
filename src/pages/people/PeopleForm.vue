@@ -257,10 +257,12 @@ const create = async () => {
   ]));
   if (fields.value.some((field) => field.required && !payload[field.key])) {
     error.value = '필수 항목을 입력해 주세요.';
+    await notify(error.value);
     return;
   }
   if (!selectedCollegeId.value || !form.departmentId || (admission.value && !form.advisorProfessorId)) {
     error.value = '소속 단과대와 학과, 지도교수를 확인해 주세요.';
+    await notify(error.value);
     return;
   }
   payload.departmentId = Number(form.departmentId);
@@ -276,7 +278,7 @@ const create = async () => {
 };
 
 const update = async () => {
-  if (!canEditDetail.value) return;
+  if (!canEditDetail.value) { await notify('현재 상태에서는 정보를 수정할 수 없습니다. 등록 상태를 확인해 주세요.'); return; }
 
   let payload;
   if (admission.value) {
@@ -293,6 +295,7 @@ const update = async () => {
   } else {
     if (!changeReason.value.trim()) {
       error.value = '교수 정보 변경 사유를 입력해 주세요.';
+      await notify(error.value);
       return;
     }
     payload = {
@@ -318,6 +321,7 @@ const submit = async () => {
   } catch (requestError) {
     error.value = requestError.response?.data?.message
       || `${title.value} 정보 ${detail.value ? '수정' : '등록'}에 실패했습니다. 입력 내용을 확인해 주세요.`;
+    await notify(error.value);
   } finally {
     saving.value = false;
   }

@@ -266,7 +266,7 @@ onBeforeUnmount(stopLiveUpdates);
             color="deep-blue"
             size="middle"
             :content="isOpening ? '생성 중...' : '세션 생성'"
-            :disabled="!selectedClassId || hasOpenSession || isOpening"
+            :disabled="isOpening || isLoading" :blocked-reason="!selectedClassId ? '강의를 먼저 선택해 주세요.' : hasOpenSession ? '진행 중인 출석 세션을 먼저 종료해 주세요.' : ''"
             @click="createSession"
           />
         </div>

@@ -87,7 +87,8 @@ const issueAndDownload = async (certificate) => {
   }
 };
 const downloadAgain = async (item) => {
-  if (issuingType.value || !item.downloadable) return;
+  if (issuingType.value) return;
+  if (!item.downloadable) { await notify('현재 상태의 증명서는 다운로드할 수 없습니다. 발급 상태를 확인하고 필요한 경우 새로 발급해 주세요.'); return; }
   issuingType.value = 'DOWNLOAD';
   try {
     savePdf(item, await downloadCertificate(item.id));
@@ -140,7 +141,7 @@ const downloadAgain = async (item) => {
           <td>{{ item.documentTypeLabel }}</td>
           <td>{{ formatDate(item.issuedAt) }}</td>
                     <td class="status-cell">
-            <button class="download-again" type="button" :disabled="Boolean(issuingType) || !item.downloadable"
+            <button class="download-again" type="button" :disabled="Boolean(issuingType)" :aria-disabled="Boolean(issuingType) || !item.downloadable"
               :aria-label="`${item.documentTypeLabel} 다시 다운로드`" @click="downloadAgain(item)">{{ item.status }}</button>
           </td>
         </tr>
