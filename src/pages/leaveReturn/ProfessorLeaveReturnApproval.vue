@@ -112,7 +112,11 @@ const approve = async () => {
   if (!selectedRequest.value || leaveRequestStore.isReviewing) return;
   const requestId = selectedRequest.value.id;
   const confirmed = await confirmDialog('이 신청을 승인하여 관리자 최종 승인 단계로 넘기겠습니까?');
-  if (!confirmed || leaveRequestStore.isReviewing || selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') return;
+  if (!confirmed || leaveRequestStore.isReviewing) return;
+  if (selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') {
+    await notify('검토 대상 또는 상태가 변경되었습니다. 신청 상세를 다시 확인해 주세요.');
+    return;
+  }
 
   try {
     await leaveRequestStore.reviewRequest(
@@ -138,7 +142,11 @@ const reject = async () => {
   }
 
   const confirmed = await confirmDialog('이 신청을 반려하시겠습니까?');
-  if (!confirmed || leaveRequestStore.isReviewing || selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') return;
+  if (!confirmed || leaveRequestStore.isReviewing) return;
+  if (selectedRequest.value?.id !== requestId || selectedRequest.value?.status !== 'PENDING') {
+    await notify('검토 대상 또는 상태가 변경되었습니다. 신청 상세를 다시 확인해 주세요.');
+    return;
+  }
 
   try {
     await leaveRequestStore.reviewRequest(

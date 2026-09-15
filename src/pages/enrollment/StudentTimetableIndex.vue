@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onActivated, onDeactivated, onMounted, ref } from 'vue';
 import { getMyTimetable } from '../../api/enrollmentApi';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -106,7 +106,10 @@ const applyDefaultSemester = () => {
   }
 };
 
+let loadVersion = 0;
+let initialized = false;
 const loadTimetable = async () => {
+  const version = ++loadVersion;
   if (!selectedAcademicYear.value || !selectedTerm.value) {
     loadError.value = '조회할 학년도와 학기를 선택해 주세요.';
     return;
@@ -115,16 +118,18 @@ const loadTimetable = async () => {
   loadError.value = '';
   try {
     const response = await getMyTimetable(Number(selectedAcademicYear.value), selectedTerm.value);
+    if (version !== loadVersion) return;
     items.value = response.data.data?.items || [];
     totalCredits.value = response.data.data?.totalCredits || 0;
     listPage.value = 1;
   } catch (error) {
+    if (version !== loadVersion) return;
     items.value = [];
     totalCredits.value = 0;
     loadError.value = error.response?.data?.message || '시간표를 불러오지 못했습니다.';
     await notify(loadError.value);
   } finally {
-    isLoading.value = false;
+    if (version === loadVersion) isLoading.value = false;
   }
 };
 
@@ -136,7 +141,10 @@ onMounted(async () => {
   }
   applyDefaultSemester();
   await loadTimetable();
+  initialized = true;
 });
+onActivated(() => { if (initialized) loadTimetable(); });
+onDeactivated(() => { loadVersion += 1; });
 </script>
 
 <template>

@@ -670,7 +670,7 @@ h3 {
   border-collapse: collapse;
   font-size: 12px;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
 }
 th {
   padding: 14px 10px;
@@ -679,6 +679,9 @@ th {
   font-size: 11px;
   font-weight: 600;
 }
+th, td { vertical-align: middle; text-align: center; }
+th:nth-child(2), td:nth-child(2) { text-align: left; overflow-wrap: anywhere; }
+th:last-child, td:last-child { width: 6rem; white-space: nowrap; }
 th:first-child {
   border-radius: 6px 0 0 6px;
 }

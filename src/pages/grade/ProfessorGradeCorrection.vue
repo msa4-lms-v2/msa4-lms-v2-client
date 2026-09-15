@@ -76,6 +76,22 @@ const createIdempotencyKey = () => {
 
 const normalizeScore = (value) => (value === '' || value === null || value === undefined ? null : Number(value));
 
+const limitScoreInput = (row, field, value) => {
+  if (value === '' || value === null || value === undefined) {
+    row[field] = '';
+    return;
+  }
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) {
+    row[field] = '';
+    return;
+  }
+  const clampedValue = Math.min(100, Math.max(0, numericValue));
+  row[field] = Number.isInteger(clampedValue)
+    ? String(clampedValue)
+    : String(Number(clampedValue.toFixed(2)));
+};
+
 const toRow = (item) => ({
   enrollmentId: item.enrollmentId,
   studentId: item.studentId,
@@ -272,10 +288,11 @@ onMounted(async () => {
       <tr v-for="row in rows" :key="row.enrollmentId" :class="{ 'changed-row': isRowChanged(row) }">
         <td>{{ row.studentName }}</td>
         <td>{{ row.studentNumber || '-' }}</td>
-        <td><MyInput v-model="row.midtermScore" :aria-label="row.studentName + ' 중간고사'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
-        <td><MyInput v-model="row.finalScore" :aria-label="row.studentName + ' 기말고사'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
-        <td><MyInput v-model="row.assignmentScore" :aria-label="row.studentName + ' 과제'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
-        <td><MyInput v-model="row.attendanceScore" :aria-label="row.studentName + ' 출석'" type="number" min="0" max="100" step="0.01" class="score-input" :disabled="isBusy" /></td>
+        <td><MyInput :model-value="row.midtermScore" :aria-label="row.studentName + ' 중간고사'" type="number" min="0" max="100" :min-number="0" :max-number="100" step="0.01" class="score-input" :disabled="isBusy" @update:model-value="limitScoreInput(row, 'midtermScore', $event)" /></td>
+        <td><MyInput :model-value="row.finalScore" :aria-label="row.studentName + ' 기말고사'" type="number" min="0" max="100" :min-number="0" :max-number="100" step="0.01" class="score-input" :disabled="isBusy" @update:model-value="limitScoreInput(row, 'finalScore', $event)" /></td>
+        <td><MyInput :model-value="row.assignmentScore" :aria-label="row.studentName + ' 과제'" type="number" min="0" max="100" :min-number="0" :max-number="100" step="0.01" class="score-input" :disabled="isBusy" @update:model-value="limitScoreInput(row, 'assignmentScore', $event)" /></td>
+        <td><MyInput :model-value="row.attendanceScore" :aria-label="row.studentName + ' 출석'" type="number" min="0" max="100" :min-number="0" :max-number="100" step="0.01" class="score-input" :disabled="isBusy" @update:model-value="limitScoreInput(row, 'attendanceScore', $event)" /></td>
+
         <td>{{ calculateTotal(row) === null ? '-' : `${calculateTotal(row).toFixed(2)}점` }}</td>
         <td>{{ calculateLetterGrade(calculateTotal(row)) }}</td>
         <td><span class="status-text status-text--success">공개됨</span></td>
@@ -285,7 +302,7 @@ onMounted(async () => {
     <div class="correction-controls">
       <div class="save-area">
         <span v-if="changedRows.length">{{ changedRows.length }}명 변경</span>
-        <MyButton class="professor-primary" color="deep-blue" size="big" content="변경 사항 저장" :disabled="isBusy || !changedRows.length" @click="isReasonOpen = true" />
+        <MyButton class="professor-primary" color="deep-blue" size="big" content="변경 사항 저장" :disabled="isBusy" :blocked-reason="!changedRows.length ? '저장할 변경 내용이 없습니다.' : ''" @click="isReasonOpen = true" />
       </div>
     </div>
 

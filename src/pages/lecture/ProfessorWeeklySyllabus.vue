@@ -35,8 +35,8 @@ const update = () => {
         <label :for="`syllabus-week-${index + 1}`">{{ index + 1 }}주차</label>
         <textarea :id="`syllabus-week-${index + 1}`" v-model="weeks[index]" :placeholder="`${index + 1}주차 강의 내용을 입력하세요.`" maxlength="65535" rows="2" @input="update"></textarea>
       </div>
-      <MyButton v-if="weeks.length > 15" color="white" content="비어 있는 마지막 주차 제거" :disabled="Boolean(weeks[weeks.length - 1]?.trim())" @click="weeks.pop(); update()" />
-      <MyButton class="add-week" color="white" content="+ 주차 입력란 추가" :disabled="weeks.length >= 15" @click="addWeek" />
+      <MyButton v-if="weeks.length > 15" color="white" content="비어 있는 마지막 주차 제거" :blocked-reason="weeks[weeks.length - 1]?.trim() ? '마지막 주차의 내용을 비운 후 제거해 주세요.' : ''" @click="weeks.pop(); update()" />
+      <MyButton class="add-week" color="white" content="+ 주차 입력란 추가" :blocked-reason="weeks.length >= 15 ? '주차 입력란은 최대 15개까지 추가할 수 있습니다.' : ''" @click="addWeek" />
     </template>
   </div>
 </template>

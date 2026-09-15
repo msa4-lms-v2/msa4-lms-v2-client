@@ -119,10 +119,12 @@ const downloadAttachment = async () => {
 const decide = async (approved) => {
   if (!approved && !rejectReason.value.trim()) {
     formError.value = '반려 사유를 입력해 주세요.';
+    await notify(formError.value);
     return;
   }
   if (approved && !effectiveDate.value) {
     formError.value = '승인 처리일을 선택해 주세요.';
+    await notify(formError.value);
     return;
   }
   const action = approved ? '승인' : '반려';

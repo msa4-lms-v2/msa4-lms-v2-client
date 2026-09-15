@@ -14,6 +14,7 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  minNumber: { type: Number, default: null },
   modelModifiers: {
     type: Object,
     default: () => ({}),
@@ -35,6 +36,12 @@ const updateValue = (event) => {
     event.target.value = value;
   }
 
+  if (props.type === 'number' && value !== '' && Number.isFinite(Number(value))) {
+    const numeric = Number(value);
+    const bounded = Math.max(props.minNumber ?? -Infinity, Math.min(props.maxNumber ?? Infinity, numeric));
+    if (bounded !== numeric) value = String(bounded);
+    event.target.value = value;
+  }
   emit('update:modelValue', value);
 };
 </script>

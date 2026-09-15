@@ -66,7 +66,6 @@ const loadDepartment = async () => {
 };
 
 const validate = () => {
-  if (!/^\d{3}$/.test(form.code)) return '학과 코드는 숫자 3자리로 입력해 주세요.';
   if (!form.name.trim()) return '학과명을 입력해 주세요.';
   return '';
 };
@@ -84,7 +83,6 @@ const save = async () => {
     const payload = isEdit.value
       ? { name: form.name.trim(), active: form.active }
       : {
-        code: form.code,
         name: form.name.trim(),
         collegeId: form.collegeId || null,
         active: form.active,
@@ -138,18 +136,7 @@ onMounted(async () => {
 
       <section class="form-card">
         <h3>{{ isEdit ? '학과 정보' : '학과 기본정보' }}</h3>
-        <div class="field">
-          <label for="department-code">학과 코드 <em>*</em></label>
-          <MyInput
-            id="department-code"
-            v-model="form.code"
-            numeric-only
-            :maxlength="3"
-            :disabled="isEdit"
-            placeholder="예: 001"
-          />
-          <small v-if="isEdit">학과 코드는 등록 후 변경할 수 없습니다.</small>
-        </div>
+
         <div class="field">
           <label for="department-name">학과명 <em>*</em></label>
           <MyInput
@@ -199,7 +186,7 @@ onMounted(async () => {
         <h3>등록 정보 확인</h3>
         <dl>
           <dt>학과 코드</dt>
-          <dd>{{ form.code || '-' }}</dd>
+          <dd>{{ form.code || '등록 시 자동 발급' }}</dd>
           <dt>학과명</dt>
           <dd>{{ form.name || '-' }}</dd>
           <dt>단과대학</dt>
