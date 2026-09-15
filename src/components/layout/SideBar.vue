@@ -93,9 +93,7 @@ watch(() => route.path, path => {
     activeMenus.value.adminGraduation = true;
   }
   if (
-    path.startsWith('/admin/attendance')
-    || path.startsWith('/admin/counseling')
-    || path.startsWith('/admin/withdrawals')
+    path.startsWith('/admin/withdrawals')
     || path.startsWith('/admin/dismissals')
   ) {
     activeMenus.value.adminAcademicOps = true;
@@ -582,12 +580,6 @@ const toggleMenu = (menuKey) => {
             <span>학사 운영 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminAcademicOps }">▼</span>
           </button>
           <div v-show="activeMenus.adminAcademicOps" class="submenu-list">
-            <router-link to="/admin/attendance" class="submenu-item">
-              {{ getMenuTitle("/admin/attendance") }}
-            </router-link>
-            <router-link to="/admin/counseling" class="submenu-item">
-              {{ getMenuTitle("/admin/counseling") }}
-            </router-link>
             <router-link to="/admin/withdrawals" class="submenu-item">
               {{ getMenuTitle("/admin/withdrawals") }}
             </router-link>

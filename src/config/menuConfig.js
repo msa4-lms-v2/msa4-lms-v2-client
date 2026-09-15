@@ -23,8 +23,6 @@ export const MENU_TITLES = {
     '/admin/academic-change-requests/department-transfer': { default: '전과 신청 관리' },
     '/admin/academic-change-requests/double-major': { default: '복수전공 신청 관리' },
     '/admin/academic-status-histories': { default: '학적 변경 이력' },
-    '/admin/attendance': { default: '출결 관리' },
-    '/admin/counseling': { default: '상담 관리' },
     '/admin/withdrawals': { default: '자퇴 관리' },
     '/tuition': { default: '등록금 납부' },
     '/tuition/history': { default: '등록금 납부 내역' },

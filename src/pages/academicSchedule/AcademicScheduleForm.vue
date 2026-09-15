@@ -63,7 +63,9 @@ const save = async () => {
     await notify(isEdit.value ? '학사일정을 수정했습니다.' : '학사일정을 등록했습니다.');
     const previousTab = route.meta?.tabKey || route.path;
     await router.replace({ name: 'AcademicScheduleIndex' });
-    useTabStore().removeTab(previousTab);
+    const tabs = useTabStore();
+    tabs.addTab(router.currentRoute.value);
+    tabs.removeTab(previousTab);
   } catch (error) { await notify(error.response?.data?.message || '학사일정 저장에 실패했습니다.'); }
   finally { saving.value = false; }
 };
@@ -95,7 +97,7 @@ onMounted(async () => { await loadTemplates(); await loadSchedule(); });
               :key="template.category"
               :value="template.category"
             >
-              {{ template.label }}
+              {{ template.categoryLabel }}
             </option>
           </MySelect>
           <small v-if="isEdit">
@@ -115,7 +117,7 @@ onMounted(async () => { await loadTemplates(); await loadSchedule(); });
             placeholder="일정 내용을 입력해 주세요"
           />
         </div>
-        <div class="field">
+        <div class="field full">
           <label for="target">공지 대상 <em>*</em></label>
           <MySelect id="target" v-model="form.targetRole">
             <option value="ALL">전체</option>
@@ -140,7 +142,7 @@ onMounted(async () => { await loadTemplates(); await loadSchedule(); });
         <h3>일정 정보 확인</h3>
         <dl>
           <dt>일정 분류</dt>
-          <dd>{{ selectedTemplate?.label || '-' }}</dd>
+          <dd>{{ selectedTemplate?.categoryLabel || '-' }}</dd>
           <dt>일정명</dt>
           <dd>{{ form.title || '-' }}</dd>
           <dt>공지 대상</dt>

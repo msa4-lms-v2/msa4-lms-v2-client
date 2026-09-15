@@ -215,17 +215,23 @@ const processReview = async (approved) => {
   const reason = rejectReason.value.trim();
   if (!approved && !reason) {
     formError.value = '반려 사유를 입력해 주세요.';
+    await notify(formError.value);
     return;
   }
   if (isAdmin.value && approved && !canApproveToday.value) {
     formError.value = `희망 처리일인 ${selectedRequest.value.requestedEffectiveDate}부터 승인할 수 있습니다.`;
+    await notify(formError.value);
     return;
   }
 
   const actionName = approved ? '승인' : '반려';
   const targetName = isAdmin.value ? '최종 처리' : '지도교수 검토';
   if (!await confirmDialog(`이 자퇴 신청을 ${actionName}하시겠습니까?`)) return;
-  if (isProcessing.value || selectedRequest.value?.id !== requestId || !canReview.value) return;
+  if (isProcessing.value) return;
+  if (selectedRequest.value?.id !== requestId || !canReview.value) {
+    await notify('검토 대상 또는 상태가 변경되었습니다. 신청 상세를 다시 확인해 주세요.');
+    return;
+  }
 
   isProcessing.value = true;
   formError.value = '';

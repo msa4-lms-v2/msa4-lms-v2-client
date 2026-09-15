@@ -551,14 +551,17 @@ onMounted(async () => {
 .filter-card { display: grid; grid-template-columns: 100px 180px auto; align-items: center; gap: 12px; padding: 18px 20px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .filter-card > label { font-size: .82rem; font-weight: 700; }
 .filter-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.management-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(390px, .75fr); align-items: start; gap: 18px; margin-top: 20px; }
-.list-card, .review-card { padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
+.management-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 18px; margin-top: 20px; }
+.list-card, .review-card { min-width: 0; box-sizing: border-box; padding: 18px; border: 1px solid var(--personal-color-border-mist); border-radius: 8px; background: var(--personal-color-white); }
 .review-card { position: sticky; top: 84px; }
 .section-heading, .subheading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .section-heading { margin-bottom: 14px; }
 .section-heading h3, .subheading h4 { margin: 0; font-size: 1rem; }
 .section-heading > span:first-of-type { color: var(--personal-color-admin-secondary-indigo); font-size: .8rem; font-weight: 700; }
 .table-scroll { overflow-x: auto; }
+.table-scroll :deep(table) { min-width: 42rem; }
+.review-card :deep(input), .review-card :deep(select), .review-card textarea { box-sizing: border-box; min-width: 0; max-width: 100%; }
+@media (max-width: 1200px) { .management-grid { grid-template-columns: minmax(0, 1fr); } .review-card { position: static; } }
 .selected { background: var(--personal-color-indigo-soft-lavender); }
 .course-cell strong, .course-cell span { display: block; white-space: nowrap; }
 .course-cell span { margin-top: 3px; color: var(--personal-color-text-muted-slate); font-size: .75rem; }
@@ -569,8 +572,8 @@ onMounted(async () => {
 .request-summary dd { margin: 0; font-size: .78rem; font-weight: 600; text-align: right; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .wide-field { grid-column: 1 / -1; }
-.form-grid label, .ratio-grid label, .syllabus-field, .reject-field { display: flex; flex-direction: column; gap: 5px; color: var(--personal-color-primary-text-navy); font-size: .78rem; font-weight: 700; }
-.ratio-grid { display: grid; grid-template-columns: repeat(4, 1fr); align-items: end; gap: 8px; margin-top: 14px; }
+.form-grid label, .ratio-grid label, .syllabus-field, .reject-field { display: flex; flex-direction: column; min-width: 0; gap: 5px; color: var(--personal-color-primary-text-navy); font-size: .78rem; font-weight: 700; }
+.ratio-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; gap: 8px; margin-top: 14px; }
 .ratio-grid strong { grid-column: 1 / -1; color: var(--personal-color-text-muted-slate); font-size: .78rem; text-align: right; }
 .ratio-grid strong.invalid, .form-error { color: var(--personal-color-danger-coral); }
 .schedule-section { padding: 14px 0; margin-top: 14px; border-top: 1px solid var(--personal-color-table-border-frost); border-bottom: 1px solid var(--personal-color-table-border-frost); }
