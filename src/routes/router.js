@@ -284,7 +284,7 @@ const routes = [
     {
         path: '/tuition/:tuitionBillId/installment',
         name: 'InstallmentApply',
-        component: () => import('../pages/payment/InstallmentApply.vue'),
+        redirect: to => `/tuition/${to.params.tuitionBillId}`,
         meta: { requiresAuth: true, roles: ['STUDENT'] },
     },
     {
