@@ -1,10 +1,11 @@
 <script setup>
-import { ref } from 'vue';
-import { downloadCertificate, issueCertificate } from '../../api/certificateApi';
+import { onMounted, ref } from 'vue';
+import { downloadCertificate, issueCertificate, getStudentCertificateHistory } from '../../api/certificateApi';
 import MyButton from '../../components/button/MyButton.vue';
 import MyCard from '../../components/common/MyCard.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyTable from '../../components/table/MyTable.vue';
+import NumberedPagination from '../../components/pagination/NumberedPagination.vue';
 import { notify } from '../../composables/useDialog';
 import { formatDate } from '../../util/format';
 
@@ -24,35 +25,87 @@ const historyColumns = [
 
 const issuingType = ref(null);
 const issuedDocuments = ref([]);
+const historyLoading = ref(false);
+const historyError = ref('');
+const historyPage = ref(1);
+const historyTotalCount = ref(0);
+let historyRevision = 0;
+const loadHistory = async (page = 1) => {
+  const revision = ++historyRevision;
+  historyLoading.value = true;
+  historyError.value = '';
+  try {
+    const { data } = await getStudentCertificateHistory({ page, size: 10 });
+    if (revision !== historyRevision) return;
+    const result = data.data;
+    issuedDocuments.value = result.items.map(item => ({
+      ...item,
+      documentTypeLabel: certificateTypes.find(type => type.value === item.documentType)?.label
+        || (item.documentType === 'PAYMENT_CERTIFICATE' ? '납부 확인서' : item.documentType),
+      status: item.revoked ? '폐기' : item.downloadable ? '발급 완료' : '다운로드 불가',
+    }));
+    historyPage.value = result.page;
+    historyTotalCount.value = result.totalCount;
+  } catch (error) {
+    if (revision === historyRevision) historyError.value = error.response?.data?.message || '발급 내역을 불러오지 못했습니다.';
+  } finally {
+    if (revision === historyRevision) historyLoading.value = false;
+  }
+};
+onMounted(() => loadHistory());
 
 const savePdf = (issuedDocument, response) => {
   const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
   const link = document.createElement('a');
   link.href = url;
   link.download = `${issuedDocument.documentTypeLabel}.pdf`;
+  document.body.appendChild(link);
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
 const issueAndDownload = async (certificate) => {
   if (issuingType.value) return;
 
   issuingType.value = certificate.value;
+  let issued = null;
   try {
     const issueResponse = await issueCertificate(certificate.value);
-    const issued = issueResponse.data.data;
+    issued = issueResponse.data.data;
     const historyItem = {
       ...issued,
       documentTypeLabel: certificate.label.replaceAll(' ', ''),
       status: '발급 완료',
+      downloadable: true,
     };
 
+    issuedDocuments.value.unshift(historyItem);
+    await loadHistory(1);
     const downloadResponse = await downloadCertificate(issued.id);
     savePdf(historyItem, downloadResponse);
-    issuedDocuments.value.unshift(historyItem);
     await notify(`${certificate.label}가 발급되었습니다.`);
   } catch (error) {
-    await notify(error.response?.data?.message || '증명서 발급에 실패했습니다.');
+    if (!issued) await loadHistory(1);
+    await notify(issued
+      ? '증명서는 발급되었지만 PDF 다운로드에 실패했습니다. 발급 내역에서 다시 다운로드해 주세요.'
+      : (error.response?.data?.message || '발급 결과를 확인하지 못했습니다. 발급 내역을 확인한 뒤 다시 시도해 주세요.'));
+  } finally {
+    issuingType.value = null;
+  }
+};
+
+const downloadAgain = async (item) => {
+  if (issuingType.value) return;
+  if (!item.downloadable) {
+    await notify('현재 상태의 증명서는 다운로드할 수 없습니다. 발급 상태를 확인해 주세요.');
+    return;
+  }
+  issuingType.value = 'DOWNLOAD';
+  try {
+    savePdf(item, await downloadCertificate(item.id));
+  } catch {
+    await notify('PDF 다운로드에 실패했습니다. 발급 내역에서 다시 시도해 주세요.');
   } finally {
     issuingType.value = null;
   }
@@ -88,17 +141,23 @@ const issueAndDownload = async (certificate) => {
 
     <section class="history-section" aria-labelledby="certificate-history-title">
       <h3 id="certificate-history-title">발급 내역</h3>
+      <p v-if="historyError" role="alert">{{ historyError }} <button type="button" :disabled="historyLoading" @click="loadHistory(historyPage)">다시 조회</button></p>
       <MyTable
         :columns="historyColumns"
+        :loading="historyLoading"
         :empty="issuedDocuments.length === 0"
         empty-message="발급한 증명서가 없습니다."
       >
         <tr v-for="item in issuedDocuments" :key="item.id">
           <td>{{ item.documentTypeLabel }}</td>
           <td>{{ formatDate(item.issuedAt) }}</td>
-          <td class="status-cell">{{ item.status }}</td>
+          <td class="status-cell">
+            <button v-if="item.downloadable" type="button" :disabled="Boolean(issuingType)" @click="downloadAgain(item)">PDF 다운로드</button>
+            <span v-else>{{ item.status }}</span>
+          </td>
         </tr>
       </MyTable>
+      <NumberedPagination v-if="historyTotalCount > 10" :page="historyPage" :total-count="historyTotalCount" :size="10" @page-change="loadHistory" />
     </section>
   </MyPageContainer>
 </template>

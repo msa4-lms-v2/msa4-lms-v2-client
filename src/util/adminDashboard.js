@@ -54,6 +54,10 @@ export function pendingTaskRoute(task) {
     return `/admin/tuition/${task.tuitionBillId}`;
   }
   return {
+    LEAVE: '/admin/application-management/leave-requests',
+    RETURN: '/admin/application-management/leave-requests',
+    LECTURE: '/admin/lecture-opening-requests',
+    WITHDRAWAL: '/admin/withdrawals',
     TRANSFER: '/admin/academic-change-requests/department-transfer',
     DOUBLE_MAJOR: '/admin/academic-change-requests/double-major',
     DISMISSAL: '/admin/dismissals',
