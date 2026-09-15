@@ -336,8 +336,8 @@ onMounted(async () => {
 
 .lecture-group :deep(select) { min-width: 300px; }
 .lecture-summary { display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px; }
-.lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 0.85rem; font-weight: 600; }
-.lecture-summary strong { padding: 8px 0; color: var(--personal-color-professor-primary-navy); font-size: 0.95rem; }
+.lecture-summary span { color: var(--personal-color-text-secondary-steel); font-size: 12px; font-weight: 600; }
+.lecture-summary strong { padding: 4px 0; color: var(--personal-color-professor-primary-navy); font-size: 14px; }
 .section-title { margin: 0 0 14px; font-size: 1rem; }
 .score-input { width: 64px; text-align: center; }
 .score-input:disabled { background: var(--personal-color-table-header-smoke); color: var(--personal-color-text-muted-slate); }
@@ -352,9 +352,9 @@ onMounted(async () => {
 @media (max-width: 560px) { .lecture-group { width: 100%; } .lecture-group :deep(select) { width: 100%; min-width: 0; } }
 
 .section-title { margin-top: 38px; font-size: 20px; }
-.lecture-summary strong { color: var(--personal-color-primary-text-navy); font-size: 18px; }
+.lecture-summary strong { color: var(--personal-color-primary-text-navy); font-size: 14px; }
 .grade-table :deep(.my-table th) { height: 48px; padding: 10px 12px; font-size: 13px; border-right: 1px solid var(--personal-color-table-border-frost); }
-.grade-table :deep(.my-table td) { height: 90px; padding: 18px 12px; font-size: 14px; border-right: 1px solid var(--personal-color-table-border-frost); }
+.grade-table :deep(.my-table td) { height: 90px; padding: 18px 12px; font-size: 13px; border-right: 1px solid var(--personal-color-table-border-frost); }
 .score-input { width: 78px; height: 36px; font-size: 13px; }
 
 </style>

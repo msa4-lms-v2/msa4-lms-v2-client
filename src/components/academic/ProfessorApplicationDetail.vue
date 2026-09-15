@@ -39,10 +39,10 @@ defineEmits(['update:reviewReason', 'approve', 'reject', 'back']);
       <p v-if="error" class="error" role="alert">{{ error }}</p>
     </section>
     <div class="actions">
-      <MyButton color="white" size="middle" content="목록" :disabled="busy" @click="$emit('back')" />
+      <MyButton btn-type="button" color="white" size="middle" content="목록" :disabled="busy" @click="$emit('back')" />
       <div v-if="reviewable" class="review-actions">
-        <MyButton color="red" size="middle" content="반려" :disabled="busy" @click="$emit('reject')" />
-        <MyButton color="deep-blue" size="middle" content="승인" :disabled="busy" @click="$emit('approve')" />
+        <MyButton btn-type="button" color="red" size="middle" content="반려" :disabled="busy" @click="$emit('reject')" />
+        <MyButton btn-type="button" color="deep-blue" size="middle" content="승인" :disabled="busy" @click="$emit('approve')" />
       </div>
     </div>
   </div>

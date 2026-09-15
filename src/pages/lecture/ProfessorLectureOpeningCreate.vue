@@ -98,6 +98,7 @@ const isLoadingEdit = ref(false);
 const history = ref([]);
 const isLoadingHistory = ref(false);
 const importRequestId = ref('');
+const excelFileInput = ref(null);
 const historyStatus = ref('');
 const historyPage = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 
@@ -260,6 +261,141 @@ const importRequest = async () => {
   if (await confirmDialog('선택한 신청 내역으로 현재 입력을 바꾸시겠습니까? 개설 학기는 다시 선택해야 합니다.')) await editRequest(item, true);
 };
 
+
+const excelRows = () => [
+  ['항목', '값'],
+  ['courseId', form.courseId],
+  ['courseName', selectedCourse.value?.name || ''],
+  ['courseCode', selectedCourse.value?.code || ''],
+  ['semesterId', form.semesterId],
+  ['sectionNo', form.sectionNo],
+  ['requestedCapacity', form.requestedCapacity],
+  ['classroom', form.classroom],
+  ['midtermRatio', form.midtermRatio],
+  ['finalRatio', form.finalRatio],
+  ['assignmentRatio', form.assignmentRatio],
+  ['attendanceRatio', form.attendanceRatio],
+  ['schedules', schedules.value.map((schedule) => `${schedule.dayOfWeek}:${schedule.startPeriod}-${schedule.endPeriod}`).join(';')],
+  ['syllabus', form.syllabus],
+];
+
+const escapeExcelCell = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/\n/g, '<br>');
+
+const downloadExcelFile = async () => {
+  const html = `<!doctype html><html><head><meta charset="utf-8"></head><body><table>${excelRows()
+    .map((row) => `<tr>${row.map((cell) => `<td>${escapeExcelCell(cell)}</td>`).join('')}</tr>`)
+    .join('')}</table></body></html>`;
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10).replaceAll('-', '');
+  link.href = url;
+  link.download = `강의개설신청_${date}.xls`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  await notify('작성한 강의 개설 신청 내용을 엑셀 파일로 내려받았습니다.');
+};
+
+const openExcelFilePicker = () => {
+  if (isSubmitting.value || isLoadingEdit.value) return;
+  excelFileInput.value?.click();
+};
+
+const parseDelimitedRows = (textValue) => {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quote = false;
+  for (let index = 0; index < textValue.length; index += 1) {
+    const char = textValue[index];
+    const next = textValue[index + 1];
+    if (char === '"') {
+      if (quote && next === '"') { cell += '"'; index += 1; }
+      else quote = !quote;
+    } else if (!quote && (char === ',' || char === '\t')) {
+      row.push(cell.trim()); cell = '';
+    } else if (!quote && (char === '\n' || char === '\r')) {
+      if (char === '\r' && next === '\n') index += 1;
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = []; cell = '';
+    } else cell += char;
+  }
+  row.push(cell.trim());
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+};
+
+const parseExcelText = (textValue) => {
+  const result = {};
+  if (/<table[\s>]/i.test(textValue)) {
+    const doc = new DOMParser().parseFromString(textValue, 'text/html');
+    doc.querySelectorAll('tr').forEach((tr) => {
+      const cells = Array.from(tr.querySelectorAll('td, th')).map((cell) => cell.innerText.trim());
+      if (cells.length >= 2 && cells[0] !== '항목') result[cells[0]] = cells.slice(1).join(' ').trim();
+    });
+    return result;
+  }
+  parseDelimitedRows(textValue).forEach((row, index) => {
+    if (index === 0 && ['항목', 'key', 'field'].includes(row[0])) return;
+    if (row.length >= 2) result[row[0]] = row.slice(1).join(' ').trim();
+  });
+  return result;
+};
+
+const applyExcelData = (data) => {
+  if (data.courseId) {
+    form.courseId = String(data.courseId).trim();
+    selectedCourse.value = {
+      id: Number(data.courseId) || data.courseId,
+      name: data.courseName || `저장된 교과목 (${data.courseId})`,
+      code: data.courseCode || '',
+    };
+  }
+  form.semesterId = data.semesterId ? String(data.semesterId).trim() : form.semesterId;
+  form.sectionNo = data.sectionNo ?? form.sectionNo;
+  form.requestedCapacity = data.requestedCapacity ?? form.requestedCapacity;
+  form.classroom = data.classroom ?? form.classroom;
+  form.midtermRatio = data.midtermRatio ?? form.midtermRatio;
+  form.finalRatio = data.finalRatio ?? form.finalRatio;
+  form.assignmentRatio = data.assignmentRatio ?? form.assignmentRatio;
+  form.attendanceRatio = data.attendanceRatio ?? form.attendanceRatio;
+  form.syllabus = data.syllabus ?? form.syllabus;
+  if (data.schedules) {
+    schedules.value = String(data.schedules).split(';').map((item) => {
+      const [, dayOfWeek, startPeriod, endPeriod] = item.trim().match(/^([A-Z]{3}):(\d+)-(\d+)$/) || [];
+      return dayOfWeek ? { dayOfWeek, startPeriod, endPeriod } : null;
+    }).filter(Boolean);
+  }
+  syllabusEditorKey.value += 1;
+  formError.value = '';
+};
+
+const importExcelFile = async (event) => {
+  const [file] = Array.from(event.target.files || []);
+  event.target.value = '';
+  if (!file) return;
+  try {
+    const textValue = await file.text();
+    const data = parseExcelText(textValue);
+    if (!Object.keys(data).length) {
+      await notify('불러올 수 있는 강의 개설 신청 데이터가 없습니다.');
+      return;
+    }
+    applyExcelData(data);
+    await notify('엑셀 파일 내용을 강의 개설 신청서에 불러왔습니다.');
+  } catch (error) {
+    await notify('엑셀 파일을 불러오지 못했습니다. 내려받은 양식 파일인지 확인해 주세요.');
+  }
+};
+
 const submitRequest = async () => {
   if (isSubmitting.value || isLoadingEdit.value) return;
   formError.value = validate();
@@ -339,6 +475,11 @@ onMounted(async () => {
       <div class="picker-actions"><MyButton content="닫기" color="white" size="middle" @click="showCoursePicker = false" /><MyButton content="선택 완료" color="deep-blue" size="middle" :disabled="!pendingCourse" @click="confirmCourse" /></div>
     </section>
     <template v-else>
+    <div class="excel-toolbar">
+      <input ref="excelFileInput" class="excel-file-input" type="file" accept=".xls,.html,.csv,.tsv,.txt" @change="importExcelFile" />
+      <MyButton btn-type="button" color="white" size="middle" content="엑셀 파일 불러오기" :disabled="isSubmitting || isLoadingEdit" @click="openExcelFilePicker" />
+      <MyButton btn-type="button" color="deep-blue" size="middle" content="엑셀 파일로 내려받기" :disabled="isSubmitting || isLoadingEdit" @click="downloadExcelFile" />
+    </div>
     <div class="content-card">
       <form class="create-form-layout" :inert="isSubmitting || isLoadingEdit" @submit.prevent="submitRequest">
         <div v-if="editingRequestId" class="edit-notice full-width">
@@ -359,7 +500,7 @@ onMounted(async () => {
                     <option value="">{{ history.length ? '신청 내역에서 선택' : '불러올 신청 내역이 없습니다' }}</option>
                     <option v-for="item in history" :key="item.openingRequestId" :value="String(item.openingRequestId)">{{ item.academicYear }} · {{ item.courseName }} ({{ item.sectionNo }}분반)</option>
                   </MySelect>
-                  <MyButton btn-type="button" color="deep-blue" size="middle" content="파일 불러오기" :disabled="isLoadingHistory || !history.some((item) => String(item.openingRequestId) === String(importRequestId)) || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
+                  <MyButton btn-type="button" color="deep-blue" size="middle" content="신청 내역 불러오기" :disabled="isLoadingHistory || !history.some((item) => String(item.openingRequestId) === String(importRequestId)) || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
                 </div>
               </div>
               <div class="form-group full-width">
@@ -563,6 +704,8 @@ onMounted(async () => {
 .selected-course-row { background: var(--personal-color-sidebar-active-bg-sky); }
 @media (max-width: 760px) { .course-picker-search { flex-wrap: wrap; } .course-picker-search > :first-child { width: 100%; } }
 
+.excel-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+.excel-file-input { display: none; }
 .course-results { border:1px solid var(--personal-color-border-mist); padding:12px; }
 .course-result { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; }
 .course-result small { display:block; color:#64748b; margin-top:4px; }
