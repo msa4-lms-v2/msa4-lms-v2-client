@@ -456,7 +456,7 @@ onMounted(() => loadRequests());
 
 .request-form {
   display: grid;
-  grid-template-columns: 160px minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(210px, 1.1fr) 77px;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
   align-items: end;
   gap: 16px;
   padding: 20px 24px 22px;
@@ -477,8 +477,9 @@ onMounted(() => loadRequests());
   font-weight: 600;
 }
 
-.form-field :deep(input),
+.form-field :deep(input:not(.visually-hidden)),
 .form-field :deep(select) {
+  min-width: 0;
   box-sizing: border-box;
   width: 100%;
   height: 38px;
@@ -498,6 +499,8 @@ onMounted(() => loadRequests());
 .history-section {
   margin-top: 8px;
 }
+
+:deep(.table-container) { overflow-x: auto; }
 
 .section-title-row {
   margin-bottom: 12px;
