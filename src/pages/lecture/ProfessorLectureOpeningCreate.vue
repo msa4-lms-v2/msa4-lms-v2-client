@@ -98,36 +98,6 @@ const isLoadingEdit = ref(false);
 const history = ref([]);
 const isLoadingHistory = ref(false);
 const importRequestId = ref('');
-const draftKey = () => {
-  const userId = authStore.userInfo?.userId;
-  return userId ? `professor-opening-draft-v1:${userId}` : null;
-};
-const saveDraft = async () => {
-  if (isSubmitting.value || isLoadingEdit.value || editingRequestId.value) return;
-  try {
-    const key = draftKey();
-    if (!key) throw new Error();
-    sessionStorage.setItem(key, JSON.stringify({ form: { ...form }, schedules: schedules.value, selectedCourse: selectedCourse.value }));
-    await notify('이 브라우저 탭에 임시저장했습니다.');
-  } catch {
-    await notify('임시저장할 수 없습니다. 로그인 상태와 브라우저 저장소를 확인해 주세요.');
-  }
-};
-const restoreDraft = async () => {
-  if (isSubmitting.value || isLoadingEdit.value || editingRequestId.value) return;
-  try {
-    const raw = draftKey() && sessionStorage.getItem(draftKey());
-    if (!raw) { await notify('임시저장한 내용이 없습니다.'); return; }
-    const draft = JSON.parse(raw);
-    if (!draft.form || !Array.isArray(draft.schedules)) throw new Error();
-    if (!await confirmDialog('임시저장한 내용으로 현재 입력을 바꾸시겠습니까?')) return;
-    for (const key of Object.keys(form)) form[key] = String(draft.form[key] ?? '');
-    schedules.value = draft.schedules.slice(0, 10).map(({ dayOfWeek, startPeriod, endPeriod }) => ({ dayOfWeek, startPeriod: String(startPeriod), endPeriod: String(endPeriod) }));
-    selectedCourse.value = draft.selectedCourse && String(draft.selectedCourse.id) === String(form.courseId) ? draft.selectedCourse : null;
-    syllabusEditorKey.value += 1;
-    formError.value = '';
-  } catch { await notify('임시저장한 내용을 불러올 수 없습니다.'); }
-};
 const historyStatus = ref('');
 const historyPage = ref({ page: 1, size: 20, totalCount: 0, hasNext: false });
 
@@ -326,9 +296,6 @@ const submitRequest = async () => {
       ? await updateLectureOpeningRequest(requestId, payload)
       : await createLectureOpeningRequest(payload);
     const saved = response.data.data;
-    if (!isEditing) {
-      try { if (draftKey()) sessionStorage.removeItem(draftKey()); } catch { /* 신청 성공 결과는 유지한다. */ }
-    }
     resetForm();
     await notify(
       isEditing
@@ -386,13 +353,13 @@ onMounted(async () => {
             </div>
             <div class="info-grid">
               <div class="form-group full-width">
-                <label for="opening-import">기존 신청 불러오기</label>
+                <label for="opening-import">신청 내역 선택</label>
                 <div class="import-controls">
                   <MySelect id="opening-import" v-model="importRequestId" :disabled="isLoadingHistory || !history.length || isLoadingEdit || isSubmitting || Boolean(editingRequestId)">
                     <option value="">{{ history.length ? '신청 내역에서 선택' : '불러올 신청 내역이 없습니다' }}</option>
                     <option v-for="item in history" :key="item.openingRequestId" :value="String(item.openingRequestId)">{{ item.academicYear }} · {{ item.courseName }} ({{ item.sectionNo }}분반)</option>
                   </MySelect>
-                  <MyButton btn-type="button" color="deep-blue" size="middle" content="불러오기" :disabled="isLoadingHistory || !history.some((item) => String(item.openingRequestId) === String(importRequestId)) || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
+                  <MyButton btn-type="button" color="deep-blue" size="middle" content="파일 불러오기" :disabled="isLoadingHistory || !history.some((item) => String(item.openingRequestId) === String(importRequestId)) || isLoadingEdit || isSubmitting || Boolean(editingRequestId)" @click="importRequest" />
                 </div>
               </div>
               <div class="form-group full-width">
@@ -508,8 +475,6 @@ onMounted(async () => {
         <p v-if="formError" class="form-error full-width" role="alert">{{ formError }}</p>
 
         <div class="form-actions full-width">
-          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장 복원" :disabled="isSubmitting || isLoadingEdit" @click="restoreDraft" />
-          <MyButton v-if="!editingRequestId" btn-type="button" color="white" size="big" content="임시저장" :disabled="isSubmitting || isLoadingEdit" @click="saveDraft" />
           <MyButton
             v-if="editingRequestId"
             btn-type="button"

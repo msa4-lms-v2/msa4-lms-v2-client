@@ -38,7 +38,7 @@ export const MENU_TITLES = {
     '/professor/certificates/apply': { default: '증명서 발급' },
     '/grade': { default: '성적 조회' },
     '/graduation-diagnosis': { default: '졸업 학점 진단' },
-    '/graduation-diagnoses': { default: '졸업요건 진단 현황' },
+    '/graduation-diagnoses': { ADMIN: '졸업요건 진단 현황', PROFESSOR: '졸업요건 진단 관리', default: '졸업요건 진단 관리' },
     '/evaluations': { default: '강의 평가' },
     '/attendance': { default: '출결 조회' },
     '/excuses': { default: '공결 신청' },
@@ -56,9 +56,9 @@ export const MENU_TITLES = {
     '/counseling/history': { default: '상담 내역' },
     '/professor/counseling': { default: '온라인 상담' },
     '/professor/leave-return': { default: '휴·복학 신청 관리' },
-    '/professor/withdrawals': { default: '자퇴 지도교수 검토' },
-    '/professor/academic-change-requests/department-transfer': { default: '전과 지도교수 검토' },
-    '/professor/academic-change-requests/double-major': { default: '복수전공 지도교수 검토' },
+    '/professor/withdrawals': { default: '자퇴 신청 관리' },
+    '/professor/academic-change-requests/department-transfer': { default: '전과 신청 관리' },
+    '/professor/academic-change-requests/double-major': { default: '복수전공 신청 관리' },
     '/professor/attendance/approvals': { default: '출결 승인' },
     '/professor/attendance': { default: '출결 확인' },
     '/professor/attendance/qr': { default: 'QR 출석 관리' },
@@ -93,3 +93,4 @@ export const getMenuTitle = (path, role) => {
     if (!menu) return '알 수 없음';
     return menu[role] || menu.default;
 };
+
