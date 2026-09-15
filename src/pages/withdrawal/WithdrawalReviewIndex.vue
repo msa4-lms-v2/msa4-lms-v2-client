@@ -106,6 +106,8 @@ const canReview = computed(() => {
     : selectedRequest.value.status === 'PENDING';
 });
 
+const getWithdrawalId = (request) => request?.id ?? request?.withdrawalId ?? request?.withdrawalRequestId;
+
 const createIdempotencyKey = (prefix) => {
   const suffix = globalThis.crypto?.randomUUID?.()
     || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -186,9 +188,10 @@ const selectRequest = async (withdrawalId) => {
 };
 
 const downloadAttachment = async () => {
-  if (!selectedRequest.value?.attachmentOriginalName) return;
+  const requestId = getWithdrawalId(selectedRequest.value);
+  if (!requestId || !selectedRequest.value?.attachmentOriginalName) return;
   try {
-    const response = await downloadWithdrawalAttachment(selectedRequest.value.id);
+    const response = await downloadWithdrawalAttachment(requestId);
     const url = URL.createObjectURL(response.data);
     const link = document.createElement('a');
     link.href = url;
@@ -203,14 +206,19 @@ const downloadAttachment = async () => {
 };
 
 const updateLocalRequest = (updated) => {
-  const index = requests.value.findIndex((item) => item.id === updated.id);
+  const updatedId = getWithdrawalId(updated);
+  const index = requests.value.findIndex((item) => getWithdrawalId(item) === updatedId);
   if (index >= 0) requests.value.splice(index, 1, updated);
-  if (selectedRequest.value?.id === updated.id) selectedRequest.value = updated;
+  if (getWithdrawalId(selectedRequest.value) === updatedId) selectedRequest.value = updated;
 };
 
 const processReview = async (approved) => {
   if (!selectedRequest.value || isProcessing.value) return;
-  const requestId = selectedRequest.value.id;
+  const requestId = getWithdrawalId(selectedRequest.value);
+  if (!requestId) {
+    formError.value = '신청 번호를 확인할 수 없습니다. 목록에서 다시 선택해 주세요.';
+    return;
+  }
 
   const reason = rejectReason.value.trim();
   if (!approved && !reason) {
@@ -225,7 +233,11 @@ const processReview = async (approved) => {
   const actionName = approved ? '승인' : '반려';
   const targetName = isAdmin.value ? '최종 처리' : '지도교수 검토';
   if (!await confirmDialog(`이 자퇴 신청을 ${actionName}하시겠습니까?`)) return;
-  if (isProcessing.value || selectedRequest.value?.id !== requestId || !canReview.value) return;
+  if (isProcessing.value || getWithdrawalId(selectedRequest.value) !== requestId) return;
+  if (!canReview.value) {
+    formError.value = '현재 상태에서는 검토할 수 없습니다.';
+    return;
+  }
 
   isProcessing.value = true;
   formError.value = '';
