@@ -8,8 +8,15 @@ export const searchAcademicChangeRequests = (type, params = {}) =>
 export const getAcademicChangeRequest = (type, requestId) =>
   myAxios.get(`${requestUrl(type)}/${requestId}`);
 
-export const downloadAcademicChangeFile = (type, requestId, fileId) =>
-  myAxios.get(`${requestUrl(type)}/${requestId}/files/${fileId}`, { responseType: 'blob' });
+export const downloadAcademicChangeFile = async (type, requestId, fileId) => {
+  try { return await myAxios.get(`${requestUrl(type)}/${requestId}/files/${fileId}`, { responseType: 'blob' }); }
+  catch(error) {
+    if(error.response?.data instanceof Blob) {
+      try { error.response.data=JSON.parse(await error.response.data.text()); } catch { /* 파일 응답이 아닌 오류는 기본 안내를 유지한다. */ }
+    }
+    throw error;
+  }
+};
 
 export const reviewAcademicChangeByAdvisor = (type, requestId, payload, idempotencyKey) =>
   myAxios.patch(`${requestUrl(type)}/${requestId}/advisor-review`, payload, {

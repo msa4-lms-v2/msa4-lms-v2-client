@@ -35,6 +35,6 @@ export const getProfessorsByDepartment = async departmentId => {
   return response.data.data.items;
 };
 export const peopleStatuses = {
-  admission: { PROVISIONING: '계정 생성 중', REGISTERED: '등록 완료', CONFIRMED: '입학 확정', PROVISIONED: '학생 계정 생성 완료', CANCELLED: '등록 취소' },
+  admission: { PENDING: '등록 대기', COMPLETED: '등록 완료', CANCELLED: '등록 취소' },
   professor: { ACTIVE: '활성', INACTIVE: '비활성', LOCKED: '잠김', PENDING: '대기' },
 };

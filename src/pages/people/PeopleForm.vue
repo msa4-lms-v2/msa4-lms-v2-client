@@ -13,6 +13,7 @@ import {
   retryAdmissionProvisioning,
   updatePerson,
 } from '../../api/peopleManagementApi';
+import AdmissionTuitionPanel from '../../components/payment/AdmissionTuitionPanel.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
@@ -32,7 +33,7 @@ const base = computed(() => (admission.value ? '/admin/admissions' : '/admin/pro
 const title = computed(() => (admission.value ? '입학 예정자' : '교수'));
 const pageTitle = computed(() => {
   if (!detail.value) return `${title.value} 등록`;
-  return admission.value ? '입학 예정자 상세 수정' : '교수 상세 수정';
+  return admission.value ? '입학 예정자 상세' : '교수 상세 수정';
 });
 
 const year = new Date().getFullYear();
@@ -62,6 +63,10 @@ const saving = ref(false);
 const ready = ref(false);
 const error = ref('');
 const status = ref('');
+const tuitionPaid = ref(false);
+const editable = ref(false);
+const savedForm = ref('');
+const hasUnsavedAdmissionChanges = computed(() => admission.value && editable.value && savedForm.value !== JSON.stringify(form));
 const registration = ref(null);
 const issuedNumber = ref('');
 const checking = ref(false);
@@ -94,10 +99,10 @@ const selectedCollegeName = computed(() => (
 ));
 
 const canEditDetail = computed(() => (
-  detail.value && (!admission.value || status.value === 'REGISTERED')
+  detail.value && (!admission.value || editable.value)
 ));
 const canManageProvisioning = computed(() => (
-  admission.value && detail.value && status.value === 'PROVISIONING'
+  admission.value && detail.value && status.value === 'PENDING'
 ));
 
 const preview = computed(() => [
@@ -136,12 +141,15 @@ const applyDetailData = (data) => {
   ));
   selectedCollegeId.value = data.collegeId || selectedDepartment?.college?.id || '';
   status.value = data.status || '';
+  tuitionPaid.value = data.tuitionPaid === true;
+  editable.value = data.editable === true;
   issuedNumber.value = data.studentNumber || data.professorNumber || '';
+  savedForm.value = JSON.stringify(form);
 };
 
 const scheduleDetailRefresh = () => {
   clearTimeout(detailTimer);
-  if (!disposed && canManageProvisioning.value) detailTimer = setTimeout(refreshProvisioning, 5000);
+  if (!disposed && canManageProvisioning.value && !editable.value) detailTimer = setTimeout(refreshProvisioning, 5000);
 };
 
 async function refreshProvisioning() {
@@ -153,7 +161,7 @@ async function refreshProvisioning() {
     applyDetailData(response.data.data);
     if (!canManageProvisioning.value) {
       confirmCancellation.value = false;
-      provisioningNotice.value = status.value === 'PROVISIONED' ? '학생 계정 생성이 완료되었습니다.' : '';
+      provisioningNotice.value = status.value === 'COMPLETED' ? '학생 계정 생성이 완료되었습니다.' : '';
     }
   } catch {
     // 다음 자동 조회에서 다시 확인한다.
@@ -262,6 +270,7 @@ const create = async () => {
   );
 
   const response = await createPerson(props.kind, payload);
+  if(admission.value){await router.replace(base.value+'/'+response.data.data.id);await initialize();return;}
   registration.value = response.data.data;
   checkRegistration();
 };
@@ -278,6 +287,7 @@ const update = async () => {
       phoneNumber: form.phoneNumber.trim(),
       address: form.address.trim(),
       departmentId: Number(form.departmentId),
+      advisorProfessorId: Number(form.advisorProfessorId),
       admissionYear: Number(form.admissionYear),
     };
   } else {
@@ -318,13 +328,17 @@ watch(() => form.departmentId, async (departmentId) => {
     String(department.id) === String(departmentId)
   ));
   if (selectedDepartment?.college?.id) selectedCollegeId.value = selectedDepartment.college.id;
-  if (!admission.value || detail.value) return;
-  form.advisorProfessorId = '';
+  if (!admission.value) return;
+  const previousAdvisor = form.advisorProfessorId;
+  if(!loading.value) form.advisorProfessorId = '';
   professors.value = [];
   if (!departmentId) return;
   professorsLoading.value = true;
   try {
-    professors.value = await getProfessorsByDepartment(Number(departmentId));
+    const result = await getProfessorsByDepartment(Number(departmentId));
+    if(String(form.departmentId)!==String(departmentId)) return;
+    professors.value=result;
+    if(result.some(p=>String(p.professorId)===String(previousAdvisor)))form.advisorProfessorId=previousAdvisor;
   } catch {
     error.value = '해당 학과의 교수 목록을 불러오지 못했습니다.';
   } finally {
@@ -385,7 +399,8 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <form v-if="ready && !registration" class="people-registration" @submit.prevent="submit">
+    <AdmissionTuitionPanel v-if="ready && detail && admission" :key="route.params.id" :candidate-id="Number(route.params.id)" :admission-year="Number(form.admissionYear)" :status="status" :tuition-paid="tuitionPaid" :disabled="hasUnsavedAdmissionChanges" @refresh="refreshProvisioning" />
+    <form v-if="ready && !registration" class="people-registration" @submit.prevent="submit" @invalid.capture="error = '필수 항목과 입력 형식을 확인해 주세요.'">
       <section class="people-card people-basic">
         <div class="people-section-heading">
           <h3>{{ title }} 기본 정보</h3>
@@ -460,9 +475,9 @@ onUnmounted(() => {
             </label>
           </div>
 
-          <label v-if="admission && !detail">
+          <label v-if="admission">
             <span class="field-label">지도교수 <em>*</em></span>
-            <MySelect v-model="form.advisorProfessorId" :disabled="!form.departmentId || professorsLoading" required>
+            <MySelect v-model="form.advisorProfessorId" :disabled="!form.departmentId || professorsLoading || (detail && !canEditDetail)" required>
               <option value="" disabled>
                 {{ professorsLoading ? '교수 목록을 불러오는 중...' : professors.length ? '지도교수를 선택해 주세요.' : '해당 학과에 활성 교수가 없습니다.' }}
               </option>
@@ -474,17 +489,11 @@ onUnmounted(() => {
 
           <label v-if="admission">
             <span class="field-label">입학 연도 <em v-if="!detail">*</em></span>
-            <MySelect v-if="!detail" v-model="form.admissionYear" required>
+            <MySelect v-model="form.admissionYear" :disabled="detail && !canEditDetail" required>
+              <option v-if="![year, year + 1].includes(Number(form.admissionYear))" :value="form.admissionYear" disabled>{{ form.admissionYear }}</option>
               <option :value="year">{{ year }}</option>
               <option :value="year + 1">{{ year + 1 }}</option>
             </MySelect>
-            <MyInput
-              v-else
-              v-model="form.admissionYear"
-              numeric-only
-              :disabled="!canEditDetail"
-              placeholder="입학 연도를 입력해 주세요."
-            />
           </label>
 
           <label v-else>
@@ -516,11 +525,12 @@ onUnmounted(() => {
           <h3>계정 생성 상태</h3>
           <p v-if="provisioningNotice" class="success-text" role="status">{{ provisioningNotice }}</p>
           <template v-if="canManageProvisioning">
-            <p class="people-help">처리가 중단되었다면 계정 생성을 재시도하거나 등록을 취소할 수 있습니다.</p>
+            <p class="people-help">완납 전에는 등록을 취소할 수 있습니다. 완납 후 생성이 중단되면 계정 생성을 재시도하세요.</p>
             <div class="people-actions">
               <MyButton
                 color="red"
                 size="big"
+                v-if="!tuitionPaid"
                 content="등록 취소"
                 :disabled="Boolean(provisioningAction)"
                 @click="confirmCancellation = true"
@@ -528,6 +538,7 @@ onUnmounted(() => {
               <MyButton
                 color="admin-indigo"
                 size="big"
+                v-if="tuitionPaid"
                 :content="provisioningAction === 'retry' ? '요청 중...' : '계정 생성 재시도'"
                 :disabled="Boolean(provisioningAction)"
                 @click="manageProvisioning(false)"
@@ -589,7 +600,7 @@ onUnmounted(() => {
             color="admin-indigo"
             size="big"
             :content="saving ? (detail ? '수정 중...' : '등록 중...') : (detail ? '수정 저장' : '등록')"
-            :disabled="saving || !form.departmentId || (!detail && admission && !form.advisorProfessorId)"
+            :disabled="saving || !ready"
           />
         </div>
       </div>
