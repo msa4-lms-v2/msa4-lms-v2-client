@@ -55,8 +55,10 @@ const savePdf = (issuedDocument, response) => {
   const link = document.createElement('a');
   link.href = url;
   link.download = `${issuedDocument.documentTypeLabel}.pdf`;
+  document.body.appendChild(link);
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
 const issueAndDownload = async (certificate) => {

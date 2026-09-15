@@ -235,7 +235,9 @@ onMounted(async () => {
 
 <style scoped>
 .enrollment-page :deep(.search-section) { padding: 18px 20px; }
-.enrollment-page :deep(.search-row) { display: grid; grid-template-columns: 150px 180px 120px minmax(150px, 1fr) minmax(150px, 1fr) 135px 77px; gap: 14px; }
+.enrollment-page :deep(.search-row) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 14px; }
+.enrollment-page :deep(.search-group) { min-width: 0; }
+.enrollment-page :deep(.table-container) { overflow-x: auto; }
 .enrollment-page :deep(.search-group select), .enrollment-page :deep(.search-group input) { width: 100%; min-width: 0; height: 38px; }
 .enrollment-page :deep(.submit-at-end) { margin-left: 0; }
 .semester-display { display: flex; flex-direction: column; justify-content: flex-end; gap: 7px; height: 62px; padding-bottom: 8px; }

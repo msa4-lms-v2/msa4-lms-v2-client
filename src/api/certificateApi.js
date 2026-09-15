@@ -5,17 +5,19 @@ const EMPLOYMENT_CERTIFICATES_URL = '/api/payment/employment-certificates';
 
 // 학생 재학/성적/졸업증명서 발급 (documentType: 'ENROLLMENT' | 'GRADE' | 'GRADUATION')
 export const issueCertificate = (documentType) =>
-  myAxios.post(CERTIFICATES_URL, { documentType });
+  myAxios.post(CERTIFICATES_URL, { documentType }, { skipRetry: true });
 
 // 교수 재직증명서 발급
 export const issueEmploymentCertificate = () =>
-  myAxios.post(EMPLOYMENT_CERTIFICATES_URL);
+  myAxios.post(EMPLOYMENT_CERTIFICATES_URL, undefined, { skipRetry: true });
 
-// 발급된 증명서 PDF 다운로드 (서버가 MinIO 다운로드 URL로 302 리다이렉트한다)
+// 인증된 Payment 서버가 PDF를 직접 반환한다.
 export const downloadCertificate = (documentId) =>
-  myAxios.get(`${CERTIFICATES_URL}/${documentId}/download`, { responseType: 'blob' });
+  myAxios.get(`${CERTIFICATES_URL}/${documentId}/content`, { responseType: 'blob' });
 
-export const issueCareerCertificate = () => myAxios.post("/api/payment/career-certificates");
-export const issueLectureCareerCertificate = () => myAxios.post("/api/payment/lecture-career-certificates");
+export const issueCareerCertificate = () => myAxios.post('/api/payment/career-certificates', undefined, { skipRetry: true });
+export const issueLectureCareerCertificate = () => myAxios.post('/api/payment/lecture-career-certificates', undefined, { skipRetry: true });
+
+export const getStudentCertificateHistory = (params) => myAxios.get('/api/payment/students/me/certificates', { params });
 
 export const getProfessorCertificateHistory = (params) => myAxios.get('/api/payment/professors/me/certificates', { params });
