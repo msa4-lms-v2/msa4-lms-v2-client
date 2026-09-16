@@ -51,7 +51,7 @@ const activeMenus = ref({
   adminApplicationManagement: false,
   adminLecture: false,
   adminGraduation: false,
-  adminAcademicOps: false,
+  adminStudent: false,
   adminTuition: false,
   studentAcademic: false,
   studentCourse: false,
@@ -92,8 +92,10 @@ watch(() => route.path, path => {
   if (
     path.startsWith('/admin/withdrawals')
     || path.startsWith('/admin/dismissals')
+    || path === '/students'
+    || path.startsWith('/students/')
   ) {
-    activeMenus.value.adminAcademicOps = true;
+    activeMenus.value.adminStudent = true;
   }
   if (
     path.startsWith('/admin/tuition')
@@ -570,21 +572,21 @@ const toggleMenu = (menuKey) => {
           </div>
         </div>
         <div class="menu-group">
-          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminAcademicOps" @click="toggleMenu('adminAcademicOps')">
-            <span>학사 운영 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminAcademicOps }">▼</span>
+          <button type="button" class="menu-header" :aria-expanded="activeMenus.adminStudent" @click="toggleMenu('adminStudent')">
+            <span>학생 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminStudent }">▼</span>
           </button>
-          <div v-show="activeMenus.adminAcademicOps" class="submenu-list">
+          <div v-show="activeMenus.adminStudent" class="submenu-list">
             <router-link to="/admin/withdrawals" class="submenu-item">
               {{ getMenuTitle("/admin/withdrawals") }}
             </router-link>
             <router-link to="/admin/dismissals" class="submenu-item">
               {{ getMenuTitle("/admin/dismissals") }}
             </router-link>
+            <router-link to="/students" class="submenu-item">
+              {{ getMenuTitle("/students") }}
+            </router-link>
           </div>
         </div>
-        <router-link to="/students" class="nav-item">{{
-          getMenuTitle("/students")
-        }}</router-link>
         <div class="menu-group">
           <button type="button" class="menu-header" :aria-expanded="activeMenus.adminTuition" @click="toggleMenu('adminTuition')">
             <span>등록금 관리</span><span class="chevron" :class="{ rotated: !activeMenus.adminTuition }">▼</span>
