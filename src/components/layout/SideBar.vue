@@ -86,10 +86,7 @@ watch(() => route.path, path => {
     activeMenus.value.adminApplicationManagement = true;
   }
   if (path.startsWith('/admin/lecture-opening-requests')) activeMenus.value.adminLecture = true;
-  if (
-    path.startsWith('/admin/graduation-requirements')
-    || path.startsWith('/graduation-diagnoses')
-  ) {
+  if (path.startsWith('/admin/graduation-requirements')) {
     activeMenus.value.adminGraduation = true;
   }
   if (
@@ -569,9 +566,6 @@ const toggleMenu = (menuKey) => {
           <div v-show="activeMenus.adminGraduation" class="submenu-list">
             <router-link to="/admin/graduation-requirements" class="submenu-item">
               {{ getMenuTitle("/admin/graduation-requirements") }}
-            </router-link>
-            <router-link to="/graduation-diagnoses" class="submenu-item">
-              {{ getMenuTitle("/graduation-diagnoses") }}
             </router-link>
           </div>
         </div>
