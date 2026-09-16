@@ -22,6 +22,7 @@ const isLoading = ref(false);
 const status = ref(null);
 const allocation = ref(null);
 const plan = ref(null);
+const virtualAccount = ref(null);
 const billItems = ref([]);
 const showApplication = ref(false);
 const isApplying = ref(false);
@@ -32,6 +33,7 @@ const methodOptions = [
   { value: 'VIRTUAL_ACCOUNT', label: '가상계좌' },
   { value: 'TRANSFER', label: '계좌이체' },
 ];
+const bankNames = { '04': '국민은행', '88': '신한은행', '20': '우리은행', '11': '농협은행', '81': '하나은행' };
 const currentBill = computed(() => tuitionStore.myBills.find((bill) => bill.id === props.tuitionBillId));
 const semesterLabel = computed(() => currentBill.value?.semesterId
   ? semesterStore.getSemesterLabel(currentBill.value.semesterId) : '등록금');
@@ -41,8 +43,9 @@ const scheduledPlanItems = computed(() => sortedPlanItems.value.filter((item) =>
 const selectedInstallmentItem = computed(() => scheduledPlanItems.value.find((item) => item.id === selectedInstallmentItemId.value));
 const billStatus = computed(() => status.value?.status ?? currentBill.value?.status);
 const isPaid = computed(() => billStatus.value === 'PAID');
+const isAwaitingDeposit = computed(() => ['ISSUED', 'PARTIALLY_DEPOSITED'].includes(virtualAccount.value?.status));
 const isBusy = computed(() => isLoading.value || tuitionStore.isPaymentLoading || isApplying.value);
-const canApply = computed(() => !plan.value && billStatus.value === 'UNPAID' && Number(allocation.value?.actualPaymentAmount) > 0 && !loadErrorMessage.value);
+const canApply = computed(() => !isAwaitingDeposit.value && !plan.value && billStatus.value === 'UNPAID' && Number(allocation.value?.actualPaymentAmount) > 0 && !loadErrorMessage.value);
 const planMessage = computed(() => {
   if (plan.value?.status === 'REQUESTED') return '분할납부 신청이 접수되어 관리자 심사 중입니다. 승인 후 회차별 납부가 가능합니다.';
   if (plan.value?.status === 'REJECTED') return `분할납부 신청이 반려되었습니다. 사유: ${plan.value.rejectReason || '관리자에게 문의해 주세요.'}`;
@@ -57,6 +60,7 @@ const displayedPaymentAmount = computed(() => {
   return Number.isFinite(Number(amount)) ? Number(amount) : 0;
 });
 const canPay = computed(() => {
+  if (isAwaitingDeposit.value) return false;
   if (isBusy.value || showApplication.value || plan.value?.status === 'REQUESTED' || loadErrorMessage.value || isPaid.value || displayedPaymentAmount.value <= 0) return false;
   if (paymentType.value === 'INSTALLMENT') return hasActivePlan.value && !!selectedInstallmentItem.value;
   // 일시납 금액은 잔액이 아닌 전체 실납부액이므로 부분납부 상태의 재결제를 막는다.
@@ -107,6 +111,7 @@ const load = async () => {
   status.value = null;
   allocation.value = null;
   plan.value = null;
+  virtualAccount.value = null;
   billItems.value = [];
   showApplication.value = false;
   isApplying.value = false;
@@ -124,9 +129,11 @@ const load = async () => {
           if (error.response?.status === 404) return { data: { data: null } };
           throw error;
         }),
+      myAxios.get('/api/payment/virtual-accounts', { params: { tuitionBillId: billId } }),
     ]);
     if (version !== loadVersion) return;
-    [status.value, allocation.value, billItems.value, plan.value] = responses.map((response) => response.data.data);
+    [status.value, allocation.value, billItems.value, plan.value, virtualAccount.value] = responses.map((response) => response.data.data);
+    if (isAwaitingDeposit.value) selectedMethod.value = 'VIRTUAL_ACCOUNT';
     if (hasActivePlan.value) paymentType.value = 'INSTALLMENT';
     selectedInstallmentItemId.value = scheduledPlanItems.value[0]?.id ?? '';
     emit('details-change', { billId, status: status.value, allocation: allocation.value });
@@ -228,7 +235,7 @@ onBeforeUnmount(() => { loadVersion += 1; });
               <MySelect
                 :id="`payment-type-${props.tuitionBillId}`"
                 v-model="paymentType"
-                :disabled="isBusy || isPaid || !!loadErrorMessage"
+                :disabled="isBusy || isPaid || isAwaitingDeposit || !!loadErrorMessage"
               >
                 <option
                   value="LUMP_SUM"
@@ -250,7 +257,7 @@ onBeforeUnmount(() => { loadVersion += 1; });
                 v-if="paymentType === 'INSTALLMENT'"
                 :id="`installment-round-${props.tuitionBillId}`"
                 v-model="selectedInstallmentItemId"
-                :disabled="isBusy || isPaid || !scheduledPlanItems.length"
+                :disabled="isBusy || isPaid || isAwaitingDeposit || !scheduledPlanItems.length"
               >
                 <option
                   v-if="!scheduledPlanItems.length"
@@ -302,12 +309,33 @@ onBeforeUnmount(() => { loadVersion += 1; });
                 color="white"
                 size="middle"
                 content="취소"
-                :disabled="isBusy || isPaid"
+                :disabled="isBusy || isPaid || isAwaitingDeposit"
                 @click="handleCancel"
               />
             </div>
           </div>
         </form>
+        <section
+          v-if="isAwaitingDeposit"
+          class="virtual-account"
+        >
+          <h4>등록금 가상계좌</h4>
+          <dl>
+            <dt>은행 / 계좌번호</dt>
+            <dd>{{ bankNames[virtualAccount.bankCode] || virtualAccount.bankCode }} / {{ virtualAccount.accountNumber }}</dd>
+            <dt>입금 기한</dt>
+            <dd>{{ virtualAccount.expiresAt?.replace('T', ' ') }}</dd>
+            <dt>납부 상태</dt>
+            <dd>{{ virtualAccount.status === 'PARTIALLY_DEPOSITED' ? '부분 납부' : '입금 대기' }}</dd>
+          </dl>
+          <MyButton
+            color="white"
+            size="middle"
+            content="납부 정보 새로고침"
+            :disabled="isBusy"
+            @click="load"
+          />
+        </section>
         <div
           v-if="canApply && !showApplication"
           class="application-entry"
@@ -399,6 +427,9 @@ h4 { margin-bottom: 0.5rem; font-size: 0.85rem; }
   border-radius: var(--personal-radius);
 }
 .bill-details { min-width: 0; }
+.virtual-account { grid-column: 1 / -1; padding-top: 1rem; border-top: 1px solid var(--personal-color-border-mist); }
+.virtual-account dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.75rem 1.5rem; margin: 1rem 0; font-size: 0.85rem; }
+.virtual-account dd { margin: 0; overflow-wrap: anywhere; }
 .details-scroll { max-height: 12rem; overflow: auto; }
 .details-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
 .details-table th, .details-table td { border: 1px solid var(--personal-color-border-mist); padding: 0.6rem 0.65rem; }
