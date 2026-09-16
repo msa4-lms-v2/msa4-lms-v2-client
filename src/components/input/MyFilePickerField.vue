@@ -7,6 +7,7 @@ defineProps({
   files: { type: Array, default: () => [] },
   accept: { type: String, default: '' },
   multiple: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
   emptyText: { type: String, default: '선택된 파일 없음' },
   countSuffix: { type: String, default: '개 파일 첨부됨' },
 });
@@ -23,7 +24,7 @@ defineExpose({ reset });
 </script>
 
 <template>
-  <div class="file-picker">
+  <div class="file-picker" :class="{ 'file-picker--compact': compact }">
     <MyFileSelectButton
       ref="buttonRef"
       :accept="accept"
@@ -31,6 +32,7 @@ defineExpose({ reset });
       @change="onChange"
     />
     <span
+      v-if="!compact || !files.length"
       class="file-count"
       :class="{ 'file-count--attached': files.length > 0 }"
     >
@@ -154,5 +156,32 @@ defineExpose({ reset });
   .file-chip {
     max-width: 100%;
   }
+}
+
+.file-picker--compact {
+  min-width: 0;
+  height: 38px;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+}
+
+.file-picker--compact .file-count {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-picker--compact .file-chips {
+  flex: 1;
+  flex-wrap: nowrap;
+}
+
+.file-picker--compact .file-chip {
+  flex: 1;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 </style>

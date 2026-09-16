@@ -15,7 +15,6 @@ import {
 } from '../../api/peopleManagementApi';
 import AdmissionTuitionPanel from '../../components/payment/AdmissionTuitionPanel.vue';
 import MyButton from '../../components/button/MyButton.vue';
-import MyDateField from '../../components/input/MyDateField.vue';
 import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
@@ -422,13 +421,14 @@ onUnmounted(() => {
             <span class="field-label">
               {{ field.label }} <em v-if="field.required && !detail">*</em>
             </span>
-            <MyDateField
+            <MyInput
               v-if="field.type === 'date'"
               v-model="form[field.key]"
+              type="date"
               :max="maxBirth"
               :required="field.required"
               :disabled="detail && (!admission || !canEditDetail)"
-              :placeholder="`${field.label} 선택`"
+              :aria-label="field.label"
             />
             <MyInput
               v-else

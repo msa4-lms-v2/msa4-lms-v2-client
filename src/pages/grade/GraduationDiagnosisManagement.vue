@@ -10,13 +10,10 @@ import NumberedPagination from '../../components/pagination/NumberedPagination.v
 import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import { notify } from '../../composables/useDialog';
-import { useAuthStore } from '../../store/auth/useAuthStore';
 import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/academic/enumLabels';
 
 defineOptions({ name: 'GraduationDiagnosisManagement' });
 
-const authStore = useAuthStore();
-const isAdmin = computed(() => authStore.userInfo?.role === 'ADMIN');
 const departments = ref([]);
 const diagnoses = ref([]);
 const selectedDiagnosis = ref(null);
@@ -180,8 +177,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :class="isAdmin ? 'admin-role' : 'professor-role professor-page'" :title="isAdmin ? '졸업요건 진단 현황' : '학생 졸업요건 현황'">
-    <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" submit-at-end @search="loadDiagnoses(1)">
+  <MyPageContainer class="professor-role professor-page" title="학생 졸업요건 현황">
+    <MySearchFilter class="professor-search" submit-text="조회" submit-at-end @search="loadDiagnoses(1)">
       <div class="search-group">
         <label for="diagnosis-keyword">학생 이름</label>
         <MyInput id="diagnosis-keyword" v-model="filters.keyword" placeholder="학생 이름" @keyup-enter="loadDiagnoses(1)" />
@@ -266,7 +263,7 @@ onMounted(async () => {
         </td>
         <td>
           <MyButton
-            :class="selectedDiagnosis?.studentId === item.studentId ? '' : (isAdmin ? 'admin-secondary' : 'professor-secondary')"
+            :class="selectedDiagnosis?.studentId === item.studentId ? '' : 'professor-secondary'"
             size="middle"
             :color="selectedDiagnosis?.studentId === item.studentId ? 'gray' : 'white'"
             :content="selectedDiagnosis?.studentId === item.studentId ? '선택됨' : '상세'"
@@ -282,17 +279,17 @@ onMounted(async () => {
       :page="page.page"
       :total-count="page.totalCount"
       :size="page.size"
-      :color="isAdmin ? 'admin-indigo' : 'professor-navy'"
+      color="professor-navy"
       @page-change="loadDiagnoses"
     />
 
-    <section v-if="!isAdmin && selectedDiagnosis" class="professor-credit-summary">
+    <section v-if="selectedDiagnosis" class="professor-credit-summary">
       <h3>선택 학생 · {{ selectedDiagnosis.studentName }}</h3>
       <dl><div v-for="row in requirementRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ creditRatio(row.earned, row.required) }}학점</dd></div></dl>
       <h3>조회 범위</h3><p>지도학생의 전공·교양·총 학점 충족 현황입니다. {{ selectedDiagnosis.reason }}</p>
     </section>
-    <component :is="isAdmin ? 'section' : 'details'" v-if="selectedDiagnosis" class="detail-section">
-      <summary v-if="!isAdmin">학점 반영 상세 내역</summary>
+    <details v-if="selectedDiagnosis" class="detail-section">
+      <summary>학점 반영 상세 내역</summary>
       <div class="detail-heading">
         <div>
           <span class="section-eyebrow">학생별 상세</span>
@@ -328,7 +325,7 @@ onMounted(async () => {
         <strong>{{ recordPage.totalCount.toLocaleString() }}건</strong>
       </div>
 
-      <MySearchFilter :class="isAdmin ? 'admin-search' : 'professor-search'" submit-text="조회" submit-at-end @search="loadCreditRecords(1)">
+      <MySearchFilter class="professor-search" submit-text="조회" submit-at-end @search="loadCreditRecords(1)">
         <div class="search-group compact-filter">
           <label for="record-year">수강 연도</label>
           <MyInput id="record-year" v-model="recordFilters.academicYear" numeric-only placeholder="예: 2025" @keyup-enter="loadCreditRecords(1)" />
@@ -388,10 +385,10 @@ onMounted(async () => {
         :page="recordPage.page"
         :total-count="recordPage.totalCount"
         :size="recordPage.size"
-        :color="isAdmin ? 'admin-indigo' : 'professor-navy'"
+        color="professor-navy"
         @page-change="loadCreditRecords"
       />
-    </component>
+    </details>
   </MyPageContainer>
 </template>
 
@@ -405,11 +402,6 @@ onMounted(async () => {
 .professor-role .detail-section > summary { cursor: pointer; font-size: 14px; color: var(--personal-color-primary-navy); margin-bottom: 16px; }
 .professor-role :deep(.status-badge) { background: transparent; padding: 0; border: 0; font-weight: 400; }
 .professor-role :deep(.my-table strong) { font-weight: 400; }
-
-.admin-role {
-  --role-accent: var(--personal-color-admin-secondary-indigo);
-  --role-selection: var(--personal-color-indigo-soft-lavender);
-}
 
 .professor-role {
   --role-accent: var(--personal-color-professor-primary-navy);
