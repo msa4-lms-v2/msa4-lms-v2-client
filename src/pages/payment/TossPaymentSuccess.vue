@@ -10,17 +10,22 @@ const tuitionStore = useTuitionStore();
 
 const isConfirming = ref(true);
 const errorMessage = ref('');
+const isAwaitingDeposit = ref(false);
 
 const tuitionBillId = Number(route.query.tuitionBillId);
 
 onMounted(async () => {
   try {
-    await tuitionStore.confirmTossPayment({
+    const payment = await tuitionStore.confirmTossPayment({
       tuitionBillId,
       orderId: route.query.orderId,
       paymentKey: route.query.paymentKey,
       amount: Number(route.query.amount),
     });
+    isAwaitingDeposit.value = payment?.method === 'VIRTUAL_ACCOUNT' && payment.status === 'REQUESTED';
+    if (payment?.status !== 'SUCCEEDED' && !isAwaitingDeposit.value) {
+      errorMessage.value = '등록금 고지 화면에서 납부 상태를 확인해 주세요.';
+    }
   } catch {
     errorMessage.value = '결제 승인 확정에 실패했습니다. 등록금 고지 화면에서 상태를 다시 확인해 주세요.';
   } finally {
@@ -37,13 +42,19 @@ onMounted(async () => {
       </p>
       <template v-else>
         <h1 v-if="!errorMessage">
-          결제가 완료됐습니다
+          {{ isAwaitingDeposit ? '가상계좌가 발급됐습니다' : '결제가 완료됐습니다' }}
         </h1>
         <h1 v-else>
           결제 확인이 필요합니다
         </h1>
-        <p v-if="errorMessage" class="notice notice--error">
+        <p
+          v-if="errorMessage"
+          class="notice notice--error"
+        >
           {{ errorMessage }}
+        </p>
+        <p v-else-if="isAwaitingDeposit">
+          입금 대기
         </p>
         <MyButton
           color="deep-blue"
