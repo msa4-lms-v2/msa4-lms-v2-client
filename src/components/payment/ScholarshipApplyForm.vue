@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { SCHOLARSHIP_TYPE_LABEL } from '../../util/payment/enumLabels';
 import MySelect from '../input/MySelect.vue';
 import MyInput from '../input/MyInput.vue';
+import MyButton from '../button/MyButton.vue';
 
 const props = defineProps({
   isSubmitting: { type: Boolean, default: false },
@@ -40,19 +41,26 @@ const handleSubmit = () => {
 
     <div class="field">
       <label for="scholarship-reason">사유</label>
-      <input id="scholarship-reason" v-model="reason" type="text" required />
+      <MyInput id="scholarship-reason" v-model="reason" required />
     </div>
 
-    <button type="submit" :disabled="props.isSubmitting">
+    <MyButton
+      class="submit-button"
+      btn-type="submit"
+      size="middle"
+      color="admin-indigo"
+      :disabled="props.isSubmitting"
+    >
       {{ props.isSubmitting ? '적용 중...' : '적용' }}
-    </button>
+    </MyButton>
   </form>
 </template>
 
 <style scoped>
 .scholarship-form {
   background: var(--personal-color-white);
-  border-radius: var(--personal-radius-card);
+  border: 1px solid var(--personal-color-border-mist);
+  border-radius: 8px;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -65,24 +73,11 @@ const handleSubmit = () => {
   gap: 4px;
 }
 
-input,
-select {
-  padding: 8px 12px;
-  border-radius: var(--personal-radius);
-  border: 1px solid var(--personal-color-border-mist);
-}
-
-button {
+.submit-button {
   align-self: flex-start;
-  padding: 10px 20px;
-  border: none;
-  border-radius: var(--personal-radius);
-  background: var(--personal-color-admin-secondary-indigo);
-  color: var(--personal-color-white);
-  cursor: pointer;
 }
 
-button:disabled {
+.submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
