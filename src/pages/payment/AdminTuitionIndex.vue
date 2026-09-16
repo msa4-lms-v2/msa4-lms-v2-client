@@ -59,7 +59,7 @@ const load = async (page = 1) => {
 const personFor = bill => people.value[bill.studentId
   ? `student:${bill.studentId}` : `admission:${bill.admissionCandidateId}`];
 const studentNumberFor = bill => personFor(bill)?.studentNumber
-  || (!bill.studentId && bill.admissionCandidateId ? '학번 발급 대기' : '확인 불가');
+  || (!bill.studentId && bill.admissionCandidateId ? '발급 대기' : '확인 불가');
 const detailPath = bill => !bill.studentId && bill.admissionCandidateId
   ? `/admin/admissions/${bill.admissionCandidateId}` : `/admin/tuition/${bill.id}`;
 

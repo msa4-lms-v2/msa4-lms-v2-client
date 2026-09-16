@@ -36,7 +36,7 @@ test('고지 목록은 내부 ID 대신 실제 학번을 연결하고 예정자�
   await page.load();
   assert.equal(lookups, 1);
   assert.equal(page.studentNumberFor(student), '25010006');
-  assert.equal(page.studentNumberFor(candidate), '학번 발급 대기');
+  assert.equal(page.studentNumberFor(candidate), '발급 대기');
   assert.equal(page.personFor(candidate).departmentName, '미술학과');
   assert.equal(page.detailPath(candidate), '/admin/admissions/12');
   assert.equal(page.detailPath(student), '/admin/tuition/1');
