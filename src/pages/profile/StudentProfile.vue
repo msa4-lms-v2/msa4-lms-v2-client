@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onActivated, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
@@ -9,12 +9,23 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MyButton from '../../components/button/MyButton.vue';
 import { ACADEMIC_STATUS_LABEL, ACADEMIC_STATUS_VARIANT } from '../../util/academic/enumLabels';
 
+defineOptions({ name: 'StudentProfile' });
+
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
 const router = useRouter();
 
+let initialized = false;
+
 onMounted(async () => {
   await profileStore.fetchStudentProfile();
+  initialized = true;
+});
+
+// 정보 변경 신청이 승인된 뒤 학적 조회 탭으로 돌아와도 최신 정보가 보이도록,
+// keep-alive로 유지되는 탭이 다시 활성화될 때마다 프로필을 다시 불러온다.
+onActivated(() => {
+  if (initialized) profileStore.fetchStudentProfile();
 });
 
 const user = computed(() => profileStore.profile || {});
@@ -32,6 +43,7 @@ const student = computed(() => ({
   advisor: user.value.advisorName || '-',
   entranceYear: user.value.admissionYear || '-',
   totalCredits: user.value.totalCredits ?? 0,
+  profileImageUrl: user.value.profileImageUrl || '',
 }));
 
 const statusVariant = computed(() => ACADEMIC_STATUS_VARIANT[user.value.academicStatus] || 'processing');

@@ -109,14 +109,14 @@ watch(() => props.profile.profileImageUrl, () => { imageFailed.value = false; })
 
 .profile-image {
   width: 96px;
-  height: 96px;
-  border-radius: 50%;
+  height: 150px;
+  margin-top: 10px;
   background: var(--personal-color-bg-surface-frost);
   flex: 0 0 96px;
 }
 
 .profile-main {
-  min-width: 0;
+  min-width: 100px;
 }
 
 .name-row {
