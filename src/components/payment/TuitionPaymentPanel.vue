@@ -312,7 +312,6 @@ onBeforeUnmount(() => { loadVersion += 1; });
           v-if="canApply && !showApplication"
           class="application-entry"
         >
-          <p>등록금을 나누어 납부하려면 분할납부를 신청해 주세요.</p>
           <MyButton
             color="white"
             size="middle"

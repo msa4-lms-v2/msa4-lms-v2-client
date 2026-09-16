@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed, watch } from 'vue';
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 import myAxios from '../../api/myAxios';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 import { formatCurrency, formatDate } from '../../util/format';
@@ -14,9 +14,37 @@ const semesters=useSemesterStore();
 const detail=ref(null),busy=ref(false),loading=ref(false),error=ref('');
 const semesterId=ref(''),amount=ref(''),dueDate=ref(''),bankCode=ref('');
 const reissueDueDate=ref('');
+const rateLoading = ref(false);
+const rateError = ref('');
+let rateRequest = 0;
 const today=()=>formatDate(new Date());
 const bankNames={'04':'국민은행','88':'신한은행','20':'우리은행','11':'농협은행','81':'하나은행'};
 const eligibleSemesters=computed(()=>semesters.semesters.filter(s=>s.academicYear===props.admissionYear));
+const loadRate = async () => {
+  const request = ++rateRequest;
+  rateError.value = '';
+  rateLoading.value = false;
+  if (detail.value?.bill) {
+    amount.value = detail.value.bill.billingAmount;
+    return;
+  }
+  amount.value = '';
+  if (!semesterId.value || loading.value || props.disabled || props.status !== 'PENDING' || props.tuitionPaid) return;
+  rateLoading.value = true;
+  try {
+    const response = await myAxios.get(`/api/payment/admission-candidates/${props.candidateId}/tuition/quote`, {
+      params: { semesterId: Number(semesterId.value) },
+    });
+    if (request === rateRequest) amount.value = response.data.data.billingAmount;
+  } catch (e) {
+    if (request === rateRequest) rateError.value = e.response?.data?.message || '등록금 기준 금액을 불러오지 못했습니다.';
+  } finally {
+    if (request === rateRequest) rateLoading.value = false;
+  }
+};
+watch([semesterId, loading, () => props.disabled, () => props.status, () => props.tuitionPaid,
+  () => detail.value?.bill], loadRate);
+onUnmounted(() => { rateRequest++; });
 watch(()=>props.admissionYear,()=>{if(!detail.value?.bill)semesterId.value=eligibleSemesters.value[0]?.id || '';});
 const load=async({preserveError=false}={})=>{
   if(loading.value)return;
@@ -32,13 +60,14 @@ const load=async({preserveError=false}={})=>{
   finally{loading.value=false;}
 };
 const issue=async()=>{
-  if(busy.value || loading.value)return;
+  if(busy.value || loading.value || rateLoading.value)return;
   if(props.disabled){await notify('입학 정보의 수정 사항을 먼저 저장해 주세요.');return;}
   if(props.status!=='PENDING' || props.tuitionPaid){await notify('입학 대기 상태이고 완납하지 않은 예정자만 고지를 발급할 수 있습니다.');return;}
-  if(!semesterId.value || !Number.isSafeInteger(Number(amount.value)) || Number(amount.value)<=0 || !dueDate.value || !bankCode.value){await notify('입학 학기, 0원보다 큰 정수 금액, 납부 기한과 은행을 입력해 주세요.');return;}
+  if(rateError.value || !Number.isSafeInteger(Number(amount.value)) || Number(amount.value)<=0){await notify(rateError.value || '등록금 기준 금액을 확인해 주세요.');return;}
+  if(!semesterId.value || !dueDate.value || !bankCode.value){await notify('입학 학기, 납부 기한과 은행을 선택해 주세요.');return;}
   busy.value=true;error.value='';
   try {
-    const r=await myAxios.post('/api/payment/admission-candidates/'+props.candidateId+'/tuition',{semesterId:Number(semesterId.value),billingAmount:Number(amount.value),dueDate:dueDate.value,bankCode:bankCode.value});
+    const r=await myAxios.post('/api/payment/admission-candidates/'+props.candidateId+'/tuition',{semesterId:Number(semesterId.value),dueDate:dueDate.value,bankCode:bankCode.value});
     detail.value=r.data.data; emit('refresh');
   } catch(e){error.value=e.response?.data?.message || '발급 결과를 확인하지 못했습니다. 같은 고지로 다시 요청해 주세요.';await load({preserveError:true});emit('refresh');await notify(error.value);}
   finally{busy.value=false;}
@@ -65,9 +94,9 @@ const reissue=async()=>{
 <template>
   <section class="admission-tuition" aria-label="입학 등록금 가상계좌">
     <h3>입학 등록금 가상계좌</h3>
-    <p v-if="tuitionPaid">완납이 확인되었습니다. 계정 생성 중 오류가 발생하면 재납부하지 말고 생성 재시도를 이용해 주세요.</p>
-    <p v-if="disabled">입학 정보의 수정 사항을 먼저 저장해 주세요. 저장된 정보로 고지를 발급합니다.</p>
+    <p v-if="disabled">변경 사항을 먼저 저장해 주세요.</p>
     <p v-if="error" role="alert">{{ error }}</p>
+    <p v-if="rateError" role="alert">{{ rateError }}</p>
     <dl v-if="detail?.virtualAccount">
       <dt>은행 / 계좌번호</dt><dd>{{ bankNames[detail.virtualAccount.bankCode] || detail.virtualAccount.bankCode }} / {{ detail.virtualAccount.accountNumber }}</dd>
       <dt>납부금액</dt><dd>{{ formatCurrency(detail.bill.billingAmount) }}</dd>
@@ -87,7 +116,12 @@ const reissue=async()=>{
       </label>
       <label class="tuition-field">
         등록금 금액
-        <MyInput v-model="amount" type="number" min="1" step="1" :disabled="busy || !!detail?.bill" />
+        <MyInput
+          :model-value="rateLoading ? '조회 중…' : amount !== '' ? formatCurrency(amount) : ''"
+          placeholder="학기 선택 후 자동 책정"
+          readonly
+          :aria-busy="rateLoading"
+        />
       </label>
       <div class="tuition-field">
         <label :for="`admission-due-date-${candidateId}`">납부 기한</label>
@@ -112,13 +146,12 @@ const reissue=async()=>{
       <MyButton
         color="admin-indigo"
         size="big"
-        :disabled="busy || loading"
+        :disabled="busy || loading || rateLoading || !!rateError || !amount || disabled"
         :content="busy ? '발급 중…' : '고지 및 가상계좌 발급'"
         @click="issue"
       />
     </div>
     <div v-if="status==='PENDING' && !tuitionPaid && detail?.canReissue" class="reissue-fields">
-      <p v-if="detail.reissuePending">재발급 요청이 저장되었습니다. 동일한 기한으로 이어서 처리합니다.</p>
       <div class="reissue-actions">
         <div class="tuition-field">
           <label :for="`admission-reissue-due-date-${candidateId}`">새 납부 기한</label>
