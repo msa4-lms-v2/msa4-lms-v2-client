@@ -340,6 +340,7 @@ onMounted(() => loadRequests());
           <span>첨부파일</span>
           <MyFilePickerField
             ref="attachmentFileSelect"
+            compact
             :files="form.attachmentFile ? [form.attachmentFile] : []"
             accept=".pdf,application/pdf"
             @change="selectAttachment"
@@ -456,7 +457,7 @@ onMounted(() => loadRequests());
 
 .request-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
   align-items: end;
   gap: 16px;
   padding: 20px 24px 22px;
@@ -468,6 +469,10 @@ onMounted(() => loadRequests());
   min-width: 0;
   flex-direction: column;
   gap: 6px;
+}
+
+.button-field {
+  align-items: flex-end;
 }
 
 .form-field label,
@@ -596,7 +601,7 @@ onMounted(() => loadRequests());
   }
 
   .button-field {
-    align-items: flex-end;
+    grid-column: 1 / -1;
   }
 }
 
@@ -605,8 +610,5 @@ onMounted(() => loadRequests());
     grid-template-columns: 1fr;
   }
 
-  .button-field {
-    align-items: stretch;
-  }
 }
 </style>
