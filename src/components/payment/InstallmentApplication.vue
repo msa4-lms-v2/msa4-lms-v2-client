@@ -165,5 +165,5 @@ table { width: 100%; max-width: 38rem; border-collapse: collapse; background: va
 caption { text-align: left; margin-bottom: 0.5rem; }
 th, td { padding: 0.65rem; border: 1px solid var(--personal-color-border-mist); text-align: left; white-space: nowrap; }
 .error { color: var(--personal-color-red); }
-.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 0.75rem; }
 </style>
