@@ -10,7 +10,7 @@
         <p class="notice">아직 분할납부를 신청하지 않았습니다.</p>
 
         <div v-if="submitSuccess">
-          <p class="success-notice">신청 완료, 관리자 승인을 기다려주세요.</p>
+          <p class="success-notice">신청 완료</p>
         </div>
         <div v-else class="apply-form">
           <div class="form-group">
@@ -42,21 +42,13 @@
           />
         </div>
 
-        <div v-if="instStore.installmentPlan.status === 'REQUESTED'">
-          <p class="notice">승인 대기 중입니다. 관리자 승인 후 결제가 가능합니다.</p>
-        </div>
-
-        <div v-else-if="instStore.installmentPlan.status === 'REJECTED'">
+        <div v-if="instStore.installmentPlan.status === 'REJECTED'">
           <p class="error-notice">
             반려됨: {{ instStore.installmentPlan.rejectReason || '사유 없음' }}
           </p>
         </div>
 
         <div v-else-if="instStore.installmentPlan.status === 'ACTIVE' || instStore.installmentPlan.status === 'COMPLETED'">
-          <div v-if="instStore.installmentPlan.status === 'COMPLETED'" class="success-notice">
-            모든 분할납부가 완료되었습니다.
-          </div>
-
           <MyTable
             :columns="[
               { key: 'round', label: '회차' },
@@ -78,9 +70,9 @@
             </tr>
           </MyTable>
 
-          <p v-if="instStore.installmentPlan.status === 'ACTIVE'" class="notice">
-            회차별 결제는 <RouterLink :to="`/tuition/${tuitionBillId}`">등록금 납부</RouterLink> 화면에서 진행합니다.
-          </p>
+          <RouterLink v-if="instStore.installmentPlan.status === 'ACTIVE'" :to="`/tuition/${tuitionBillId}`">
+            <MyButton color="deep-blue" size="middle" content="등록금 납부" />
+          </RouterLink>
         </div>
       </div>
     </article>

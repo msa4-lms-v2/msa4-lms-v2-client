@@ -220,9 +220,6 @@ onMounted(() => {
         <p v-if="installmentStore.isLoadingPlan">불러오는 중...</p>
         <p v-else-if="!installmentStore.installmentPlan" class="empty-text">분할납부 신청 이력이 없습니다.</p>
         <template v-else>
-          <p class="description">
-            총 {{ installmentStore.installmentPlan.totalRounds }}회차 분할납부 신청입니다.
-          </p>
           <MyTable
             :columns="[
               { key: 'round', label: '회차' },
@@ -310,7 +307,6 @@ onMounted(() => {
     </div>
 
     <MyModal :is-open="isReviewOpen" title="분할납부 신청 심사" max-width="480px" @close="closeReview">
-      <p class="description">이 신청을 승인하면 학생이 회차 결제를 시작할 수 있습니다.</p>
       <div class="review-area">
         <textarea v-model="rejectReason" rows="2" placeholder="반려 시 사유를 입력해 주세요."></textarea>
       </div>

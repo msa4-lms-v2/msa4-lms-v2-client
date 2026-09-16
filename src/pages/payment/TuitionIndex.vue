@@ -74,7 +74,6 @@ onMounted(() => {
       </template>
       <template v-else>
         <h2>납부할 등록금 고지가 없습니다.</h2>
-        <p>등록금 고지가 발행되면 이곳에서 확인하고 납부할 수 있습니다.</p>
         <RouterLink to="/tuition/history">납부 내역 확인</RouterLink>
       </template>
     </section>
