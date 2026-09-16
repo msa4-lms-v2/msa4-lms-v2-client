@@ -69,7 +69,6 @@ onBeforeUnmount(() => { version += 1; emit('busy-change', false); });
     @submit.prevent="submit"
   >
     <h4>분할납부 신청</h4>
-    <p>연체 이력이 없으면 자동 승인됩니다. 연체 이력이 있으면 관리자 심사 후 납부할 수 있습니다.</p>
     <div class="round-selection">
       <label :for="`apply-rounds-${props.tuitionBillId}`">분할 회차</label>
       <MySelect
@@ -93,9 +92,6 @@ onBeforeUnmount(() => { version += 1; emit('busy-change', false); });
       신청 조건과 납부 일정을 확인하는 중...
     </p>
     <template v-else-if="preview">
-      <p role="status">
-        {{ preview.requiresReview ? '연체 이력이 있어 관리자 심사가 필요합니다.' : '현재 자동 승인 대상입니다.' }}
-      </p>
       <div class="preview-scroll">
         <table>
           <caption>신청 후 납부 일정</caption>
@@ -123,9 +119,6 @@ onBeforeUnmount(() => { version += 1; emit('busy-change', false); });
           </tbody>
         </table>
       </div>
-      <p class="hint">
-        첫 회차는 고지서 납부기한, 이후 회차는 한 달 간격입니다. 신청 시 조건을 다시 확인합니다.
-      </p>
     </template>
     <p
       v-if="errorMessage"
@@ -171,7 +164,6 @@ p, table, label { font-size: 0.85rem; }
 table { width: 100%; max-width: 38rem; border-collapse: collapse; background: var(--personal-color-white); }
 caption { text-align: left; margin-bottom: 0.5rem; }
 th, td { padding: 0.65rem; border: 1px solid var(--personal-color-border-mist); text-align: left; white-space: nowrap; }
-.hint { color: var(--personal-color-text-muted-slate); }
 .error { color: var(--personal-color-red); }
-.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 0.75rem; }
 </style>

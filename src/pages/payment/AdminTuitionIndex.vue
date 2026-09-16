@@ -37,7 +37,6 @@ onMounted(() => load());
         </option>
       </MySelect>
     </div>
-    <p class="status-guide">상태는 조회 조건입니다. 결제 취소는 고지 상세의 취소·환불 절차가 완료되면 자동 반영됩니다.</p>
 
     <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
@@ -78,7 +77,6 @@ onMounted(() => load());
 
 <style scoped>
 .filter { padding: 1.25rem; background: var(--personal-color-white); border: 1px solid var(--personal-color-border-mist); border-radius: .5rem; }
-.status-guide { font-size: .8125rem; color: var(--personal-color-text-secondary-steel); }
 .admin-tuition-page :deep(.my-table) { background: var(--personal-color-white); }
 .filter {
   display: flex;
