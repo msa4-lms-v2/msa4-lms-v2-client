@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onActivated, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfileStore } from '../../store/profile/useProfileStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
@@ -13,15 +13,24 @@ const profileStore = useProfileStore();
 const authStore = useAuthStore();
 const router = useRouter();
 const loadError = ref('');
+let initialized = false;
 const loadProfile = async () => {
   loadError.value = '';
   try {
     await profileStore.fetchProfessorProfile();
   } catch (error) {
     loadError.value = error.response?.data?.message || '교수 정보를 불러오지 못했습니다.';
+  } finally {
+    initialized = true;
   }
 };
 onMounted(loadProfile);
+
+// 정보 변경 신청이 승인된 뒤 교적 조회 탭으로 돌아와도 최신 정보가 보이도록,
+// keep-alive로 유지되는 탭이 다시 활성화될 때마다 프로필을 다시 불러온다.
+onActivated(() => {
+  if (initialized) loadProfile();
+});
 const user = computed(() => profileStore.profile || {});
 const statusLabels = { ACTIVE: '재직', INACTIVE: '비활성' };
 const statusVariants = { ACTIVE: 'processing', INACTIVE: 'fail' };
