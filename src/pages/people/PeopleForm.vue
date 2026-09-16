@@ -19,6 +19,7 @@ import MyInput from '../../components/input/MyInput.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import { notify } from '../../composables/useDialog';
+import { normalizeBirthDate } from '../../util/birthDate';
 import './peopleManagement.css';
 
 defineOptions({ name: 'PeopleForm' });
@@ -36,9 +37,6 @@ const pageTitle = computed(() => {
 });
 
 const year = new Date().getFullYear();
-const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
-const maxBirth = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
 const form = reactive({
   name: '',
@@ -76,7 +74,7 @@ const confirmCancellation = ref(false);
 
 const fields = computed(() => [
   { key: 'name', label: '이름', type: 'text', max: 50, required: true },
-  { key: 'birthDate', label: '생년월일', type: 'date', required: !detail.value },
+  { key: 'birthDate', label: '생년월일', type: 'text', required: !detail.value },
   { key: 'email', label: '이메일', type: 'email', max: 100, required: !detail.value },
   { key: 'phoneNumber', label: '연락처', type: 'tel', max: 20 },
   { key: 'address', label: '주소', type: 'text', max: 255 },
@@ -312,6 +310,15 @@ const update = async () => {
 
 const submit = async () => {
   if (saving.value || registration.value || !ready.value) return;
+  if ((!detail.value || admission.value) && (form.birthDate || !detail.value)) {
+    const birthDate = normalizeBirthDate(form.birthDate);
+    if (!birthDate) {
+      error.value = '생년월일을 오늘 이전의 올바른 날짜로 입력해 주세요. (예: 20000101)';
+      await notify(error.value);
+      return;
+    }
+    form.birthDate = birthDate;
+  }
   saving.value = true;
   error.value = '';
   try {
@@ -422,10 +429,13 @@ onUnmounted(() => {
               {{ field.label }} <em v-if="field.required && !detail">*</em>
             </span>
             <MyInput
-              v-if="field.type === 'date'"
+              v-if="field.key === 'birthDate'"
               v-model="form[field.key]"
-              type="date"
-              :max="maxBirth"
+              type="text"
+              inputmode="numeric"
+              maxlength="10"
+              pattern="[0-9]{8}|[0-9]{4}-[0-9]{2}-[0-9]{2}"
+              placeholder="예: 20000101"
               :required="field.required"
               :disabled="detail && (!admission || !canEditDetail)"
               :aria-label="field.label"
