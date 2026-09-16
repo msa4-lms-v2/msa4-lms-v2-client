@@ -591,7 +591,6 @@ const toggleMenu = (menuKey) => {
           </button>
           <div v-show="activeMenus.adminTuition" class="submenu-list">
             <router-link to="/admin/tuition" class="submenu-item">등록금 목록</router-link>
-            <router-link to="/payment/health" class="submenu-item">결제 상태</router-link>
             <router-link to="/admin/certificates/revoke" class="submenu-item">증명서 폐기</router-link>
           </div>
         </div>
