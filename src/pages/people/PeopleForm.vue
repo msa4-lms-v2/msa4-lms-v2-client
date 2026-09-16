@@ -422,8 +422,17 @@ onUnmounted(() => {
             <span class="field-label">
               {{ field.label }} <em v-if="field.required && !detail">*</em>
             </span>
+            <MyInput
+              v-if="admission && field.type === 'date'"
+              v-model="form[field.key]"
+              type="date"
+              :max="maxBirth"
+              :required="field.required"
+              :disabled="detail && !canEditDetail"
+              :aria-label="field.label"
+            />
             <MyDateField
-              v-if="field.type === 'date'"
+              v-else-if="field.type === 'date'"
               v-model="form[field.key]"
               :max="maxBirth"
               :required="field.required"
