@@ -8,7 +8,7 @@ export const useTabStore = defineStore('tabStore', () => {
     const activeTab = ref('');
 
     const addTab = (route) => {
-        if (route.path === '/login') return; // 로그인 페이지는 탭에 추가하지 않음
+        if (route.path === '/login' || route.path === '/main') return; // 로그인·메인 화면은 탭에 추가하지 않음
 
         const title = getTitleByPath(route.path, route.name);
         const key = route.meta?.tabKey || route.path;
