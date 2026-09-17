@@ -360,9 +360,6 @@ const toggleMenu = (menuKey) => {
             >
               {{ getMenuTitle("/professor/academic-change-requests/double-major") }}
             </router-link>
-            <router-link to="/graduation-diagnoses" class="submenu-item">{{
-              getMenuTitle("/graduation-diagnoses", "PROFESSOR")
-            }}</router-link>
           </div>
         </div>
 

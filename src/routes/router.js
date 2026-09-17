@@ -339,7 +339,7 @@ const routes = [
         path: '/graduation-diagnoses',
         name: 'GraduationDiagnosisManagement',
         component: () => import('../pages/grade/GraduationDiagnosisManagement.vue'),
-        meta: { requiresAuth: true, roles: ['PROFESSOR'] },
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
         path: '/evaluations',

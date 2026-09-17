@@ -69,8 +69,8 @@ defineEmits(['search']);
   font-weight: 600;
 }
 
-:deep(.search-group select),
-:deep(.search-group input) {
+:deep(.search-group > select),
+:deep(.search-group > input) {
   min-width: 160px;
   padding: 8px 12px;
   border: 1px solid var(--personal-color-border-mist);
