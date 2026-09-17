@@ -8,6 +8,7 @@ import MyPageContainer from '../../components/layout/MyPageContainer.vue';
 import MySelect from '../../components/input/MySelect.vue';
 import MyTable from '../../components/table/MyTable.vue';
 import MyButton from '../../components/button/MyButton.vue';
+import MySearchFilter from '../../components/search/MySearchFilter.vue';
 import { confirmDialog, notify } from '../../composables/useDialog';
 import { useSemesterStore } from '../../store/semester/useSemesterStore';
 
@@ -255,36 +256,27 @@ onMounted(async () => {
 
 <template>
   <MyPageContainer v-if="!isFormView" title="강의 평가">
-    <section class="evaluation-filter-card">
-      <div class="filter-fields">
-        <div class="filter-group semester-filter">
-          <label for="evaluation-year">연도</label>
-          <MySelect id="evaluation-year" v-model="filters.academicYear">
-            <option v-for="year in semesterStore.academicYears" :key="year" :value="year">
-              {{ year }}년
-            </option>
-          </MySelect>
-        </div>
-        <div class="filter-group semester-filter">
-          <label for="evaluation-term">학기</label>
-          <MySelect id="evaluation-term" v-model="filters.term">
-            <option value="FIRST">1학기</option>
-            <option value="SECOND">2학기</option>
-          </MySelect>
-        </div>
-        <MyButton
-          btn-type="button"
-          color="deep-blue"
-          size="middle"
-          content="조회"
-          @click="loadEvaluationData"
-        />
+    <MySearchFilter class="evaluation-filter-card" submit-at-end @search="loadEvaluationData">
+      <div class="search-group semester-filter">
+        <label for="evaluation-year">연도</label>
+        <MySelect id="evaluation-year" v-model="filters.academicYear">
+          <option v-for="year in semesterStore.academicYears" :key="year" :value="year">
+            {{ year }}년
+          </option>
+        </MySelect>
+      </div>
+      <div class="search-group semester-filter">
+        <label for="evaluation-term">학기</label>
+        <MySelect id="evaluation-term" v-model="filters.term">
+          <option value="FIRST">1학기</option>
+          <option value="SECOND">2학기</option>
+        </MySelect>
       </div>
       <div class="evaluation-period">
         <span>평가 기간</span>
         <strong>{{ evaluationPeriodLabel }}</strong>
       </div>
-    </section>
+    </MySearchFilter>
 
     <section class="lecture-list-section">
       <h3>수강 강의</h3>
@@ -410,35 +402,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.evaluation-filter-card {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  min-height: 104px;
-  padding: 20px;
-  border: 1px solid var(--personal-color-border-mist);
-  border-radius: 8px;
-  background: var(--personal-color-white);
-}
-
-.filter-fields {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.filter-group label {
-  color: var(--personal-color-text-secondary-steel);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
 .semester-filter {
   width: 180px;
 }
@@ -448,7 +411,6 @@ onMounted(async () => {
   flex-direction: column;
   gap: 10px;
   min-width: 310px;
-  margin-left: auto;
   padding-bottom: 2px;
 }
 
@@ -639,14 +601,12 @@ onMounted(async () => {
 }
 
 @media (max-width: 1000px) {
-  .evaluation-filter-card,
-  .filter-fields {
-    flex-wrap: wrap;
-  }
-
   .evaluation-period {
     width: 100%;
-    margin-left: 0;
+  }
+
+  .evaluation-filter-card :deep(.submit-at-end) {
+    width: 100%;
   }
 
   .question-row {
@@ -657,10 +617,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
-  .filter-fields {
-    width: 100%;
-  }
-
   .semester-filter {
     width: 100%;
   }

@@ -239,11 +239,7 @@ onMounted(async () => {
 
 <style scoped>
 .cart-page :deep(.search-section) { padding: 18px 20px; }
-.cart-page :deep(.search-row) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 14px; }
-.cart-page :deep(.search-group) { min-width: 0; }
 .cart-page :deep(.table-container) { overflow-x: auto; }
-.cart-page :deep(.search-group select), .cart-page :deep(.search-group input) { width: 100%; min-width: 0; height: 38px; }
-.cart-page :deep(.submit-at-end) { margin-left: 0; }
 .semester-display { display: flex; flex-direction: column; justify-content: flex-end; gap: 7px; height: 62px; padding-bottom: 8px; }
 .semester-display span { color: var(--personal-color-text-secondary-steel); font-size: .78rem; font-weight: 600; }
 .semester-display strong { color: var(--personal-color-primary-navy); font-size: .82rem; white-space: nowrap; }
@@ -266,6 +262,5 @@ onMounted(async () => {
 .lecture-cell { z-index: 1; flex-direction: column; gap: 3px; margin: 2px; color: var(--personal-color-primary-text-navy); font-size: .72rem; text-align: center; }
 .lecture-cell span { font-size: .66rem; }
 .color-0 { background: var(--personal-color-timetable-lilac); }.color-1 { background: var(--personal-color-timetable-sage); }.color-2 { background: var(--personal-color-timetable-sky); }.color-3 { background: var(--personal-color-timetable-apricot); }.color-4 { background: var(--personal-color-timetable-aqua); }
-@media (max-width: 1100px) { .cart-page :deep(.search-row) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 700px) { .cart-page :deep(.search-row) { grid-template-columns: 1fr; } .semester-display { height: auto; } .cart-page :deep(.submit-at-end) { width: 100%; } }
+@media (max-width: 700px) { .semester-display { height: auto; } .cart-page :deep(.submit-at-end) { width: 100%; } }
 </style>
