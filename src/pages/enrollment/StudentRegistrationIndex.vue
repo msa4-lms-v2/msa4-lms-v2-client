@@ -235,11 +235,7 @@ onMounted(async () => {
 
 <style scoped>
 .enrollment-page :deep(.search-section) { padding: 18px 20px; }
-.enrollment-page :deep(.search-row) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 14px; }
-.enrollment-page :deep(.search-group) { min-width: 0; }
 .enrollment-page :deep(.table-container) { overflow-x: auto; }
-.enrollment-page :deep(.search-group select), .enrollment-page :deep(.search-group input) { width: 100%; min-width: 0; height: 38px; }
-.enrollment-page :deep(.submit-at-end) { margin-left: 0; }
 .semester-display { display: flex; flex-direction: column; justify-content: flex-end; gap: 7px; height: 62px; padding-bottom: 8px; }
 .semester-display span { color: var(--personal-color-text-secondary-steel); font-size: .78rem; font-weight: 600; }
 .semester-display strong { color: var(--personal-color-primary-navy); font-size: .82rem; white-space: nowrap; }
@@ -252,6 +248,5 @@ onMounted(async () => {
 .enrollment-page :deep(td) { padding: 11px 10px; font-size: .76rem; }
 .enrollment-list :deep(.schedule-cell) { white-space: pre-line; }
 .inline-error { margin: -4px 0 10px; color: var(--personal-color-red); font-size: .78rem; }
-@media (max-width: 1100px) { .enrollment-page :deep(.search-row) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 700px) { .enrollment-page :deep(.search-row) { grid-template-columns: 1fr; } .semester-display { height: auto; } .enrollment-page :deep(.submit-at-end) { width: 100%; } }
+@media (max-width: 700px) { .semester-display { height: auto; } .enrollment-page :deep(.submit-at-end) { width: 100%; } }
 </style>
